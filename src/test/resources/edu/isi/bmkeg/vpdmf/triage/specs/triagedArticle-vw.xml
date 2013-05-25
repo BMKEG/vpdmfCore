@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view name="TriagedArticle" type="Data" editable="true" parent="TriagedDocument">
+	<primitives>
+		<primitive name="TriagedDocument">
+			<classes>
+				<class name="TriagedDocument"/>
+			</classes>
+			<pvLinks>
+				<pvLink c1="TriagedDocument" role="citation" pv2="LiteratureCitation" c2="LiteratureCitation"/>
+				<pvLink c1="TriagedDocument" role="corpus" pv2="TriageCorpus" c2="TriageCorpus"/>
+				<pvLink c1="TriagedDocument" role="provenance" pv2="TriageProvenance" c2="TriageProvenance"/>
+			</pvLinks>
+		</primitive>
+		<primitive name="TriageCorpus" >
+			<classes>
+				<class name="ViewTable"/>
+				<class name="TriageCorpus"/>
+			</classes>
+		</primitive>
+		<primitive name="LiteratureCitation">
+			<classes>
+				<class name="ViewTable"/>
+				<class name="LiteratureCitation"/>
+				<class name="ArticleCitation"/>
+			</classes>
+		</primitive>
+		<primitive name="TriageProvenance">
+			<classes>
+				<class name="TriageProvenance"/>
+			</classes>
+		</primitive>
+	</primitives>
+	<vpdmfLabel format="pmid:$1$ ($3$) = $2$" />
+	<indexElements>
+		<indexElement pos="1" p="LiteratureCitation" c="ArticleCitation" a="pmid" />
+		<indexElement pos="2" p="TriagedDocument" c="TriagedDocument" a="code" />
+		<indexElement pos="3" p="TriageCorpus" c="TriageCorpus" a="name" />
+	</indexElements>
+</view>

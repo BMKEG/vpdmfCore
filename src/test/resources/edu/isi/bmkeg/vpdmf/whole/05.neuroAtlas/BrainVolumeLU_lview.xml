@@ -1,0 +1,15 @@
+<ViewDefinition Name="BrainVolumeLU" Type="Lookup" Editable="0" >
+	<Primitives>
+		<PrimitiveDefinition Name="BrainVolumeLU" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="ViewTable" primaryFlag="TRUE"/>
+				<Class Name="SpatialPrimitive"/>
+			</Classes>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="$1$"/>
+	<MachineIndex Format="$1$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]BrainVolumeLU|SpatialPrimitive.name"/>
+	</IndexElements>
+</ViewDefinition>

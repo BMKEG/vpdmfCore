@@ -1,0 +1,18 @@
+<!-- edited with XMLSPY v5 rel. 3 U (http://www.xmlspy.com) by Gully APC Burns (UNIV OF SOUTHERN CALIFORNIA) -->
+<ViewDefinition Name="DiagramElementLU" Type="Lookup" Editable="0">
+	<Primitives>
+		<PrimitiveDefinition Name="DiagramElementLU" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="ViewTable" primaryFlag="TRUE"/>
+				<Class Name="KnowledgeStatement"/>
+				<Class Name="DiagramElement"/>
+			</Classes>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="$1$"/>
+	<MachineIndex Format="$2$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]DiagramElementLU|ViewTable.indexString"/>
+		<IndexElement Pos="2" attributeAddress="]DiagramElementLU|ViewTable.machineIndex"/>
+	</IndexElements>
+</ViewDefinition>

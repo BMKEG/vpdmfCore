@@ -1,0 +1,19 @@
+<ViewDefinition Name="PhysiologyExperimentLU" Type="Lookup">
+	<Documentation>
+	</Documentation>
+	<Primitives>
+		<PrimitiveDefinition Name="PhysiologyExperimentLU" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="ViewTable" primaryFlag="TRUE"/>
+				<Class Name="KnowledgeStatement"/>
+                                <Class Name="PhysiologyExperiment"/>
+			</Classes>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="$1$"/>
+	<MachineIndex Format="$2$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]PhysiologyExperimentLU|ViewTable.indexString"/>
+		<IndexElement Pos="2" attributeAddress="]PhysiologyExperimentLU|ViewTable.machineIndex"/>
+	</IndexElements>
+</ViewDefinition>

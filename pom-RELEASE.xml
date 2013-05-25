@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>edu.isi.bmkeg</groupId>
+	<artifactId>vpdmf</artifactId>
+	<version>1.0.6</version>
+	<packaging>jar</packaging>
+	<properties>
+		<spring.version>3.0.3.RELEASE</spring.version>
+		<slf4j.version>1.5.6</slf4j.version>
+		<spring-ws.version>2.0.0-M1</spring-ws.version>
+		<spring-flex.version>1.5.0.M2</spring-flex.version>
+		<blazeds.version>4.0.0.14931</blazeds.version>
+	</properties>
+
+	<name>VPDMf</name>
+
+	<profiles>
+		<profile>
+			<id>default-tools.jar</id>
+			<activation>
+				<property>
+					<name>java.vendor</name>
+					<value>Sun Microsystems Inc.</value>
+				</property>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>com.sun</groupId>
+					<artifactId>tools</artifactId>
+					<version>1.4.2</version>
+					<scope>system</scope>
+					<systemPath>${java.home}/../lib/tools.jar</systemPath>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
+
+
+	<build>
+		<plugins>
+			<plugin>
+				<!-- NOTE: We don't need a groupId specification because the group is 
+					org.apache.maven.plugins ...which is assumed by default. -->
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.2.1</version>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id> <!-- this is used for inheritance merges -->
+						<phase>package</phase> <!-- bind to the packaging phase -->
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.1.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
+
+	<repositories>
+		<repository>
+			<id>com.springsource.repository.bundles.release</id>
+			<name>SpringSource Enterprise Bundle Repository - SpringSource Releases</name>
+			<url>http://repository.springsource.com/maven/bundles/release</url>
+		</repository>
+		<repository>
+			<id>com.springsource.repository.bundles.external</id>
+			<name>SpringSource Enterprise Bundle Repository - External Releases</name>
+			<url>http://repository.springsource.com/maven/bundles/external</url>
+		</repository>
+		<repository>
+			<id>com.springsource.repository.bundles.milestone</id>
+			<name>SpringSource Enterprise Bundle Repository - SpringSource Milestones</name>
+			<url>http://repository.springsource.com/maven/bundles/milestone</url>
+		</repository>
+		<repository>
+			<id>com.springsource.repository.bundles.snapshot</id>
+			<name>SpringSource Enterprise Bundle Repository - Snapshot Releases</name>
+			<url>http://repository.springsource.com/maven/bundles/snapshot</url>
+		</repository>
+		<repository>
+			<id>spring-external</id>
+			<name>Spring External Repository</name>
+			<url>http://maven.springframework.org/external</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>spring-milestone</id>
+			<name>Spring Milestone Repository</name>
+			<url>http://maven.springframework.org/milestone</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+ 		
+ 		<repository>
+			<id>dixiechicks-public</id>
+			<name>Dixiechicks public repository</name>
+			<url>http://dixiechicks.isi.edu:8081/nexus/content/groups/public/</url>
+		</repository> 
+		
+ 		<repository>
+			<id>dixiechicks</id>
+			<name>Dixiechicks BMKEG SNAPSHOT repository</name>
+			<url>http://dixiechicks.isi.edu:8081/nexus/content/repositories/BMKEG-SNAPSHOT/</url>
+		</repository>
+
+	</repositories>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>dixiechicks</id>
+			<name>Dixiechicks ISI MRP repository</name>
+			<url>http://dixiechicks.isi.edu:8081/nexus/content/groups/public/</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>edu.isi.bmkeg</groupId>
+			<artifactId>uml</artifactId>
+			<version>0.0.9-SNAPSHOT</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- Java Compile and Runtime Dependencies -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>taglibs</groupId>
+			<artifactId>standard</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+
+		<!-- MySQL JDBC Connector -->
+		<dependency>
+			<groupId>com.mysql.jdbc</groupId>
+			<artifactId>com.springsource.com.mysql.jdbc</artifactId>
+			<version>5.1.6</version>
+		</dependency>
+
+		<!-- JPA Persistence <dependency> <groupId>javax.persistence</groupId> 
+			<artifactId>com.springsource.javax.persistence</artifactId> <version>2.0.0</version> 
+			</dependency> -->
+
+
+		<!-- Easy Mock -->
+		<dependency>
+			<groupId>org.easymock</groupId>
+			<artifactId>easymock</artifactId>
+			<version>3.0</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>javassist</groupId>
+			<artifactId>javassist</artifactId>
+			<version>3.12.1.GA</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		
+	</dependencies>
+
+</project>

@@ -1,0 +1,21 @@
+<ViewDefinition Name="IpsiContraRelation" Type="Lookup" Editable="0">
+	<Primitives>
+		<PrimitiveDefinition Name="IpsiContraRelation" primaryFlag="TRUE">
+			<Condition>
+				|CV.context='IpsiContraRelation.code'
+			</Condition>
+			<Classes primaryFlag="TRUE">
+				<Class Name="CV" primaryFlag="TRUE"/>
+			</Classes>
+			<FormDesign>
+				<Control Type="TextInput" Pos="1" Label="Name" Size="20" attributeAddress="]IpsiContraRelation|CV.name"/>
+				<Control Type="TextInput" Pos="2" Label="Description" Size="20" attributeAddress="]IpsiContraRelation|CV.description"/>
+			</FormDesign>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="$1$: $2$."/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]IpsiContraRelation|CV.name"/>
+		<IndexElement Pos="2" attributeAddress="]IpsiContraRelation|CV.description"/>
+	</IndexElements>
+</ViewDefinition>

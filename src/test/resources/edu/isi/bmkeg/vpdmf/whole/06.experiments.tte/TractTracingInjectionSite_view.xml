@@ -1,0 +1,53 @@
+<ViewDefinition Name="TractTracingInjectionSite" Type="Data">
+	<Primitives>
+		<PrimitiveDefinition Name="TractTracingInjectionSite" primaryFlag="TRUE">
+			<Classes>
+                <Class Name="SpatialPrimitive" primaryFlag="TRUE"/>
+				<Class Name="TracerInjection" primaryFlag="TRUE"/>
+			</Classes>
+            <triplets>
+		    	<triplet>TracerInjection->expt=TractTracingExperimentLU|TractTracingExperiment</triplet>
+                <triplet>TracerInjection->tracer=TracerChemicalLU|TracerChemical</triplet>
+                <triplet>TracerInjection->injectionArea=CoveredAtlasArea|CoveredAtlasArea</triplet>
+            </triplets>
+			<FormDesign>
+                <Control Type="Label" Pos="1" Label="Experiment" Size="40" attributeAddress="]TractTracingExperimentLU|TractTracingExperiment.name"/>
+				<Control Type="TextInput" Pos="2" Label="Injection Site Id" Size="40" attributeAddress="]TractTracingInjectionSite|SpatialPrimitive.name"/>
+				<Control Type="TextRegion" Pos="3" Label="Description" Height="20" Width="40" attributeAddress="]TractTracingInjectionSite|TracerInjection.description"/>
+				<Control Type="Lookup" Pos="4" Label="Tracer Chemical" lookupView="TracerChemicalLU" attributeAddress="]TracerChemicalLU|TracerChemical.name"/>
+				<GridArray Pos="5" Label="Covered Atlas Area" attributeAddress="]CoveredAtlasArea">
+					<Control Type="Lookup" Pos="5.1" Label="Atlas Volume" lookupView="CoveredAtlasVolumeLU" attributeAddress="]CoveredAtlasVolumeLU|ViewTable.indexString"/>
+					<Control Type="Lookup" Pos="5.2" Label="Participation Relation" lookupView="ParticipationRelation" attributeAddress="]ParticipationRelation|CV.indexString"/>
+					<Control Type="Lookup" Pos="5.3" Label="Hemisphere" lookupView="HemisphereRelation" attributeAddress="]HemisphereRelation|CV.indexString"/>
+				</GridArray>
+      		</FormDesign>
+		</PrimitiveDefinition>
+        <PrimitiveDefinition Editable="0" Nullable="1" lookupView="TractTracingExperimentLU"/>
+	    <PrimitiveDefinition Editable="0" lookupView="TracerChemicalLU"/>
+        <PrimitiveDefinition Editable="0" Name="CoveredAtlasVolumeLU" lookupView="AtlasVolumeLU"/>
+	    <PrimitiveDefinition Editable="0" lookupView="ParticipationRelation"/>
+        <PrimitiveDefinition Editable="0" lookupView="HemisphereRelation"/>
+		<PrimitiveDefinition Name="CoveredAtlasArea">
+			<Classes>
+				<Class Name="CoveredAtlasArea" primaryFlag="TRUE"/>
+			</Classes>
+			<triplets>
+            	<triplet>CoveredAtlasArea->atlasVolume=CoveredAtlasVolumeLU|AtlasVolume</triplet>
+                <triplet>CoveredAtlasArea->participation=ParticipationRelation|CV</triplet>
+                <triplet>CoveredAtlasArea->hemisphere=HemisphereRelation|CV</triplet>
+			</triplets>
+		</PrimitiveDefinition>
+	</Primitives>
+    <Links>
+    	<Link Name="Tracer" setRelation="Overlap">[TractTracingInjectionSite]TracerChemicalLU|TracerChemical=[TracerChemical]TracerChemical|TracerChemical</Link>
+	</Links>
+	<Index Format="Tract Tracing Injection: $1$"/>
+	<MachineIndex Format="Tract Tracing Injection: $1$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]TractTracingInjectionSite|SpatialPrimitive.name"/>
+	</IndexElements>
+	<Dependencies>
+		<Dependency Name="TractTracingExperiment"/>
+	</Dependencies>
+	<Parent Name="BrainVolume"/>
+</ViewDefinition>

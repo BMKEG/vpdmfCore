@@ -1,0 +1,16 @@
+<ViewDefinition Name="TracerChemicalLU" Editable="0" Type="Lookup">
+	<Primitives>
+		<PrimitiveDefinition Name="TracerChemical" primaryFlag="TRUE">
+			<Classes>
+                        	<Class Name="ViewTable" primaryFlag="TRUE"/>
+				<Class Name="TracerChemical"/>
+			</Classes>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="$1$"/>
+	<MachineIndex Format="$2$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]TracerChemical|ViewTable.indexString"/>
+		<IndexElement Pos="2" attributeAddress="]TracerChemical|ViewTable.machineIndex"/>
+	</IndexElements>
+</ViewDefinition>

@@ -1,0 +1,29 @@
+<ViewDefinition Name="DataFile" Type="Data" >
+	<Primitives>
+		<PrimitiveDefinition Name="DataFile" primaryFlag="TRUE">
+			<Classes primaryFlag="TRUE">
+				<Class Name="DataFile" primaryFlag="TRUE"/>
+			</Classes>
+			<triplets>
+				<triplet>
+					DataFile->archive=NotebookLU|Notebook
+				</triplet>
+			</triplets>
+			<FormDesign>
+				<Control Type="FileImport" Pos="1" Label="File Name" Size="10" attributeAddress="]DataFile|DataFile.name"/>
+				<Control Type="Label" Pos="2" Label="File Signature" Size="8" attributeAddress="]DataFile|DataFile.checksum"/>
+				<Control Type="TextRegion" Pos="3" Label="Description" Height="20" Width="40" attributeAddress="]DataFile|DataFile.description"/>
+			</FormDesign>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Editable="0" lookupView="NotebookLU"/>
+	</Primitives>
+	<Index Format="$1$ (signature: $2$)"/>
+	<MachineIndex Format="$1$ $2$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]DataFile|DataFile.name"/>
+		<IndexElement Pos="2" attributeAddress="]DataFile|DataFile.checksum"/>
+	</IndexElements>
+	<Dependencies>
+		<Dependency Name="Notebook"/>
+	</Dependencies>
+</ViewDefinition>

@@ -1,0 +1,55 @@
+<ViewDefinition Name="Notebook" Type="Data" >
+	<Primitives>
+		<PrimitiveDefinition Name="Resource" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="Resource" primaryFlag="TRUE"/>
+				<Class Name="Notebook" />
+			</Classes>
+			<triplets>
+				<triplet>
+					Resource->authorList=Scientist|Person
+				</triplet>
+				<triplet>
+					Resource->resourceType=ResourceType|CV
+				</triplet>
+				<triplet>
+					Notebook->pages=NotebookPage|NotebookPage
+				</triplet>
+			</triplets>
+			<FormDesign>
+				<Control Type="TextInput" Pos="1" Label="Owner Initials" Size="10" attributeAddress="]Scientist|Person.Initials"/>
+				<Control Type="TextInput" Pos="2" Label="Owner Surname" Size="10" attributeAddress="]Scientist|Person.LastName"/>
+				<Control Type="TextRegion" Pos="3" Label="Title" Height="3" Width="40" attributeAddress="]Resource|Resource.Title"/>
+				<Control Type="TextRegion" Pos="4" Label="Abstract" Height="20" Width="40" attributeAddress="]Resource|Resource.Abstract"/>
+				<Control Type="DateInput" Pos="5" Label="Upload Date" Format="yyyy-MM-dd" Size="7" attributeAddress="]Resource|Notebook.PubDate"/>
+				<Control Type="Label" Pos="6" Label="Pages" Size="8" attributeAddress="]Resource|Notebook.PageCount"/>
+				<Control Type="ArchiveLoader" Pos="7" Label="ArchiveID" Size="20" attributeAddress="]Resource|Notebook.ArchiveID"/>
+			</FormDesign>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition lookupView="Scientist"/>
+		<PrimitiveDefinition Name="NotebookPage">
+			<Classes>
+				<Class Name="NotebookPage" primaryFlag="TRUE"/>
+			</Classes>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Editable="0" Nullable="1" lookupView="ResourceType">
+			<Conditions>
+                        	<Condition>|CV.context='Resource.ResourceType'</Condition>
+				<Condition>|CV.name='Notebook'</Condition>
+			</Conditions>
+		</PrimitiveDefinition>
+	</Primitives>
+        <Links>
+		<Link Name="DataFile" setRelation="ReverseDependent">[Notebook]Resource|Notebook=[DataFile]Notebook|Notebook</Link>
+	</Links>
+	<Index Format="@1@ ($2$), `$3$` :$4$"/>
+	<MachineIndex Format="$5$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]Scientist|Person.LastName"/>
+		<IndexElement Pos="2" attributeAddress="]Resource|Notebook.PubDate"/>
+		<IndexElement Pos="3" attributeAddress="]Resource|Resource.Title"/>
+		<IndexElement Pos="4" attributeAddress="]Resource|Notebook.PageCount"/>
+		<IndexElement Pos="5" attributeAddress="]Resource|Notebook.ArchiveID"/>
+	</IndexElements>
+	<Parent Name="Resource"/>
+</ViewDefinition>

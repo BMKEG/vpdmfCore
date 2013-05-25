@@ -1,0 +1,71 @@
+<ViewDefinition Name="NonNeuralStimulus" Type="Data">
+	<Primitives>
+
+<!--  TOP PRIMITIVE -->
+
+                <PrimitiveDefinition Name="NonNeuralStimulus" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="NonNeuralStimulus" primaryFlag="TRUE"/>
+			</Classes>
+        	    	<triplets>
+            			<triplet>NonNeuralStimulus->nonNeuralStimulusType=NonNeuralStimulusType|CV</triplet>
+            			<triplet>NonNeuralStimulus->physiologyExpt=PhysiologyExperimentLU|PhysiologyExperiment</triplet>
+            			<triplet>NonNeuralStimulus->stimulusDuration=NonNeuralStimulusDuration|LookupDatum</triplet>
+            			<triplet>NonNeuralStimulus->stimulusIntensity=NonNeuralStimulusIntensity|CV</triplet>
+              		</triplets>
+			<FormDesign>
+                        	<GridArray Pos="1" Label="Experiment" attributeAddress="]PhysiologyExperimentLU">
+					<Control Type="Lookup" Pos="1.1" Label="Experiment" lookupView="PhysiologyExperimentLU" attributeAddress="]PhysiologyExperimentLU|ViewTable.indexString"/>
+        			</GridArray>
+	                	<GridArray Pos="2" Label="Non-Neural Stimulus" attributeAddress="]NonNeuralStimulusType">
+			        	<Control Type="Lookup" Pos="2.1" Label="Type" lookupView="NonNeuralStimulusType" removeTerm="0" attributeAddress="]NonNeuralStimulusType|CV.name"/>
+                                      	<Control Type="TextRegion" Pos="2.2" Label="Description" Height="3" Width="30" attributeAddress="]NonNeuralStimulusType|CV.description"/>
+				</GridArray>
+				<Control Type="Lookup" Pos="3" Label="Stimulus Intensity" lookupView="NonNeuralStimulusIntensity" attributeAddress="]NonNeuralStimulusIntensity|LookupDatum.value"/>
+		        	<GridArray Pos="4" Label="Stimulus Duration" attributeAddress="]NonNeuralStimulusDuration">
+                                	<Control Type="TextInput" Pos="4.1" Size="15" Label="time" attributeAddress="]NonNeuralStimulusDuration|LookupDatum.value"/>
+                                	<Control Type="TextInput" Pos="4.2" Size="15" Label="(error)" attributeAddress="]NonNeuralStimulusDuration|LookupDatum.error"/>
+                                        <Control Type="Lookup" Pos="4.3" Label="units" lookupView="NonNeuralStimulusDurationDefinition" attributeAddress="]NonNeuralStimulusDurationDefinition|DataDefinition.units"/>
+                                </GridArray>
+			</FormDesign>
+                </PrimitiveDefinition>
+
+<!--  'DATA' DEPENDENT PRIMITIVES *** Physiology Experiment -->
+
+		<PrimitiveDefinition lookupView="PhysiologyExperimentLU"/>
+
+<!--  EDITABLE TYPES -->
+
+                <PrimitiveDefinition Editable="1" Nullable="1" lookupView="NonNeuralStimulusType"/>
+
+<!--  (1) Stimulus Duration -->
+		<PrimitiveDefinition Name="NonNeuralStimulusDuration">
+			<Classes>
+				<Class Name="LookupDatum" primaryFlag="TRUE"/>
+			</Classes>
+			<triplets>
+				<triplet>
+					LookupDatum->def=NonNeuralStimulusDurationDefinition|DataDefinition
+				</triplet>
+			</triplets>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Name="NonNeuralStimulusDurationDefinition" lookupView="TimeDefinition"/>
+
+<!--  (2) Stimulus Intensity-->
+		<PrimitiveDefinition lookupView="NonNeuralStimulusIntensity"/>
+
+	</Primitives>
+
+<!--  Try a simple index to start with  -->
+
+	<Index Format="$1$ ,$2$, $3$ ± $4$ $5$"/>
+	<MachineIndex Format="$1$ ,$2$, $3$ ± $4$ $5$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]NonNeuralStimulusType|CV.name"/>
+		<IndexElement Pos="2" Nullable="1" attributeAddress="]NonNeuralStimulusIntensity|LookupDatum.indexString"/>
+		<IndexElement Pos="3" Nullable="1" attributeAddress="]NonNeuralStimulusDuration|LookupDatum.value"/>
+		<IndexElement Pos="4" Nullable="1" attributeAddress="]NonNeuralStimulusDuration|LookupDatum.error"/>
+		<IndexElement Pos="5" Nullable="1" attributeAddress="]NonNeuralStimulusDurationDefinition|DataDefinition.units"/>
+	</IndexElements>
+
+</ViewDefinition>

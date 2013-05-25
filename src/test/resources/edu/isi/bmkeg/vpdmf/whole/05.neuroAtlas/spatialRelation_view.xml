@@ -1,0 +1,36 @@
+<!-- edited with XMLSPY v5 rel. 3 U (http://www.xmlspy.com) by Gully APC Burns (UNIV OF SOUTHERN CALIFORNIA) -->
+<ViewDefinition Name="spatialRelation" Type="Link">
+	<Primitives>
+		<PrimitiveDefinition Name="spatialRelation" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="SpatialRelation" primaryFlag="TRUE"/>
+			</Classes>
+			<triplets>
+				<triplet>ViewLinkTable->from=FromView|ViewTable</triplet>
+				<triplet>ViewLinkTable->to=ToView|ViewTable</triplet>
+				<triplet>SpatialRelation->code=spatialRelationValue|CV</triplet>
+			</triplets>
+			<FormDesign>
+				<Control Type="Lookup" Pos="1" Label="From" lookupView="FromView" attributeAddress="]FromView|ViewTable.indexString"/>
+				<Control Type="Lookup" Pos="2" Label="Relation" lookupView="spatialRelationValue" attributeAddress="]spatialRelationValue|CV.name"/>
+				<Control Type="Lookup" Pos="3" Label="To" lookupView="ToView" attributeAddress="]ToView|ViewTable.indexString"/>
+			</FormDesign>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Editable="0" Nullable="1" lookupView="spatialRelationValue"/>
+		<PrimitiveDefinition Name="FromView" Editable="0" lookupView="SpatialPrimitiveLU"/>
+		<PrimitiveDefinition Name="ToView" Editable="0" lookupView="SpatialPrimitiveLU"/>
+	</Primitives>
+	<Links>
+		<Link Name="SPToRel" setRelation="Overlap">[SpatialPrimitive]SpatialPrimitive|ViewTable=[spatialRelation]FromView|ViewTable</Link>
+		<Link Name="RelToSP" setRelation="Overlap">[spatialRelation]ToView|ViewTable=[SpatialPrimitive]SpatialPrimitive|ViewTable</Link>
+	</Links>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]FromView|ViewTable.indexString"/>
+		<IndexElement Pos="2" attributeAddress="]ToView|ViewTable.indexString"/>
+		<IndexElement Pos="3" attributeAddress="]FromView|ViewTable.ViewTable_id"/>
+		<IndexElement Pos="4" attributeAddress="]ToView|ViewTable.ViewTable_id"/>
+		<IndexElement Pos="5" attributeAddress="]spatialRelationValue|CV.indexString"/>
+	</IndexElements>
+	<Index Format="$1$ >>> $5$ >>> $2$"/>
+	<MachineIndex Format="ViewTable_id=$3$ >>> $5$ >>> ViewTable_id=$4$"/>
+</ViewDefinition>

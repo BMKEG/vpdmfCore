@@ -1,0 +1,16 @@
+<ViewDefinition Name="ConferenceProceedingsLU" Type="Lookup" Editable="0">
+	<Primitives>
+		<PrimitiveDefinition Name="ConferenceProceedingsLU" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="ViewTable" primaryFlag="TRUE"/>
+				<Class Name="ConferenceProceedings"/>
+			</Classes>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="$1$"/>
+	<MachineIndex Format="$2$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]ConferenceProceedingsLU|ViewTable.indexString"/>
+		<IndexElement Pos="2" attributeAddress="]ConferenceProceedingsLU|ViewTable.machineIndex"/>
+	</IndexElements>
+</ViewDefinition>

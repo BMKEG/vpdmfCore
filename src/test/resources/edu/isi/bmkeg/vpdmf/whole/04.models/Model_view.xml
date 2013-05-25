@@ -1,0 +1,43 @@
+<ViewDefinition Name="Model" Type="Data" Editable="0">
+	<Primitives>
+		<PrimitiveDefinition Name="KnowledgeStatement" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="KnowledgeStatement" primaryFlag="TRUE"/>
+			</Classes>
+			<triplets>
+				<triplet>
+					KnowledgeStatement->knowledgeType=KnowledgeType|CV
+				</triplet>
+				<triplet>
+					KnowledgeStatement->statementFormat=StatementFormat|CV
+				</triplet>
+			</triplets>
+			<FormDesign>
+				<Control Type="Label" Pos="1" Label="Statement" Size="40" attributeAddress="]KnowledgeStatement|KnowledgeStatement.statement"/>
+				<Control Type="Label" Pos="2" Label="Knowledge Type" Size="40" attributeAddress="]KnowledgeType|CV.indexString"/>
+				<Control Type="Label" Pos="3" Label="Statement Format" Size="40" attributeAddress="]StatementFormat|CV.indexString"/>
+			</FormDesign>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Editable="0" Nullable="1" lookupView="KnowledgeType">
+                	<Conditions>
+				<Condition>
+					|CV.name='data'
+				</Condition>
+			</Conditions>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Editable="0" Nullable="1" lookupView="StatementFormat">
+			<Conditions>
+				<Condition>
+					|CV.name='Computational: VPDMf'
+				</Condition>
+			</Conditions>
+		</PrimitiveDefinition>
+	</Primitives>
+        <machineIndex Format="$2$"/>
+	<Index Format="$1$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]KnowledgeStatement|ViewTable.indexString"/>
+		<IndexElement Pos="2" attributeAddress="]KnowledgeStatement|ViewTable.machineIndex"/>
+	</IndexElements>
+	<Parent Name="KnowledgeStatement"/>
+</ViewDefinition>

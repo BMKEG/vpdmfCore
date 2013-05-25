@@ -1,0 +1,21 @@
+<ViewDefinition Name="HemisphereRelation" Type="Lookup" Editable="0">
+	<Primitives>
+		<PrimitiveDefinition Name="HemisphereRelation" primaryFlag="TRUE">
+			<Condition>
+				|CV.context='HemisphereRelation.code'
+			</Condition>
+			<Classes primaryFlag="TRUE">
+				<Class Name="CV" primaryFlag="TRUE"/>
+			</Classes>
+			<FormDesign>
+				<Control Type="TextInput" Pos="1" Label="Name" Size="20" attributeAddress="]HemisphereRelation|CV.name"/>
+				<Control Type="TextInput" Pos="2" Label="Description" Size="20" attributeAddress="]HemisphereRelation|CV.description"/>
+			</FormDesign>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="$1$: $2$."/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]HemisphereRelation|CV.name"/>
+		<IndexElement Pos="2" attributeAddress="]HemisphereRelation|CV.description"/>
+	</IndexElements>
+</ViewDefinition>

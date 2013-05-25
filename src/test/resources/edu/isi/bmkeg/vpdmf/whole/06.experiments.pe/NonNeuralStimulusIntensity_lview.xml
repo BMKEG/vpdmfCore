@@ -1,0 +1,51 @@
+<ViewDefinition Name="NonNeuralStimulusIntensity" Type="Lookup">
+	<Primitives>
+		<PrimitiveDefinition Name="NonNeuralStimulusIntensity" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="LookupDatum" primaryFlag="TRUE"/>
+			</Classes>
+			<Conditions>
+				<Condition>
+					|LookupDatum.max='7'
+				</Condition>
+			</Conditions>
+			<triplets>
+				<triplet>
+					LookupDatum->def=DataDefinition|DataDefinition
+				</triplet>
+			</triplets>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Name="DataDefinition" >
+			<Classes>
+				<Class Name="DataDefinition" primaryFlag="TRUE"/>
+				<Class Name="CV"/>
+			</Classes>
+			<Conditions>
+				<Condition>
+					|DataDefinition.name='Intensity'
+				</Condition>
+				<Condition>
+					|DataDefinition.units='-'
+				</Condition>
+				<Condition>
+					|DataDefinition.siConversionFactor='0'
+				</Condition>
+				<Condition>
+					|CV.name='ordinal'
+				</Condition>
+			</Conditions>
+			<triplets>
+				<triplet>
+					DataDefinition->scaleOfMeasurement=DataDefinition|CV
+				</triplet>
+			</triplets>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="$1$ ($2$/$3$)"/>
+	<MachineIndex Format="$1$ ($2$/$3$)"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]NonNeuralStimulusIntensity|LookupDatum.value"/>
+		<IndexElement Pos="2" attributeAddress="]NonNeuralStimulusIntensity|LookupDatum.rank"/>
+		<IndexElement Pos="3" attributeAddress="]NonNeuralStimulusIntensity|LookupDatum.max"/>
+	</IndexElements>
+</ViewDefinition>

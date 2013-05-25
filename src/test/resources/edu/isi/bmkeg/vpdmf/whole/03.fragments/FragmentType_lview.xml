@@ -1,0 +1,26 @@
+<ViewDefinition Name="FragmentType" Type="Lookup" Editable="0" >
+	<Primitives>
+		<PrimitiveDefinition Name="FragmentType" primaryFlag="TRUE">
+			<Conditions>
+				<Condition>
+					|CV.context='Fragment.fragment_type'
+				</Condition>
+				<Condition>
+					|CV.name='pdf'
+				</Condition>
+			</Conditions>
+			<Classes primaryFlag="TRUE">
+				<Class Name="CV" primaryFlag="TRUE"/>
+			</Classes>
+			<FormDesign>
+				<Control Type="TextInput" Pos="1" Label="Name" Size="20" attributeAddress="]FragmentType|CV.name"/>
+				<Control Type="TextInput" Pos="2" Label="Description" Size="20" attributeAddress="]FragmentType|CV.description"/>
+			</FormDesign>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="$1$: $2$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]FragmentType|CV.name"/>
+		<IndexElement Pos="2" attributeAddress="]FragmentType|CV.description"/>
+	</IndexElements>
+</ViewDefinition>

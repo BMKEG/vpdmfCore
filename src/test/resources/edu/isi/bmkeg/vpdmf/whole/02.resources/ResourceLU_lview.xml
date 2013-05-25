@@ -1,0 +1,16 @@
+<ViewDefinition Name="ResourceLU" Type="Lookup" Editable="0">
+	<Primitives>
+		<PrimitiveDefinition Name="ResourceLU" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="ViewTable" primaryFlag="TRUE"/>
+				<Class Name="Resource"/>
+			</Classes>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="$1$"/>
+	<MachineIndex Format="$2$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]ResourceLU|ViewTable.indexString"/>
+		<IndexElement Pos="2" attributeAddress="]ResourceLU|ViewTable.machineIndex"/>
+	</IndexElements>
+</ViewDefinition>

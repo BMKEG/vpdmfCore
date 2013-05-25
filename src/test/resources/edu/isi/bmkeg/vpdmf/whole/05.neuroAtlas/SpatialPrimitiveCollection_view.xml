@@ -1,0 +1,30 @@
+<ViewDefinition Name="SpatialPrimitiveCollection" Type="Collection" >
+	<Primitives>
+		<PrimitiveDefinition Name="SpatialPrimitiveCollection" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="SpatialPrimitiveCollection" primaryFlag="TRUE"/>
+			</Classes>
+			<triplets>
+				<triplet>
+					SpatialPrimitiveCollection->sp=SpatialPrimitiveLU|SpatialPrimitive
+				</triplet>
+			</triplets>
+			<FormDesign>
+				<Control Type="TextInput" Pos="1" Label="Name" Size="40" attributeAddress="]SpatialPrimitiveCollection|SpatialPrimitiveCollection.name"/>
+				<Control Type="TextRegion" Pos="2" Label="Description" Height="20" Width="40" attributeAddress="]SpatialPrimitiveCollection|SpatialPrimitiveCollection.description"/>
+				<GridArray Pos="3" Label="SpatialPrimitives" attributeAddress="]SpatialPrimitiveLU">
+					<Control Type="Lookup" Pos="3.1" Label="SpatialPrimitive" lookupView="SpatialPrimitiveLU" attributeAddress="]SpatialPrimitiveLU|ViewTable.indexString"/>
+				</GridArray>
+			</FormDesign>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Editable="0" lookupView="SpatialPrimitiveLU"/>
+	</Primitives>
+	<Links>
+		<Link Name="SpatialPrimitive" setRelation="Superset">[SpatialPrimitiveCollection]SpatialPrimitiveLU|ViewTable=[SpatialPrimitive]SpatialPrimitive|ViewTable</Link>
+	</Links>
+	<Index Format="$1$"/>
+	<MachineIndex Format="$1$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]SpatialPrimitiveCollection|SpatialPrimitiveCollection.name"/>
+	</IndexElements>
+</ViewDefinition>

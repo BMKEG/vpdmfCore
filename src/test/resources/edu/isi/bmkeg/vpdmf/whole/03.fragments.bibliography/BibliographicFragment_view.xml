@@ -1,0 +1,97 @@
+<ViewDefinition Name="BibliographicFragment" Type="Data">
+	<Primitives>
+		<PrimitiveDefinition Name="Fragment" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="KnowledgeStatement" primaryFlag="TRUE"/>
+				<Class Name="Fragment"/>
+			</Classes>
+			<triplets>
+				<triplet>
+					Fragment->resource=PublicationLU|Resource
+				</triplet>
+				<triplet>
+					Fragment->excerpts=Excerpt|Excerpt
+				</triplet>
+				<triplet>
+					KnowledgeStatement->knowledgeType=KnowledgeType|CV
+				</triplet>
+				<triplet>
+					KnowledgeStatement->statementFormat=StatementFormat|CV
+				</triplet>
+				<triplet>
+					KnowledgeStatement->dataS=Datum|Datum
+				</triplet>
+				<triplet>
+					Fragment->fragmentType=FragmentType|CV
+				</triplet>
+			</triplets>
+			<FormDesign>
+				<Control Type="Plugin" Pos="0" Label="Fragments" helperApplications="Ghostscript" baseClass="edu.usc.kmrg.tools.fragmenter.Fragmenter_maincontrol" attributeAddress="]Fragment|Fragment.ViewTable_id"/>
+				<Control Type="TextRegion" Pos="1" Height="3" Width="40" Label="Statement" attributeAddress="]Fragment|KnowledgeStatement.statement"/>
+				<Control Type="Lookup" Pos="2" Label="Citation" lookupView="PublicationLU" attributeAddress="]PublicationLU|ViewTable.indexString"/>
+				<Control Type="Lookup" Pos="3" Label="Knowledge Type" lookupView="KnowledgeType" attributeAddress="]KnowledgeType|CV.indexString"/>
+			</FormDesign>
+		</PrimitiveDefinition>
+                <PrimitiveDefinition Editable="0" Nullable="1" lookupView="DataType"/>
+                <PrimitiveDefinition Name="Datum" Nullable="1">
+			<Classes>
+				<Class Name="ViewTable" primaryFlag="TRUE"/>
+				<Class Name="Datum"/>
+				<Class Name="DataDefinition"/>
+			</Classes>
+                      	<triplets>
+                      		<triplet>Datum->def=Datum|DataDefinition</triplet>
+                      		<triplet>DataDefinition->scaleOfMeasurement=DataType|CV</triplet>
+			</triplets>
+			<Conditions>
+				<Condition>
+					|ViewTable.viewType='.Datum.%'
+				</Condition>
+			</Conditions>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Editable="0" Nullable="1" lookupView="StatementFormat">
+			<Conditions>
+				<Condition>
+					|CV.name='Natural Language: English'
+				</Condition>
+			</Conditions>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Editable="0" Nullable="1" lookupView="KnowledgeType"/>
+		<PrimitiveDefinition Name="Excerpt">
+			<Classes>
+				<Class Name="Excerpt" primaryFlag="TRUE"/>
+			</Classes>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Editable="0" lookupView="PublicationLU"/>
+                <PrimitiveDefinition Editable="0" Nullable="0" lookupView="FragmentType">
+			<Conditions>
+				<Condition>
+					|CV.name='Bibliographic'
+				</Condition>
+			</Conditions>
+		</PrimitiveDefinition>
+	</Primitives>
+	<machineIndex Format="checksum[$1$_p@2@(@3@,@4@,@5@,@6@,@7@,@8@,@9@,@10@)]"/>
+	<Index Format="tidy[REGEX[$12$,/^(.*?\\), \\`\\S+\\s+\\S+)/]    ]$11$ hide[checksum[$1$_p@2@(@3@,@4@,@5@,@6@,@7@,@8@,@9@,@10@)]]"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]PublicationLU|Resource.uid"/>
+		<IndexElement Pos="2" attributeAddress="]Excerpt|Excerpt.pagenumber"/>
+		<IndexElement Pos="3" attributeAddress="]Excerpt|Excerpt.bl_x"/>
+		<IndexElement Pos="4" attributeAddress="]Excerpt|Excerpt.bl_y"/>
+		<IndexElement Pos="5" attributeAddress="]Excerpt|Excerpt.tr_x"/>
+		<IndexElement Pos="6" attributeAddress="]Excerpt|Excerpt.tr_y"/>
+		<IndexElement Pos="7" attributeAddress="]Excerpt|Excerpt.li_x"/>
+		<IndexElement Pos="8" attributeAddress="]Excerpt|Excerpt.li_y"/>
+		<IndexElement Pos="9" attributeAddress="]Excerpt|Excerpt.ri_x"/>
+		<IndexElement Pos="10" attributeAddress="]Excerpt|Excerpt.ri_y"/>
+		<IndexElement Pos="11" attributeAddress="]Fragment|KnowledgeStatement.statement"/>
+		<IndexElement Pos="12" attributeAddress="]PublicationLU|ViewTable.indexString"/>
+	</IndexElements>
+        <Links>
+		<Link Name="BibliographicFragment" setRelation="ForwardDependent">[BibliographicFragment]PublicationLU|Resource=[Publication]Resource|Resource</Link>
+	</Links>
+	<Parent Name="Fragment"/>
+	<Dependencies>
+		<Dependency Name="Publication"/>
+	</Dependencies>
+</ViewDefinition>

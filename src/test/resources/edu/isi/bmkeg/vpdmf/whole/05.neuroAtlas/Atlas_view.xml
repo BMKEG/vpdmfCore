@@ -1,0 +1,18 @@
+<ViewDefinition Name="Atlas" Type="External">
+	<Primitives>
+		<PrimitiveDefinition Name="Atlas" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="Atlas" primaryFlag="TRUE"/>
+			</Classes>
+			<FormDesign>
+				<Control Type="TextInput" Pos="1" Label="Name" Size="40" attributeAddress="]Atlas|Atlas.name"/>
+				<Control Type="TextRegion" Pos="2" Label="Description" Height="20" Width="40" attributeAddress="]Atlas|Atlas.description"/>
+			</FormDesign>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="$1$"/>
+	<MachineIndex Format="$1$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]Atlas|Atlas.name"/>
+	</IndexElements>
+</ViewDefinition>

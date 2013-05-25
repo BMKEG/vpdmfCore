@@ -1,0 +1,42 @@
+<ViewDefinition Name="Resource" Type="Data" Editable="0">
+	<Documentation>
+	</Documentation>
+	<Primitives>
+		<PrimitiveDefinition Editable="0" Name="Resource" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="Resource" primaryFlag="TRUE"/>
+			</Classes>
+			<triplets>
+				<triplet>
+					Resource->authorList=Scientist|Person
+				</triplet>
+				<triplet>
+					Resource->resourceType=ResourceType|CV
+				</triplet>
+			</triplets>
+			<FormDesign>
+				<GridArray Pos="1" Label="Author" attributeAddress="]Scientist">
+					<Control Type="Label" Pos="1.1" Label="Initials" Size="10" attributeAddress="]Scientist|Person.Initials"/>
+					<Control Type="Label" Pos="1.2" Label="Surname" Size="10" attributeAddress="]Scientist|Person.LastName"/>
+				</GridArray>
+				<Control Type="Label" Pos="2" Label="Year" Format="yyyy" Size="5" attributeAddress="]Resource|Resource.PubYear"/>
+				<Control Type="TextRegion" Pos="3" Label="Title" Height="3" Width="40" attributeAddress="]Resource|Resource.Title"/>
+				<Control Type="TextInput" Pos="4" Label="Pages" Size="8" attributeAddress="]Resource|Resource.Pages"/>
+				<Control Type="TextRegion" Pos="5" Label="Abstract" Height="10" Width="40" attributeAddress="]Resource|Resource.Abstract"/>
+				<Control Type="TextInput" Pos="6" Label="Unique Id" Size="10" attributeAddress="]Resource|Resource.uid"/>
+				<Control Type="Lookup" Pos="7" Label="Resource Type" lookupView="ResourceType" attributeAddress="]ResourceType|CV.indexString"/>
+			</FormDesign>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Editable="0" lookupView="Scientist"/>
+                <PrimitiveDefinition Editable="0" lookupView="ResourceType"/>
+	</Primitives>
+	<Links>
+		<Link Name="Scientist" setRelation="Superset">[Resource]Scientist|Person=[Scientist]Scientist|Person</Link>
+	</Links>
+	<Index Format="$1$"/>
+	<MachineIndex Format="$2$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]Resource|ViewTable.indexString"/>
+		<IndexElement Pos="2" attributeAddress="]Resource|ViewTable.machineIndex"/>
+	</IndexElements>
+</ViewDefinition>

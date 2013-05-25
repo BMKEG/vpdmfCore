@@ -1,0 +1,95 @@
+<ViewDefinition Name="NeuralSignal" Type="Data">
+	<Primitives>
+
+<!--  TOP PRIMITIVE -->
+
+                <PrimitiveDefinition Name="NeuralSignal" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="SpatialPrimitive" primaryFlag="TRUE"/>
+                		<Class Name="NeuralSignal"/>
+			</Classes>
+			<triplets>
+			        <triplet>NeuralSignal->timeAfterExposure=SignalTime|LookupDatum</triplet>
+			        <triplet>NeuralSignal->sigType=NeuralSignalType|CV</triplet>
+			        <triplet>NeuralSignal->sigAV=SignalAtlasVolume|SignalAtlasVolume</triplet>
+            			<triplet>NeuralSignal->expt=PhysiologyExperimentLU|PhysiologyExperiment</triplet>
+			</triplets>
+                        <FormDesign>
+				<Control Type="Lookup" Pos="1" Label="Experiment" lookupView="PhysiologyExperimentLU" attributeAddress="]PhysiologyExperimentLU|ViewTable.indexString"/>
+				<GridArray Pos="2" Label="Type" attributeAddress="]NeuralSignalType">
+					<Control Type="Lookup" Pos="2.1" Label="Signal Type" lookupView="NeuralSignalType" removeTerm="0" attributeAddress="]NeuralSignalType|CV.name"/>
+					<Control Type="TextRegion" Pos="2.2" Height="3" Width="30" Label="Description" attributeAddress="]NeuralSignalType|CV.description"/>
+			        </GridArray>
+				<GridArray Pos="3" Label="Time after exposure" attributeAddress="]SignalTime">
+	                                <Control Type="TextInput" Pos="3.1" Label="time" Size="15" attributeAddress="]SignalTime|LookupDatum.value"/>
+        	                        <Control Type="TextInput" Pos="3.2" Label="(error)" Size="15" attributeAddress="]SignalTime|LookupDatum.error"/>
+                	                <Control Type="Lookup" Pos="3.3" Label="units" removeTerm="1" lookupView="TimeDefinition" attributeAddress="]TimeDefinition|DataDefinition.units"/>
+			        </GridArray>
+				<GridArray Pos="4" Label="Atlas Area displaying [br]neural signal" attributeAddress="]SignalAtlasVolume">
+					<Control Type="Lookup" Pos="4.1" Label="Atlas Volume" lookupView="SigAtlasVolumeLU" attributeAddress="]SigAtlasVolumeLU|ViewTable.indexString"/>
+					<Control Type="Lookup" Pos="4.2" Label="Signal Strength" lookupView="SignalStrength" attributeAddress="]SignalStrength|LookupDatum.indexString"/>
+					<Control Type="Lookup" Pos="4.3" Label="Pattern" lookupView="PatternRelation" attributeAddress="]PatternRelation|CV.indexString"/>
+					<Control Type="Lookup" Pos="4.4" Label="Topography" lookupView="TopographyRelation" attributeAddress="]TopographyRelation|CV.indexString"/>
+					<Control Type="Lookup" Pos="4.5" Label="Hemisphere" lookupView="Hemi2Relation" attributeAddress="]Hemi2Relation|CV.indexString"/>
+				</GridArray>
+			</FormDesign>
+		</PrimitiveDefinition>
+
+<!--  'DATA' DEPENDENT PRIMITIVES *** SignalAtlasVolume -->
+
+		<PrimitiveDefinition Name="SignalAtlasVolume">
+			<Classes>
+				<Class Name="SignalAtlasVolume" primaryFlag="TRUE"/>
+			</Classes>
+			<triplets>
+            			<triplet>SignalAtlasVolume->sigAV=SigAtlasVolumeLU|AtlasVolume</triplet>
+                		<triplet>SignalAtlasVolume->signalStrength=SignalStrength|CV</triplet>
+		                <triplet>SignalAtlasVolume->pattern=PatternRelation|CV</triplet>
+		                <triplet>SignalAtlasVolume->topography=TopographyRelation|CV</triplet>
+		                <triplet>SignalAtlasVolume->signalHemisphere=Hemi2Relation|CV</triplet>
+			</triplets>
+		</PrimitiveDefinition>
+
+<!--  'DATA' DEPENDENT PRIMITIVES *** Physiology Experiment -->
+
+		<PrimitiveDefinition lookupView="PhysiologyExperimentLU"/>
+
+<!--  EDITABLE TYPES -->
+
+                <PrimitiveDefinition Editable="1" Nullable="1" lookupView="NeuralSignalType"/>
+
+<!--  OTHER SECONDARY DATA ITEMS -->
+
+<!--  Neural Signal  -->
+	        <PrimitiveDefinition Editable="0" Name="SigAtlasVolumeLU" lookupView="AtlasVolumeLU"/>
+        	<PrimitiveDefinition Editable="0" lookupView="TopographyRelation"/>
+	    	<PrimitiveDefinition Editable="0" lookupView="PatternRelation"/>
+	    	<PrimitiveDefinition Editable="0" lookupView="SignalStrength"/>
+        	<PrimitiveDefinition Editable="0" Name="Hemi2Relation" lookupView="HemisphereRelation"/>
+
+                <PrimitiveDefinition Name="SignalTime">
+			<Classes>
+				<Class Name="LookupDatum" primaryFlag="TRUE"/>
+			</Classes>
+			<triplets>
+				<triplet>
+					LookupDatum->def=TimeDefinition|DataDefinition
+				</triplet>
+			</triplets>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition lookupView="TimeDefinition"/>
+
+	</Primitives>
+
+<!--  Only links to subsidiary data ... what about atlas?  -->
+
+<!--  Try a simple index to start with  -->
+
+	<Index Format="$1$"/>
+	<MachineIndex Format="$1$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]PhysiologyExperimentLU|PhysiologyExperiment.name"/>
+		<IndexElement Pos="2" Nullable="1" attributeAddress="]NeuralSignal|SpatialPrimitive.name"/>
+	</IndexElements>
+	<Parent Name="DataMap"/>
+</ViewDefinition>

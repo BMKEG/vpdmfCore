@@ -1,0 +1,51 @@
+<ViewDefinition Name="LabelingDensityMeasurement" Type="Lookup">
+	<Primitives>
+		<PrimitiveDefinition Name="LabelingDensityMeasurement" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="LookupDatum" primaryFlag="TRUE"/>
+			</Classes>
+			<Conditions>
+				<Condition>
+					|LookupDatum.max='7'
+				</Condition>
+			</Conditions>
+			<triplets>
+				<triplet>
+					LookupDatum->def=DataDefinition|DataDefinition
+				</triplet>
+			</triplets>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Name="DataDefinition" >
+			<Classes>
+				<Class Name="DataDefinition" primaryFlag="TRUE"/>
+				<Class Name="CV"/>
+			</Classes>
+			<Conditions>
+				<Condition>
+					|DataDefinition.name='Density'
+				</Condition>
+				<Condition>
+					|DataDefinition.units='-'
+				</Condition>
+				<Condition>
+					|DataDefinition.siConversionFactor='0'
+				</Condition>
+				<Condition>
+					|CV.name='ordinal'
+				</Condition>
+			</Conditions>
+			<triplets>
+				<triplet>
+					DataDefinition->scaleOfMeasurement=DataDefinition|CV
+				</triplet>
+			</triplets>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="Labeling Density : $1$ ($2$/$3$)"/>
+	<MachineIndex Format="Labeling Density : $1$ ($2$/$3$)"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]LabelingDensityMeasurement|LookupDatum.value"/>
+		<IndexElement Pos="2" attributeAddress="]LabelingDensityMeasurement|LookupDatum.rank"/>
+		<IndexElement Pos="3" attributeAddress="]LabelingDensityMeasurement|LookupDatum.max"/>
+	</IndexElements>
+</ViewDefinition>

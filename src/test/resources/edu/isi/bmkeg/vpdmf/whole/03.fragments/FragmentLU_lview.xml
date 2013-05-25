@@ -1,0 +1,16 @@
+<ViewDefinition Name="FragmentLU" Type="Lookup" Editable="0">
+	<Primitives>
+		<PrimitiveDefinition Name="Fragment" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="ViewTable" primaryFlag="TRUE"/>
+				<Class Name="KnowledgeStatement"/>
+				<Class Name="Fragment"/>
+			</Classes>
+		</PrimitiveDefinition>
+	</Primitives>
+	<machineIndex Format="$1$"/>
+	<Index Format="$1$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]Fragment|ViewTable.indexString"/>
+	</IndexElements>
+</ViewDefinition>

@@ -1,0 +1,130 @@
+<ViewDefinition Name="TractTracingExperiment" Type="Data">
+	<Documentation>
+	</Documentation>
+	<Primitives>
+		<PrimitiveDefinition Name="TractTracingExperiment" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="KnowledgeStatement" primaryFlag="TRUE"/>
+				<Class Name="TractTracingExperiment"/>
+			</Classes>
+			<FormDesign>
+				<Control Type="Wizard" Pos="0" Label="Experiment Name" baseClass="edu.usc.kmrg.vpdmf.knowledgeCapture.experiments.TractTracingExperiment" attributeAddress="]TractTracingExperiment|ViewTable.ViewTable_id"/>
+				<Control Type="TextInput" Pos="1" Label="Name" Size="40" attributeAddress="]TractTracingExperiment|TractTracingExperiment.name"/>
+				<Control Type="Lookup" Pos="2" Label="Atlas" lookupView="AtlasLU" attributeAddress="]Atlas|ViewTable.indexString"/>
+		    	<Control Type="Lookup" Pos="3" Label="Tracer" lookupView="TracerChemicalLU" attributeAddress="]TracerChemicalLU|TracerChemical.name"/>
+		        <GridArray Pos="4" Label="Atlas Area coverd by[br]Injection Site" attributeAddress="]CoveredAtlasArea">
+					<Control Type="Lookup" Pos="4.1" Label="Atlas Volume" lookupView="CoveredAtlasVolumeLU" attributeAddress="]CoveredAtlasVolumeLU|ViewTable.indexString"/>
+					<Control Type="Lookup" Pos="4.2" Label="Participation Relation" lookupView="ParticipationRelation" attributeAddress="]ParticipationRelation|CV.indexString"/>
+					<Control Type="Lookup" Pos="4.3" Label="Hemisphere" lookupView="HemisphereRelation" attributeAddress="]HemisphereRelation|CV.indexString"/>
+				</GridArray>
+				<Control Type="Lookup" Pos="5" Label="Labeling Type" lookupView="VolumeType" attributeAddress="]VolumeType|CV.name"/>
+				<GridArray Pos="6" Label="Atlas Area covered by[br]Transported Tracer" attributeAddress="]labeledAtlasVolume">
+					<Control Type="Lookup" Pos="6.1" Label="Atlas Volume" lookupView="LabeledAtlasVolumeLU" attributeAddress="]LabeledAtlasVolumeLU|ViewTable.indexString"/>
+					<Control Type="Lookup" Pos="6.2" Label="Pattern" lookupView="PatternRelation" attributeAddress="]PatternRelation|CV.indexString"/>
+					<Control Type="Lookup" Pos="6.3" Label="Density" lookupView="LabelingDensityMeasurement" attributeAddress="]LabelingDensityMeasurement|LookupDatum.indexString"/>
+					<Control Type="Lookup" Pos="6.4" Label="Topography" lookupView="TopographyRelation" attributeAddress="]TopographyRelation|CV.indexString"/>
+					<Control Type="Lookup" Pos="6.5" Label="Ipsilateral/Contralateral" lookupView="IpsiContraRelation" attributeAddress="]IpsiContraRelation|CV.indexString"/>
+				</GridArray>
+			</FormDesign>
+			<triplets>
+				<triplet>KnowledgeStatement->knowledgeType=KnowledgeType|CV</triplet>
+				<triplet>KnowledgeStatement->statementFormat=StatementFormat|CV</triplet>
+				<triplet>TractTracingExperiment->labeling=TractTracingHistology|TransportedLabelingPattern</triplet>
+				<triplet>TractTracingExperiment->injection=TractTracingInjectionSite|TracerInjection</triplet>
+                		<triplet>TractTracingExperiment->atlas=AtlasLU|Atlas</triplet>
+			</triplets>
+		</PrimitiveDefinition>
+        	<PrimitiveDefinition Editable="0" Nullable="0" lookupView="TracerChemicalLU"/>
+	    	<PrimitiveDefinition Editable="0" Nullable="1" lookupView="VolumeType"/>
+        	<PrimitiveDefinition Editable="0" Nullable="1" lookupView="LabelingDensityMeasurement"/>
+        	<PrimitiveDefinition Name="TractTracingInjectionSite" pvCount="2">
+			<Classes>
+				<Class Name="ViewTable" primaryFlag="TRUE"/>
+				<Class Name="SpatialPrimitive"/>
+                		<Class Name="TracerInjection"/>
+			</Classes>
+			<Conditions>
+				<Condition>
+					|ViewTable.viewType='.SpatialPrimitive.%.BrainVolume.%.TractTracingInjectionSite.%'
+				</Condition>
+			</Conditions>
+        	    	<triplets>
+            			<triplet>TracerInjection->tracer=TracerChemicalLU|TracerChemical</triplet>
+	                	<triplet>TracerInjection->injectionArea=CoveredAtlasArea|CoveredAtlasArea</triplet>
+              		</triplets>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Name="TractTracingHistology">
+			<Classes>
+				<Class Name="ViewTable" primaryFlag="TRUE"/>
+				<Class Name="SpatialPrimitive"/>
+                		<Class Name="TransportedLabelingPattern"/>
+			</Classes>
+			<Conditions>
+				<Condition>
+					|ViewTable.viewType='.SpatialPrimitive.%.DataMap.%.TractTracingHistology.%'
+				</Condition>
+			</Conditions>
+			<triplets>
+			        <triplet>TransportedLabelingPattern->labelType=VolumeType|CV</triplet>
+			        <triplet>TransportedLabelingPattern->labeledArea=labeledAtlasVolume|labeledAtlasVolume</triplet>
+			</triplets>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Editable="0" Nullable="1" lookupView="AtlasLU"/>
+        	<PrimitiveDefinition Editable="0" Nullable="1" lookupView="StatementFormat">
+			<Conditions>
+				<Condition>
+					|CV.name='Computer: VPDMf'
+				</Condition>
+			</Conditions>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Editable="0" Nullable="1" lookupView="KnowledgeType">
+			<Conditions>
+				<Condition>
+					|CV.name='capture'
+				</Condition>
+			</Conditions>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Name="CoveredAtlasArea">
+			<Classes>
+				<Class Name="CoveredAtlasArea" primaryFlag="TRUE"/>
+			</Classes>
+			<triplets>
+            			<triplet>CoveredAtlasArea->atlasVolume=CoveredAtlasVolumeLU|AtlasVolume</triplet>
+                		<triplet>CoveredAtlasArea->participation=ParticipationRelation|CV</triplet>
+		                <triplet>CoveredAtlasArea->hemisphere=HemisphereRelation|CV</triplet>
+			</triplets>
+		</PrimitiveDefinition>
+	    	<PrimitiveDefinition Name="labeledAtlasVolume">
+                	<Classes>
+        			<Class Name="labeledAtlasVolume" primaryFlag="TRUE"/>
+            		</Classes>
+			<triplets>
+        			<triplet>labeledAtlasVolume->labeledAtlasVolume=LabeledAtlasVolumeLU|AtlasVolume</triplet>
+		                <triplet>labeledAtlasVolume->pattern=PatternRelation|CV</triplet>
+        		        <triplet>labeledAtlasVolume->density=LabelingDensityMeasurement|LookupDatum</triplet>
+      	        		<triplet>labeledAtlasVolume->topography=TopographyRelation|CV</triplet>
+      	       		 	<triplet>labeledAtlasVolume->ipsicontra=IpsiContraRelation|CV</triplet>
+			</triplets>
+		</PrimitiveDefinition>
+	    	<PrimitiveDefinition Editable="0" lookupView="ParticipationRelation"/>
+        	<PrimitiveDefinition Editable="0" lookupView="HemisphereRelation"/>
+	    	<PrimitiveDefinition Editable="0" lookupView="PatternRelation"/>
+        	<PrimitiveDefinition Editable="0" lookupView="TopographyRelation"/>
+        	<PrimitiveDefinition Editable="0" lookupView="IpsiContraRelation"/>
+        	<PrimitiveDefinition Editable="0" Name="LabeledAtlasVolumeLU" lookupView="AtlasVolumeLU"/>
+	        <PrimitiveDefinition Editable="0" Name="CoveredAtlasVolumeLU" lookupView="AtlasVolumeLU"/>
+	</Primitives>
+	<Links>
+		<Link Name="Injection" setRelation="ReverseDependent">[TractTracingExperiment]TractTracingExperiment|TractTracingExperiment=[TractTracingInjectionSite]TractTracingExperimentLU|TractTracingExperiment,[TractTracingExperiment]TractTracingInjectionSite|TracerInjection=[TractTracingInjectionSite]TractTracingInjectionSite|TracerInjection,[TractTracingExperiment]TracerChemicalLU|TracerChemical=[TractTracingInjectionSite]TracerChemicalLU|TracerChemical</Link>
+		<Link Name="Histology" setRelation="ReverseDependent">[TractTracingExperiment]TractTracingExperiment|TractTracingExperiment=[TractTracingHistology]TractTracingExperimentLU|TractTracingExperiment,[TractTracingExperiment]TractTracingHistology|TransportedLabelingPattern=[TractTracingHistology]TractTracingHistology|TransportedLabelingPattern,[TractTracingExperiment]VolumeType|CV=[TractTracingHistology]VolumeType|CV,[TractTracingExperiment]LabelingDensityMeasurement|LookupDatum=[TractTracingHistology]LabelingDensityMeasurement|LookupDatum</Link>
+	</Links>
+	<Index Format="$1$, $2$, injection: $3$, labeling: ( $4$ )"/>
+	<MachineIndex Format="$1$, $2$, injection: $3$, labeling: ( $4$ )"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]TractTracingExperiment|TractTracingExperiment.name"/>
+		<IndexElement Pos="2" Nullable="1" attributeAddress="]TracerChemicalLU|TracerChemical.name"/>
+		<IndexElement Pos="3" Nullable="1" attributeAddress="]TractTracingInjectionSite|SpatialPrimitive.name"/>
+		<IndexElement Pos="4" Nullable="1" attributeAddress="]TractTracingHistology|SpatialPrimitive.name"/>
+	</IndexElements>
+    <Parent Name="Experiment"/>
+</ViewDefinition>

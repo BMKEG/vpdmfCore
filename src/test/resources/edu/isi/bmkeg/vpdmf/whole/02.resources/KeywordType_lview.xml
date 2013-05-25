@@ -1,0 +1,20 @@
+<ViewDefinition Name="KeywordType" Type="Lookup" Editable="0">
+	<Primitives>
+		<PrimitiveDefinition Name="KeywordType" primaryFlag="TRUE">
+			<Condition>
+				|CV.context='Keyword.keywordType'
+			</Condition>
+			<Classes primaryFlag="TRUE">
+				<Class Name="CV" primaryFlag="TRUE"/>
+			</Classes>
+			<FormDesign>
+				<Control Type="TextInput" Pos="1" Label="Name" Size="20" attributeAddress="]KeywordType|CV.name"/>
+				<Control Type="TextInput" Pos="2" Label="Description" Size="20" attributeAddress="]KeywordType|CV.description"/>
+			</FormDesign>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="$1$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]KeywordType|CV.name"/>
+	</IndexElements>
+</ViewDefinition>

@@ -1,0 +1,23 @@
+<ViewDefinition Name="NonNeuralStimulusType" Type="Lookup">
+	<Primitives>
+		<PrimitiveDefinition Name="NonNeuralStimulusType" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="CV" primaryFlag="TRUE"/>
+			</Classes>
+			<Conditions>
+				<Condition>
+					|CV.context='NonNeuralStimulusType.nnStimulusType'
+				</Condition>
+			</Conditions>
+			<FormDesign>
+				<Control Type="Label" Pos="1" Label="LabelingType" Size="40" attributeAddress="]NonNeuralStimulusType|CV.name"/>
+				<Control Type="Label" Pos="2" Label="Description" Size="40" attributeAddress="]NonNeuralStimulusType|CV.description"/>
+			</FormDesign>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="$1$"/>
+	<MachineIndex Format="$1$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]NonNeuralStimulusType|CV.name"/>
+	</IndexElements>
+</ViewDefinition>

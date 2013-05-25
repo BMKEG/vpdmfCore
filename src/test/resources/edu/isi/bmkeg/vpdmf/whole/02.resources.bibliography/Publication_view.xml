@@ -1,0 +1,78 @@
+<ViewDefinition Name="Publication" Type="Data" Editable="0">
+	<Documentation>
+	</Documentation>
+	<Primitives>
+		<PrimitiveDefinition Editable="0" Name="Resource" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="Resource" primaryFlag="TRUE"/>
+			</Classes>
+			<triplets>
+				<triplet>
+					Resource->authorList=Scientist|Person
+				</triplet>
+				<triplet>
+					Resource->id=ID|ID
+				</triplet>
+				<triplet>
+					Resource->keyword=Keyword|Keyword
+				</triplet>
+				<triplet>
+					Resource->resourceType=ResourceType|CV
+				</triplet>
+                                <triplet>
+					Resource->fullTextURL=URI|URI
+				</triplet>
+
+			</triplets>
+			<FormDesign>
+				<GridArray Pos="1" Label="Author" attributeAddress="]Scientist">
+					<Control Type="Label" Pos="1.1" Label="Initials" Size="10" attributeAddress="]Scientist|Person.Initials"/>
+					<Control Type="Label" Pos="1.2" Label="Surname" Size="10" attributeAddress="]Scientist|Person.LastName"/>
+				</GridArray>
+				<Control Type="DateInput" Pos="2" Label="Year" Format="yyyy" Size="5" attributeAddress="]Resource|Resource.PubYear"/>
+				<Control Type="TextRegion" Pos="3" Label="Title" Height="3" Width="40" attributeAddress="]Resource|Resource.Title"/>
+				<Control Type="TextInput" Pos="4" Label="Pages" Size="8" attributeAddress="]Resource|Resource.Pages"/>
+				<Control Type="TextRegion" Pos="5" Label="Abstract" Height="10" Width="40" attributeAddress="]Resource|Resource.Abstract"/>
+				<Control Type="TextInput" Pos="6" Label="Unique Id" Size="10" attributeAddress="]Resource|Resource.uid"/>
+				<GridArray Pos="7" Label="ID values" attributeAddress="]ID">
+					<Control Type="TextInput" Pos="7.1" Size="20" attributeAddress="]ID|ID.id"/>
+				</GridArray>
+                                <GridArray Pos="8" Label="Full Text URL" attributeAddress="]URI">
+					<Control Type="URLInput" Pos="8.1" Label="URL" Size="20" attributeAddress="]URI|URI.uri"/>
+				</GridArray>
+				<GridArray Pos="9" Label="Keywords" attributeAddress="]Keyword">
+					<Control Type="TextInput" Pos="9.1" Size="20" attributeAddress="]Keyword|Keyword.value"/>
+				</GridArray>
+			</FormDesign>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Name="ID" Editable="0" Nullable="1">
+			<Classes>
+				<Class Name="ID" primaryFlag="TRUE"/>
+			</Classes>
+		</PrimitiveDefinition>
+                <PrimitiveDefinition Name="URI" Editable="1" Nullable="1">
+			<Classes>
+				<Class Name="URI" primaryFlag="TRUE"/>
+			</Classes>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Editable="0" lookupView="Scientist"/>
+		<PrimitiveDefinition Name="Keyword" Nullable="1">
+			<Classes>
+				<Class Name="Keyword" primaryFlag="TRUE"/>
+			</Classes>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Editable="0" Nullable="1" lookupView="ResourceType">
+			<Conditions>
+                        	<Condition>|CV.context='Resource.ResourceType'</Condition>
+				<Condition>|CV.name='Bibliographic'</Condition>
+			</Conditions>
+		</PrimitiveDefinition>
+        </Primitives>
+	<Index Format="$1$"/>
+	<MachineIndex Format="$2$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]Resource|ViewTable.indexString"/>
+		<IndexElement Pos="2" attributeAddress="]Resource|ViewTable.machineIndex"/>
+	</IndexElements>
+	<Parent Name="Resource"/>
+</ViewDefinition>

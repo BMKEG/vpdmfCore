@@ -1,0 +1,21 @@
+<ViewDefinition Name="Journal" Type="External" Editable="0" >
+	<Primitives>
+		<PrimitiveDefinition Name="Journal" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="Journal" primaryFlag="TRUE"/>
+			</Classes>
+			<FormDesign>
+				<Control Type="TextInput" Pos="1" Label="Title" Size="40" attributeAddress="]Journal|Journal.JournalTitle"/>
+				<Control Type="TextInput" Pos="2" Label="Abbreviation" Size="40" attributeAddress="]Journal|Journal.Abbr"/>
+				<Control Type="TextInput" Pos="3" Label="ISSN" Size="40" attributeAddress="]Journal|Journal.ISSN"/>
+				<Control Type="TextInput" Pos="4" Label="NlmId" Size="40" attributeAddress="]Journal|Journal.NlmId"/>
+			</FormDesign>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="$1$."/>
+	<machineIndex Format="$1$ (issn: $2$)"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]Journal|Journal.Abbr"/>
+		<IndexElement Pos="2" attributeAddress="]Journal|Journal.ISSN"/>
+	</IndexElements>
+</ViewDefinition>

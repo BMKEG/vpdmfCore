@@ -1,0 +1,44 @@
+<ViewDefinition Name="Response" Type="Data">
+	<Primitives>
+
+<!--  TOP PRIMITIVE -->
+
+                <PrimitiveDefinition Name="Response" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="Response" primaryFlag="TRUE"/>
+			</Classes>
+        	    	<triplets>
+            			<triplet>Response->responseType=ResponseType|CV</triplet>
+            			<triplet>Response->physiologyExpt=PhysiologyExperimentLU|PhysiologyExperiment</triplet>
+              		</triplets>
+			<FormDesign>
+                        	<GridArray Pos="1" Label="Experiment" attributeAddress="]PhysiologyExperimentLU">
+					<Control Type="Lookup" Pos="1.1" Label="Experiment" lookupView="PhysiologyExperimentLU" attributeAddress="]PhysiologyExperimentLU|ViewTable.indexString"/>
+                                </GridArray>
+                                <GridArray Pos="2" Label="Response" attributeAddress="]ResponseType">
+					<Control Type="Lookup" Pos="2.1" Label="Response Type" lookupView="ResponseType" attributeAddress="]ResponseType|CV.name"/>
+					<Control Type="TextRegion" Pos="2.2" Label="Description" attributeAddress="]ResponseType|CV.description"/>
+				</GridArray>
+			</FormDesign>
+                </PrimitiveDefinition>
+
+<!--  'DATA' DEPENDENT PRIMITIVES *** Physiology Experiment -->
+
+		<PrimitiveDefinition lookupView="PhysiologyExperimentLU"/>
+
+
+<!--  EDITABLE TYPES -->
+
+                <PrimitiveDefinition Editable="1" Nullable="1" lookupView="ResponseType"/>
+
+	</Primitives>
+
+<!--  Try a simple index to start with  -->
+
+	<Index Format="$1$"/>
+	<MachineIndex Format="$1$"/>
+	<IndexElements>
+		<IndexElement Pos="1" Nullable="1" attributeAddress="]ResponseType|CV.name"/>
+	</IndexElements>
+
+</ViewDefinition>

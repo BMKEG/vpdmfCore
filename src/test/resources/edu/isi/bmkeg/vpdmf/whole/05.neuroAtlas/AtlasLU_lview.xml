@@ -1,0 +1,16 @@
+<ViewDefinition Name="AtlasLU" Type="Lookup" Editable="0" >
+	<Primitives>
+		<PrimitiveDefinition Name="AtlasLU" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="ViewTable" primaryFlag="TRUE"/>
+				<Class Name="Atlas" />
+			</Classes>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="$1$"/>
+	<machineIndex Format="$2$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]AtlasLU|ViewTable.indexString"/>
+		<IndexElement Pos="2" attributeAddress="]AtlasLU|ViewTable.machineIndex"/>
+	</IndexElements>
+</ViewDefinition>

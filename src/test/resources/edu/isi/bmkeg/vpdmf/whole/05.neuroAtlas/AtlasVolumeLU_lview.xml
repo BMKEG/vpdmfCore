@@ -1,0 +1,15 @@
+<ViewDefinition Name="AtlasVolumeLU" Type="Lookup" Editable="0" >
+	<Primitives>
+		<PrimitiveDefinition Name="AtlasVolumeLU" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="ViewTable" primaryFlag="TRUE"/>
+				<Class Name="AtlasVolume"/>
+			</Classes>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="$1$"/>
+	<MachineIndex Format="$1$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]AtlasVolumeLU|ViewTable.IndexString"/>
+	</IndexElements>
+</ViewDefinition>

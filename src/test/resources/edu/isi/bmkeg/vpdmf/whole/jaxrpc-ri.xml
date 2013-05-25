@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<webServices xmlns="http://java.sun.com/xml/ns/jax-rpc/ri/dd" version="1.0" targetNamespaceBase="http://bollocks/wsdl" typeNamespaceBase="http://bollocks/types" urlPatternBase="/ws">
+	<endpoint name="VPDMf" displayName="VPDMf Service" description="A web service implementing the VPDMf" interface="edu.usc.kmrg.vpdmf.webservice.VpdmfIF" implementation="edu.usc.kmrg.vpdmf.webservice.VpdmfImpl"/>
+	<endpointMapping endpointName="VPDMf" urlPattern="/vpdmf"/>
+</webServices>

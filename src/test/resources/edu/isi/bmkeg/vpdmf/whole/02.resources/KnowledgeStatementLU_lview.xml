@@ -1,0 +1,16 @@
+<ViewDefinition Name="KnowledgeStatementLU" Type="Lookup" Editable="0">
+	<Primitives>
+		<PrimitiveDefinition Name="KnowledgeStatementLU" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="ViewTable" primaryFlag="TRUE"/>
+				<Class Name="KnowledgeStatement"/>
+			</Classes>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="$1$"/>
+	<MachineIndex Format="$2$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]KnowledgeStatementLU|ViewTable.indexString"/>
+		<IndexElement Pos="2" attributeAddress="]KnowledgeStatementLU|ViewTable.machineIndex"/>
+	</IndexElements>
+</ViewDefinition>

@@ -1,0 +1,25 @@
+<ViewDefinition Name="SpatialPrimitive" Type="Data" Editable="0" Start="TRUE">
+	<Primitives>
+		<PrimitiveDefinition Name="SpatialPrimitive" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="SpatialPrimitive" primaryFlag="TRUE"/>
+			</Classes>
+			<triplets>
+				<triplet>
+					SpatialPrimitive->spType=SpatialPrimitiveType|CV
+				</triplet>
+			</triplets>
+			<FormDesign>
+				<Control Type="Label" Pos="1" Label="SpatialPrimitive" Size="40" attributeAddress="]SpatialPrimitive|SpatialPrimitive.name"/>
+				<Control Type="TextRegion" Pos="2" Label="Description" Height="5" Width="40" attributeAddress="]SpatialPrimitive|SpatialPrimitive.description"/>
+			</FormDesign>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Editable="0" Nullable="1" lookupView="SpatialPrimitiveType"/>
+	</Primitives>
+	<machineIndex Format="$2$"/>
+	<Index Format="$1$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]SpatialPrimitive|ViewTable.indexString"/>
+		<IndexElement Pos="2" attributeAddress="]SpatialPrimitive|ViewTable.machineIndex"/>
+	</IndexElements>
+</ViewDefinition>

@@ -1,0 +1,15 @@
+<ViewDefinition Name="DataMapLU" Type="Lookup" Editable="0" >
+	<Primitives>
+		<PrimitiveDefinition Name="DataMapLU" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="ViewTable" primaryFlag="TRUE"/>
+				<Class Name="SpatialPrimitive"/>
+			</Classes>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="$1$"/>
+	<MachineIndex Format="$1$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]DataMapLU|SpatialPrimitive.name"/>
+	</IndexElements>
+</ViewDefinition>

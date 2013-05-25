@@ -1,0 +1,28 @@
+<ViewDefinition Name="TimeDefinition" Type="Lookup">
+	<Primitives>
+		<PrimitiveDefinition Name="TimeDefinition" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="DataDefinition" primaryFlag="TRUE"/>
+				<Class Name="CV"/>
+			</Classes>
+			<Conditions>
+				<Condition>
+					|DataDefinition.name='Time'
+				</Condition>
+				<Condition>
+					|CV.name='ratio'
+				</Condition>
+			</Conditions>
+			<triplets>
+				<triplet>
+					DataDefinition->scaleOfMeasurement=TimeDefinition|CV
+				</triplet>
+			</triplets>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Index Format="$1$"/>
+	<MachineIndex Format="$1$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]TimeDefinition|DataDefinition.units"/>
+	</IndexElements>
+</ViewDefinition>

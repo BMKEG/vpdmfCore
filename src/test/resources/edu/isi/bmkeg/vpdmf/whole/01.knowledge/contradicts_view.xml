@@ -1,0 +1,41 @@
+<!-- edited with XMLSPY v5 rel. 3 U (http://www.xmlspy.com) by Gully APC Burns (UNIV OF SOUTHERN CALIFORNIA) -->
+<ViewDefinition Name="contradicts" Type="Link">
+	<Primitives>
+		<PrimitiveDefinition Name="contradicts" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="ViewLinkTable" primaryFlag="TRUE"/>
+			</Classes>
+			<triplets>
+				<triplet>
+					ViewLinkTable->from=FromView|ViewTable
+				</triplet>
+				<triplet>
+					ViewLinkTable->to=ToView|ViewTable
+				</triplet>
+			</triplets>
+			<Conditions>
+				<Condition>
+					|ViewLinkTable.linkType='contradicts'
+				</Condition>
+			</Conditions>
+			<FormDesign>
+				<Control Type="Lookup" Pos="1" Label="Supporting Statement" lookupView="FromView" attributeAddress="]FromView|ViewTable.indexString"/>
+				<Control Type="Lookup" Pos="2" Label="Supported Statement" lookupView="ToView" attributeAddress="]ToView|ViewTable.indexString"/>
+			</FormDesign>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Name="FromView" Editable="0" lookupView="KnowledgeStatementLU"/>
+		<PrimitiveDefinition Name="ToView" Editable="0" lookupView="KnowledgeStatementLU"/>
+	</Primitives>
+	<Links>
+		<Link Name="StatementSupport" setRelation="Overlap">[KnowledgeStatement]KnowledgeStatement|ViewTable=[contradicts]FromView|ViewTable</Link>
+		<Link Name="contradictstatement" setRelation="Overlap">[contradicts]ToView|ViewTable=[KnowledgeStatement]KnowledgeStatement|ViewTable</Link>
+	</Links>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]FromView|ViewTable.indexString"/>
+		<IndexElement Pos="2" attributeAddress="]ToView|ViewTable.indexString"/>
+		<IndexElement Pos="3" attributeAddress="]FromView|ViewTable.ViewTable_id"/>
+		<IndexElement Pos="4" attributeAddress="]ToView|ViewTable.ViewTable_id"/>
+	</IndexElements>
+	<Index Format="$1$ >>> contradicts >>> $2$"/>
+	<MachineIndex Format="ViewTable_id=$3$ >>> contradicts >>> ViewTable_id=$4$"/>
+</ViewDefinition>

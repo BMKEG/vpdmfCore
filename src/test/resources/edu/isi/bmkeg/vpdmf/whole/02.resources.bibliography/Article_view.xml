@@ -1,0 +1,93 @@
+<ViewDefinition Name="Article" Type="Data" >
+	<Primitives>
+		<PrimitiveDefinition Name="Resource" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="Resource" primaryFlag="TRUE"/>
+				<Class Name="Article"/>
+			</Classes>
+			<triplets>
+				<triplet>
+					Resource->authorList=Scientist|Person
+				</triplet>
+				<triplet>
+					Resource->id=ID|ID
+				</triplet>
+				<triplet>
+					Resource->keyword=Keyword|Keyword
+				</triplet>
+				<triplet>
+					Resource->resourceType=ResourceType|CV
+				</triplet>
+                                <triplet>
+					Resource->fullTextURL=URI|URI
+				</triplet>
+				<triplet>
+					Article->journal=JournalLU|Journal
+				</triplet>
+                        </triplets>
+			<FormDesign>
+				<GridArray Pos="1" Label="Author" attributeAddress="]Scientist">
+					<Control Type="TextInput" Pos="1.1" Label="Initials" Size="10" attributeAddress="]Scientist|Person.Initials"/>
+					<Control Type="TextInput" Pos="1.2" Label="Surname" Size="10" attributeAddress="]Scientist|Person.LastName"/>
+				</GridArray>
+				<Control Type="DateInput" Pos="2" Label="Year" Format="yyyy" Size="5" attributeAddress="]Resource|Resource.PubYear"/>
+				<Control Type="TextRegion" Pos="3" Label="Title" Height="3" Width="40" attributeAddress="]Resource|Resource.Title"/>
+				<Control Type="Lookup" Pos="4" Label="Journal" lookupView="JournalLU" attributeAddress="]JournalLU|ViewTable.indexString"/>
+				<Control Type="TextInput" Pos="5" Label="Volume" Size="6" attributeAddress="]Resource|Article.Volume"/>
+				<Control Type="TextInput" Pos="6" Label="Issue" Size="4" attributeAddress="]Resource|Article.Issue"/>
+				<Control Type="TextInput" Pos="7" Label="Pages" Size="8" attributeAddress="]Resource|Resource.Pages"/>
+				<Control Type="TextRegion" Pos="8" Label="Abstract" Height="20" Width="40" attributeAddress="]Resource|Resource.Abstract"/>
+				<Control Type="TextInput" Pos="9" Label="Unique Id" Size="10" attributeAddress="]Resource|Resource.uid"/>
+				<GridArray Pos="10" Label="ID values" attributeAddress="]ID">
+					<Control Type="TextInput" Pos="10.1" Label="ID" Size="20" attributeAddress="]ID|ID.id"/>
+				</GridArray>
+                              	<GridArray Pos="11" Label="Full Text URL" attributeAddress="]URI">
+					<Control Type="URLInput" Pos="11.1" Label="URL" Size="20" attributeAddress="]URI|URI.uri"/>
+				</GridArray>
+                              	<GridArray Pos="12" Label="Keywords" attributeAddress="]Keyword">
+					<Control Type="TextInput" Pos="12.1" Label="Value" Size="20" attributeAddress="]Keyword|Keyword.value"/>
+				</GridArray>
+   				<Control Type="FileImport" Pos="13" Label="Full Text File" Size="20" suffix="pdf" attributeAddress="]Resource|Resource.fileName"/>
+				<Control Type="ArticleRobot" Pos="14" Context="single"/>
+			</FormDesign>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Name="ID" Nullable="1">
+			<Classes>
+				<Class Name="ID" primaryFlag="TRUE"/>
+			</Classes>
+		</PrimitiveDefinition>
+                <PrimitiveDefinition Name="URI" Editable="1" Nullable="1">
+			<Classes>
+				<Class Name="URI" primaryFlag="TRUE"/>
+			</Classes>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Editable="1" lookupView="Scientist"/>
+		<PrimitiveDefinition Name="Keyword" Nullable="1">
+			<Classes>
+				<Class Name="Keyword" primaryFlag="TRUE"/>
+			</Classes>
+		</PrimitiveDefinition>
+		<PrimitiveDefinition Editable="0" lookupView="JournalLU"/>
+                <PrimitiveDefinition Editable="0" Nullable="1" lookupView="ResourceType">
+			<Conditions>
+                        	<Condition>|CV.context='Resource.ResourceType'</Condition>
+				<Condition>|CV.name='Bibliographic'</Condition>
+			</Conditions>
+		</PrimitiveDefinition>
+	</Primitives>
+	<Links>
+		<Link Name="Journal" setRelation="Superset">[Article]JournalLU|Journal=[Journal]Journal|Journal</Link>
+	</Links>
+	<Index Format="@1@ ($2$), `$3$` $4$ $5$:$6$"/>
+	<MachineIndex Format="$1$-$2$-TRUNCATE[$3$,10]-$7$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]Scientist|Person.LastName"/>
+		<IndexElement Pos="2" attributeAddress="]Resource|Resource.PubYear"/>
+		<IndexElement Pos="3" attributeAddress="]Resource|Resource.Title"/>
+		<IndexElement Pos="4" attributeAddress="]JournalLU|Journal.Abbr"/>
+		<IndexElement Pos="5" attributeAddress="]Resource|Article.Volume"/>
+		<IndexElement Pos="6" attributeAddress="]Resource|Resource.Pages"/>
+		<IndexElement Pos="7" attributeAddress="]Resource|Resource.uid"/>
+	</IndexElements>
+        <Parent Name="Publication"/>
+</ViewDefinition>

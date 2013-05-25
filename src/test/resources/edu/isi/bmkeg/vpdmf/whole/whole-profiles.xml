@@ -1,0 +1,80 @@
+<Profiles>
+	<Profile Name="1) Resources">
+		Article,
+		BookChapter,
+		Book,
+		ConferencePresentation,
+		ConferenceProceedings,
+		Journal,
+		Publication,
+		Thesis,
+                DataFile,
+                NotebookFragment,
+                Notebook,
+                Scientist,
+                ResourceCollection,
+                <Description>
+                </Description>
+	</Profile>
+	<Profile Name="1.1) Resources - Bibliographic">
+		Article,
+		BookChapter,
+		Book,
+		ConferencePresentation,
+		ConferenceProceedings,
+		Journal,
+		Publication,
+		Thesis,
+                Scientist,
+                ResourceCollection,
+                <Description>
+                </Description>
+	</Profile>
+        <Profile Name="1.2) Resources - Notebook">
+        	DataFile,
+		NotebookFragment,
+		Notebook,
+                Scientist,
+                ResourceCollection,
+                <Description>
+                </Description>
+	</Profile>
+        <Profile Name="2) Fragmenting">
+		BibliographicFragment,
+		CitationFragment,
+		DescriptionFragment,
+		InterpretationFragment,
+		Publication,
+		cites,
+		Scientist,
+                ResourceCollection,
+                NotebookFragment,
+                Notebook
+                <Description>
+                </Description>
+	</Profile>
+        <Profile Name="2.1) Fragmenting - Bibliography">
+		KnowledgeStatement,
+                Fragment,
+                BibliographicFragment,
+		CitationFragment,
+		DescriptionFragment,
+		InterpretationFragment,
+		Publication,
+		cites,
+		Scientist,
+                ResourceCollection
+                <Description>
+                </Description>
+	</Profile>
+        <Profile Name="2.2) Fragmenting - Bibliography">
+		KnowledgeStatement,
+                Fragment,
+                NotebookFragment,
+		Notebook
+		Scientist,
+                ResourceCollection
+                <Description>
+                </Description>
+	</Profile>
+</Profiles>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view name="OoevvElementSet" type="Data">
+	<primitives>
+		<primitive name="OoevvElementSet">
+			<classes>
+				<class name="OoevvElementSet"/>
+			</classes>
+			<pvLinks>
+				<pvLink c1="OoevvElementSet" role="processes" pv2="OoevvProcess" c2="OoevvProcess"/>
+				<pvLink c1="OoevvElementSet" role="entities" pv2="OoevvEntity" c2="OoevvEntity"/>
+				<pvLink c1="OoevvElementSet" role="exptVbs" pv2="ExperimentalVariable" c2="ExperimentalVariable"/>
+				<pvLink c1="OoevvElementSet" role="term" pv2="Term" c2="Term"/>
+			</pvLinks>
+		</primitive>
+		<primitive name="Term">
+			<classes>
+				<class name="Term"/>
+			</classes>
+			<pvLinks>
+				<pvLink c1="Term" role="ontology" pv2="Ontology" c2="Ontology"/>
+			</pvLinks>
+		</primitive>
+		<primitive name="Ontology" nullable="true">
+			<classes>
+				<class name="Ontology"/>
+			</classes>
+		</primitive>
+		<primitive name="ExperimentalVariable" nullable="true">
+			<classes>
+				<class name="ViewTable"/>
+				<class name="ExperimentalVariable"/>
+			</classes>
+			<pvLinks>
+				<pvLink c1="ExperimentalVariable" role="term" pv2="VariableDefinition" c2="Term"/>
+			</pvLinks>
+		</primitive>
+		<primitive name="VariableDefinition" nullable="true">
+			<classes>
+				<class name="Term"/>
+			</classes>
+		</primitive>
+		<primitive name="OoevvProcess" nullable="true">
+			<classes>
+				<class name="ViewTable"/>
+				<class name="OoevvProcess"/>
+			</classes>
+			<pvLinks>
+				<pvLink c1="OoevvProcess" role="term" pv2="OoevvProcessTerm" c2="Term"/>
+			</pvLinks>
+		</primitive>
+		<primitive name="OoevvProcessTerm" nullable="true">
+			<classes>
+				<class name="Term"/>
+			</classes>
+		</primitive>
+		<primitive name="OoevvEntity" nullable="true" >
+			<classes>
+				<class name="ViewTable"/>
+				<class name="OoevvEntity"/>
+			</classes>
+			<pvLinks>
+				<pvLink c1="OoevvEntity" role="term" pv2="OoevvEntityTerm" c2="Term"/>
+			</pvLinks>
+		</primitive>
+		<primitive name="OoevvEntityTerm" nullable="true">
+			<classes>
+				<class name="Term"/>
+			</classes>
+		</primitive>
+	</primitives>
+<!--	<viewLinks>
+ 		<viewLink name="Variable1" setRelation="Superset"
+				 v1="OoevvElementSet" p1="ExperimentalVariable" c1="ExperimentalVariable"
+				 v2="ExperimentalVariable" p2="ExperimentalVariable" c2="ExperimentalVariable"/>
+ 		<viewLink name="Variable2" setRelation="Superset"
+				 v1="OoevvElementSet" p1="VariableDefinition" c1="Term"
+				 v2="ExperimentalVariable" p2="Term" c2="Term"/> 
+	</viewLinks>-->
+	<vpdmfLabel format="VariableSet: $1$:$2$ ($3$)" />
+	<indexElements>
+		<indexElement pos="1" p="Ontology" c="Ontology" a="shortName" />
+		<indexElement pos="2" p="Term" c="Term" a="shortTermId" />
+		<indexElement pos="3" p="Term" c="Term" a="termValue" />
+	</indexElements>
+</view>

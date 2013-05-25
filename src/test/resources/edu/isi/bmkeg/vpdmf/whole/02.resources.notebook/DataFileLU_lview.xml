@@ -1,0 +1,15 @@
+<ViewDefinition Name="DataFileLU" Type="Lookup" Editable="0">
+	<Primitives>
+		<PrimitiveDefinition Name="DataFile" primaryFlag="TRUE">
+			<Classes>
+				<Class Name="ViewTable" primaryFlag="TRUE"/>
+				<Class Name="DataFile"/>
+			</Classes>
+		</PrimitiveDefinition>
+	</Primitives>
+	<machineIndex Format="$1$"/>
+	<Index Format="$1$"/>
+	<IndexElements>
+		<IndexElement Pos="1" attributeAddress="]DataFile|ViewTable.indexString"/>
+	</IndexElements>
+</ViewDefinition>
