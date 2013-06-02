@@ -407,6 +407,9 @@ public class ViewBasedObjectGraph {
 						} else {
 							ai.writeValueString(value+"");													
 						}
+					} else if( ad.getType().getBaseName().equals("blob") ||
+							ad.getType().getBaseName().equals("image")) { 
+						ai.setValue(value);												
 					} else {
 						ai.writeValueString(value+"");						
 					}

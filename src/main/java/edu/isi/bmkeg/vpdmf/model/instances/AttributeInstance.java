@@ -35,7 +35,7 @@ public class AttributeInstance implements Serializable {
 	private UMLattribute definition;
 	private String defName;
 	private boolean notNull;
-	
+
 	private String queryCode = EQ;
 	public static String EQ = "equalTo";
 	public static String OR = "or";
@@ -45,13 +45,13 @@ public class AttributeInstance implements Serializable {
 	public static String GTEQ = "greaterThanOrEqualTo";
 	public static String LT = "lessThan";
 	public static String LTEQ = "lessThanOrEqualTo";
-			
+
 	private HashSet<AttributeInstance> connectedKeys = new HashSet<AttributeInstance>();
 
 	public AttributeInstance() {
 		super();
 	}
-	
+
 	public AttributeInstance(UMLattribute attDef) {
 		super();
 		this.setDefinition(attDef);
@@ -66,8 +66,7 @@ public class AttributeInstance implements Serializable {
 	}
 
 	public String getAddress() {
-		return "]"
-				+ this.get_object().getPrimitive().getDefinition().getName()
+		return "]" + this.get_object().getPrimitive().getDefinition().getName()
 				+ "|" + this.get_object().getDefinition().getBaseName() + "."
 				+ this.getDefinition().getBaseName();
 	}
@@ -79,7 +78,7 @@ public class AttributeInstance implements Serializable {
 	}
 
 	public void connectTo(AttributeInstance that) {
-		
+
 		this.connectedKeys.add(that);
 		that.connectedKeys.add(this);
 
@@ -179,15 +178,16 @@ public class AttributeInstance implements Serializable {
 	public void instantiateDefinition(UMLclass cd) throws Exception {
 
 		Iterator<UMLattribute> aIt = cd.getAttributes().iterator();
-		while(aIt.hasNext()) {
+		while (aIt.hasNext()) {
 			UMLattribute a = aIt.next();
-			if(this.getDefinition().getBaseName().equals(a.getBaseName()) ) {
-				this.setDefinition(a);				
+			if (this.getDefinition().getBaseName().equals(a.getBaseName())) {
+				this.setDefinition(a);
 				return;
 			}
 		}
-		
-		throw new Exception("Attribute "+ this.definition.getBaseName() +"not found in class " + cd.getBaseName());
+
+		throw new Exception("Attribute " + this.definition.getBaseName()
+				+ "not found in class " + cd.getBaseName());
 
 	}
 
@@ -239,7 +239,8 @@ public class AttributeInstance implements Serializable {
 	public String readValueString() {
 		String value = null;
 		try {
-			value = UMLDataConverters.convertToString(this.definition, this.value);
+			value = UMLDataConverters.convertToString(this.definition,
+					this.value);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -276,10 +277,11 @@ public class AttributeInstance implements Serializable {
 		UMLclass cDef = this.get_object().getDefinition();
 		UMLattribute aDef = this.getDefinition();
 
-		Iterator<UMLattribute> pkIt = this.get_object().getDefinition().getPkArray().iterator();
-		while(pkIt.hasNext()) {
+		Iterator<UMLattribute> pkIt = this.get_object().getDefinition()
+				.getPkArray().iterator();
+		while (pkIt.hasNext()) {
 			UMLattribute pk = pkIt.next();
-			if(aDef.equals(pk)) {
+			if (aDef.equals(pk)) {
 				return true;
 			}
 		}
@@ -290,7 +292,8 @@ public class AttributeInstance implements Serializable {
 	public void writeValueString(String value) {
 		try {
 
-			Object data = UMLDataConverters.convertToType(this.definition, value);
+			Object data = UMLDataConverters.convertToType(this.definition,
+					value);
 			this.setValue(data);
 
 		} catch (Exception e) {
@@ -338,5 +341,5 @@ public class AttributeInstance implements Serializable {
 	public void setQueryCode(String queryCode) {
 		this.queryCode = queryCode;
 	}
-	
+
 };

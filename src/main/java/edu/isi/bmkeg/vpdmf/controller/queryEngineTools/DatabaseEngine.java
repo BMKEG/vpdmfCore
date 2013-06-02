@@ -1257,17 +1257,6 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 
 			if (!aD.getToImplement())
 				continue;
-
-			// MT: Bug fix: Skipping conditions involving float attributes.
-			// An sql SELECT statement might fail
-			// to retrieve any rows when a condition is an exact
-			// match of a float value because of issues with 
-			// float or double precision. 
-			if (aD.getType().getBaseName().equals("float") ||
-					aD.getType().getBaseName().equals("double")) {
-				logger.warn("Ignoring query condition on float or double attribute: " + aD.getBaseName());
-				continue;				
-			}
 			
 			AttributeInstance aI = (AttributeInstance) cI.attributes.get(aD
 					.getBaseName());
@@ -1276,26 +1265,13 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 			if (aI.getValue() == null) {
 				continue;
 			} 
-			
-			//
-			// FIXME: We skip all integer, long and boolean attributes set 
-			// specifically to 0. Need to find a better way of issuing 
-			// the query values within objects sent via the query interface
-			//
-			String v = aI.readValueString();
-			String b = aD.getType().getBaseName();
-			if( v == null ) {
-				//
-				// Do nothing in this case
-				//
-			} else if( (b.equals("int") && v.equals("0") ) ||
-					(b.equals("long") && v.equals("0") ) ||
-					(b.equals("boolean") && v.equals("0") ) ||
-					(b.equals("float") && v.equals("0.0") ) ||
-					(b.equals("double") && v.equals("0.0") ) ) {
-				continue;
+
+			if ( !aD.getBaseName().equals("vpdmfLabel") &&
+					aD.getType().getBaseName().equals("longString") ) {
+				logger.debug("Ignoring query condition on long string attribute: " + aD.getBaseName());
+				continue;				
 			}
-					
+			
 			if ((aD.getParentClass().getBaseName().equals("vpdmfUser") || aD
 					.getParentClass().getBaseName().equals("p"))
 					&& aD.getBaseName().equals("password")) {
@@ -2621,7 +2597,6 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 
 			}
 		}
-
 		else {
 
 			throw new VPDMfException("Data type " + type + " not supported");

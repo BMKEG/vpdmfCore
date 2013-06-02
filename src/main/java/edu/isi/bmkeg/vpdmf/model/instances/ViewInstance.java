@@ -57,7 +57,7 @@ public class ViewInstance extends LightViewInstance {
 	private PrimitiveInstanceGraph subGraph;
 
 	private viewGraphInstance graph;
-	
+
 	public ViewInstance() {
 		super();
 	}
@@ -459,7 +459,8 @@ public class ViewInstance extends LightViewInstance {
 		// other than the source primtiive? We need to add those
 		// too.
 		//
-		Iterator it = newPI.getDefinition().getOutgoingEdges().values().iterator();
+		Iterator it = newPI.getDefinition().getOutgoingEdges().values()
+				.iterator();
 		while (it.hasNext()) {
 			PrimitiveLink pl = (PrimitiveLink) it.next();
 			PrimitiveDefinition otherPd = (PrimitiveDefinition) pl
@@ -490,10 +491,10 @@ public class ViewInstance extends LightViewInstance {
 	 * 
 	 * (Note that there may be additional constraints that MUST be filled in, it
 	 * is not currently clear how to accomplish this).
-	 * @throws Exception 
+	 * 
+	 * @throws Exception
 	 */
-	public void addNewPrimitiveInstance(String pdName, int j)
-			throws Exception {
+	public void addNewPrimitiveInstance(String pdName, int j) throws Exception {
 
 		PrimitiveInstanceGraph pig = (PrimitiveInstanceGraph) this
 				.getSubGraph();
@@ -506,20 +507,22 @@ public class ViewInstance extends LightViewInstance {
 		newPI.setGraph(pig);
 		newPI.fillInConditions();
 		newPI.linkAttributeInstances();
-		
+
 		// what's the path from the primary primitive to this node
 		PrimitiveDefinition ppd = this.getDefinition().getPrimaryPrimitive();
-		PrimitiveDefinitionGraph pdg = (PrimitiveDefinitionGraph) this.getDefinition().getSubGraph();
-		
-		Iterator<PrimitiveDefinition> pdIt = pdg.readPrimitivesToTarget(pd).iterator();
+		PrimitiveDefinitionGraph pdg = (PrimitiveDefinitionGraph) this
+				.getDefinition().getSubGraph();
+
+		Iterator<PrimitiveDefinition> pdIt = pdg.readPrimitivesToTarget(pd)
+				.iterator();
 		PrimitiveDefinition lastPd = pdIt.next();
-		while( pdIt.hasNext() ) {
+		while (pdIt.hasNext()) {
 			PrimitiveDefinition thisPd = (PrimitiveDefinition) pdIt.next();
-			if( thisPd.equals(pd) ) {
-				pig.addPvInstanceLink(lastPd.getName() + "_" + 0, 
-						thisPd.getName() + "_" + j);				
+			if (thisPd.equals(pd)) {
+				pig.addPvInstanceLink(lastPd.getName() + "_" + 0,
+						thisPd.getName() + "_" + j);
 			}
-			int i=0;
+			int i = 0;
 			lastPd = thisPd;
 		}
 
@@ -666,21 +669,6 @@ public class ViewInstance extends LightViewInstance {
 		}
 	}
 
-	public void convertImagesToStreams() throws IOException {
-
-		if (this.getSubGraph() == null) {
-			return;
-		}
-
-		Iterator aiIt = this.readAttributes().iterator();
-		while (aiIt.hasNext()) {
-			AttributeInstance ai = (AttributeInstance) aiIt.next();
-
-			ai.convertImagesToStreams();
-
-		}
-	}
-
 	public void instantiateDefinition(VPDMf vpdm) throws Exception {
 
 		ViewDefinition vd = (ViewDefinition) vpdm.getViews().get(
@@ -714,6 +702,21 @@ public class ViewInstance extends LightViewInstance {
 			pli.instantiateDefinition(vd);
 		}
 
+	}
+
+	public void convertImagesToStreams() throws IOException {
+
+		if (this.getSubGraph() == null) {
+			return;
+		}
+
+		Iterator aiIt = this.readAttributes().iterator();
+		while (aiIt.hasNext()) {
+			AttributeInstance ai = (AttributeInstance) aiIt.next();
+
+			ai.convertImagesToStreams();
+
+		}
 	}
 
 	public void convertStreamsToImages() throws IOException,
@@ -771,7 +774,8 @@ public class ViewInstance extends LightViewInstance {
 		//
 		// Does an example of this primitiveLink exist within the view?
 		//
-		Collection<SuperGraphEdge> existingLinks = thisPi.getIncomingEdges().values();
+		Collection<SuperGraphEdge> existingLinks = thisPi.getIncomingEdges()
+				.values();
 		existingLinks.addAll(thisPi.getOutgoingEdges().values());
 		Iterator pliIt = existingLinks.iterator();
 		while (pliIt.hasNext()) {
@@ -1982,13 +1986,14 @@ public class ViewInstance extends LightViewInstance {
 
 		ClassInstance ci = this.readPrimaryClass();
 
-		Iterator<UMLattribute> pkdIt = ci.getDefinition().getPkArray().iterator();
+		Iterator<UMLattribute> pkdIt = ci.getDefinition().getPkArray()
+				.iterator();
 		UMLattribute pkd = (UMLattribute) pkdIt.next();
 		AttributeInstance pki = (AttributeInstance) ci.attributes.get(pkd
-					.getBaseName());
-		
+				.getBaseName());
+
 		Long vpdmfId = (Long) pki.getValue();
-		
+
 		return vpdmfId;
 
 	}
@@ -2021,16 +2026,16 @@ public class ViewInstance extends LightViewInstance {
 	}
 
 	public void writeVpdmfId(Long vpdmfId) {
-		
+
 		this.setVpdmfId(vpdmfId);
-		
+
 		PrimitiveInstance pPv = this.getPrimaryPrimitive();
 		UMLclass pCd = pPv.getDefinition().getPrimaryClass();
 		ClassInstance pCI = (ClassInstance) pPv.getObjects().get(
 				pCd.getBaseName());
 		AttributeInstance ai = pCI.getAttributes().get("vpdmfId");
 		ai.setValue(vpdmfId);
-		
+
 	}
 
 	public void setKmID(int kmID) {
@@ -2113,108 +2118,77 @@ public class ViewInstance extends LightViewInstance {
 		}
 
 		String thatPdAttAddr = null;
-/*		String attLink = vl.getAttributeLinkage();
-
-		// If attribute linkage contains multiple entries, use the first one.
-		int index = attLink.indexOf(",");
-		if (index != -1) {
-			attLink = attLink.substring(0, index);
-		}
-
-		String[] attArray = attLink.split("=");
-
-		if (attLinkFromThis) {
-			thatPdAttAddr = attArray[0];
-		} else {
-			thatPdAttAddr = attArray[1];
-		}
-
-		// If the 'thatPd' is not available in the current view instance,
-		// then cannot spawn to the target view and return null.
-		try {
-			this.readPrimitiveDefinition(thatPdAttAddr);
-		} catch (Exception ex) {
-			return null;
-		}
-
-		int thatPrimaryPvCount = this.countPrimitives(thatPdAttAddr);
-
-		// End Bugfix
-		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-		for (int i = 0; i < thatPrimaryPvCount; i++) {
-
-			PrimitiveInstance thisPi = null;
-
-			//
-			// Bugfix:
-			//
-			// According to the commented code fragment above, we are trying
-			// to identify the 'thisPi' in order to put the data from
-			// 'thisPi' into the primary primitive instance of the 'thatVi'.
-			//
-			// This method is not working when trying to spawn the view instance
-			// from a 'BookChapter' to a 'Book' view.
-			//
-			Iterator nIt = thisPig.getNodes().values().iterator();
-			while (nIt.hasNext()) {
-				PrimitiveInstance pi = (PrimitiveInstance) nIt.next();
-				ViewDefinition lookupVd = (ViewDefinition) pi.getDefinition()
-						.getLookupView();
-
-				if (pi.readIndex() != i) {
-					continue;
-				}
-
-				String vName = thatVd.getName();
-				if (lookupVd == null) {
-
-					String pName = pi.getDefinition().getName();
-					if (!pName.equals(vName)) {
-						continue;
-					}
-
-				} else {
-
-					String lvName = lookupVd.getName();
-					if (!lvName.equals(vName + "LU") && !lvName.equals(vName)) {
-						continue;
-					}
-
-				}
-
-				thisPi = pi;
-				break;
-			}
-
-			if (thisPi == null) {
-				return null;
-			}
-
-			ViewInstance thatVi = new ViewInstance(thatVd);
-			thatVi.getPrimaryPrimitive().suckInData(thisPi);
-
-			//
-			// 'LookupSpec' view instance will not have machine index and
-			// thumbnail.
-			// Therefore, only update its humanIndex.
-			//
-			try {
-				thatVi.updateUIDString();
-				thatVi.updateVpdmfLabelsFromPrimaryPrimitive();
-				thatVi.setName(thatVi.getUIDString());
-				lightViewInsVec.add(thatVi);
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-		}*/
+		/*
+		 * String attLink = vl.getAttributeLinkage();
+		 * 
+		 * // If attribute linkage contains multiple entries, use the first one.
+		 * int index = attLink.indexOf(","); if (index != -1) { attLink =
+		 * attLink.substring(0, index); }
+		 * 
+		 * String[] attArray = attLink.split("=");
+		 * 
+		 * if (attLinkFromThis) { thatPdAttAddr = attArray[0]; } else {
+		 * thatPdAttAddr = attArray[1]; }
+		 * 
+		 * // If the 'thatPd' is not available in the current view instance, //
+		 * then cannot spawn to the target view and return null. try {
+		 * this.readPrimitiveDefinition(thatPdAttAddr); } catch (Exception ex) {
+		 * return null; }
+		 * 
+		 * int thatPrimaryPvCount = this.countPrimitives(thatPdAttAddr);
+		 * 
+		 * // End Bugfix //
+		 * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		 * 
+		 * for (int i = 0; i < thatPrimaryPvCount; i++) {
+		 * 
+		 * PrimitiveInstance thisPi = null;
+		 * 
+		 * // // Bugfix: // // According to the commented code fragment above,
+		 * we are trying // to identify the 'thisPi' in order to put the data
+		 * from // 'thisPi' into the primary primitive instance of the 'thatVi'.
+		 * // // This method is not working when trying to spawn the view
+		 * instance // from a 'BookChapter' to a 'Book' view. // Iterator nIt =
+		 * thisPig.getNodes().values().iterator(); while (nIt.hasNext()) {
+		 * PrimitiveInstance pi = (PrimitiveInstance) nIt.next(); ViewDefinition
+		 * lookupVd = (ViewDefinition) pi.getDefinition() .getLookupView();
+		 * 
+		 * if (pi.readIndex() != i) { continue; }
+		 * 
+		 * String vName = thatVd.getName(); if (lookupVd == null) {
+		 * 
+		 * String pName = pi.getDefinition().getName(); if
+		 * (!pName.equals(vName)) { continue; }
+		 * 
+		 * } else {
+		 * 
+		 * String lvName = lookupVd.getName(); if (!lvName.equals(vName + "LU")
+		 * && !lvName.equals(vName)) { continue; }
+		 * 
+		 * }
+		 * 
+		 * thisPi = pi; break; }
+		 * 
+		 * if (thisPi == null) { return null; }
+		 * 
+		 * ViewInstance thatVi = new ViewInstance(thatVd);
+		 * thatVi.getPrimaryPrimitive().suckInData(thisPi);
+		 * 
+		 * // // 'LookupSpec' view instance will not have machine index and //
+		 * thumbnail. // Therefore, only update its humanIndex. // try {
+		 * thatVi.updateUIDString();
+		 * thatVi.updateVpdmfLabelsFromPrimaryPrimitive();
+		 * thatVi.setName(thatVi.getUIDString()); lightViewInsVec.add(thatVi); }
+		 * catch (Exception ex) { ex.printStackTrace(); } }
+		 */
 
 		return lightViewInsVec;
 
 	}
 
-	public Vector spawnLookupLightViewInstance(ViewDefinition thatVd) throws Exception {
-		
+	public Vector spawnLookupLightViewInstance(ViewDefinition thatVd)
+			throws Exception {
+
 		Vector lightViewInsVec = new Vector();
 
 		PrimitiveInstanceGraph thisPig = (PrimitiveInstanceGraph) this
@@ -2267,8 +2241,10 @@ public class ViewInstance extends LightViewInstance {
 		PrimitiveInstanceGraph thatPig = (PrimitiveInstanceGraph) thatVi
 				.getSubGraph();
 
-		Map<ViewDefinition, ViewLink> linkHt = thisVd.readAllLinkedViewDefinitions(true);
-		Map<ViewDefinition, ViewLink> rlnHt = thisVd.readAllRelatedViewDefinitions(true);
+		Map<ViewDefinition, ViewLink> linkHt = thisVd
+				.readAllLinkedViewDefinitions(true);
+		Map<ViewDefinition, ViewLink> rlnHt = thisVd
+				.readAllRelatedViewDefinitions(true);
 
 		ViewLink vl = (ViewLink) linkHt.get((Object) thatVd);
 		ViewLink rln = (ViewLink) rlnHt.get((Object) thatVd);
@@ -2284,9 +2260,9 @@ public class ViewInstance extends LightViewInstance {
 			thatVi = this.spawnViewInstanceFromLink(rln, thatVd, thisIndex,
 					thatIndex);
 		} else {
-			
+
 			thatVi = null;
-			
+
 		}
 
 		return thatVi;
@@ -2310,303 +2286,208 @@ public class ViewInstance extends LightViewInstance {
 
 		boolean thisIn = true;
 
-/*		String sr = vl.getSetRelation();
-		String attLink = vl.getAttributeLinkage();
-
-		if (attLink == null) {
-			return null;
-		}
-
-		//
-		// Bugfix:
-		//
-		// Added by Weicheng.
-		// (NEED TO EXPLAIN THIS TO GULLY TO MAKE SURE IT'S OKAY?)
-		//
-		// How to use the attribute linkage string??
-		//
-		// BUG CASE:
-		//
-		// When trying to insert a bibliographic fragment from an
-		// article, the system will use this method to spawn a
-		// bibliographic fragment view instance from the selected
-		// article view instance.
-		// From the current view design, the 'attLink' variable we
-		// will get is ']PublicationLU|Resource=]Resource|Resource'.
-		//
-		// ']PublicationLU|Resource' => LeftPart
-		// ']Resource|Resource' => RightPart
-		//
-		// Note that, without the following bugfix, the system would
-		// always use 'LeftPart' string to find out 'thisPd' and
-		// 'RightPart' string to find out 'thatPd'. IT WOULD CAUSE
-		// ERROR!
-		//
-		// Please remove the following bugfix section to re-produce
-		// the bug if necessary.
-		//
-		// WHY IT WORKS BEFORE? The reason might come from the way we
-		// name the Publication primitive in the Publication and
-		// BibliographicFragment views.
-		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		if (vl.getOutEdgeNode() == thatVd) {
-			thisIn = false;
-		}
-		// End Bugfix
-		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-		String[] connxArray = attLink.split(",");
-		for (int i = 0; i < connxArray.length; i++) {
-
-			String addr = connxArray[i];
-
-			Pattern pattPv1 = null;
-			Pattern pattPv2 = null;
-			Pattern patt3 = Pattern.compile("\\:(.*?)\\=");
-
-			if (thisIn) {
-				pattPv1 = Pattern.compile("^](.*?)\\|.*=");
-				pattPv2 = Pattern.compile("=](.*?)\\|");
-			} else {
-				pattPv2 = Pattern.compile("^](.*?)\\|.*=");
-				pattPv1 = Pattern.compile("=](.*?)\\|");
-			}
-
-			Matcher matcher1 = pattPv1.matcher(addr);
-			Matcher matcher2 = pattPv2.matcher(addr);
-			Matcher matcher3 = patt3.matcher(addr);
-
-			if (matcher1.find() && matcher2.find()) {
-
-				String thisPv = matcher1.group(1);
-				String thatPv = matcher2.group(1);
-
-				PrimitiveDefinition thisPd = null;
-				PrimitiveDefinition thatPd = null;
-
-				if (((PrimitiveDefinitionGraph) thisVd.getSubGraph())
-						.getNodes().containsKey(thisPv)) {
-
-					thisPd = (PrimitiveDefinition) ((PrimitiveDefinitionGraph) thisVd
-							.getSubGraph()).getNodes().get(thisPv);
-
-				} else if (((PrimitiveDefinitionGraph) thisVd.getSubGraph())
-						.getNodes().containsKey(thisPv + "LU")) {
-
-					thisPd = (PrimitiveDefinition) ((PrimitiveDefinitionGraph) thisVd
-							.getSubGraph()).getNodes().get(thisPv + "LU");
-
-				}
-
-				if (((PrimitiveDefinitionGraph) thatVd.getSubGraph())
-						.getNodes().containsKey(thatPv)) {
-
-					thatPd = (PrimitiveDefinition) ((PrimitiveDefinitionGraph) thatVd
-							.getSubGraph()).getNodes().get(thatPv);
-
-				} else if (((PrimitiveDefinitionGraph) thatVd.getSubGraph())
-						.getNodes().containsKey(thatPv + "LU")) {
-
-					thatPd = (PrimitiveDefinition) ((PrimitiveDefinitionGraph) thatVd
-							.getSubGraph()).getNodes().get(thatPv + "LU");
-
-				}
-
-				PrimitiveInstance thisPi = null;
-				if (thisPig.getNodes().containsKey(
-						thisPd.getName() + "_" + thisIndex)) {
-					thisPi = (PrimitiveInstance) thisPig.getNodes().get(
-							thisPd.getName() + "_" + thisIndex);
-				} else {
-					thisPi = (PrimitiveInstance) thisPig.getNodes().get(
-							thisPd.getName() + "_0");
-				}
-
-				PrimitiveInstance thatPi = null;
-				if (thatPig.getNodes().containsKey(
-						thatPd.getName() + "_" + thisIndex)) {
-					thatPi = (PrimitiveInstance) thatPig.getNodes().get(
-							thatPd.getName() + "_" + thatIndex);
-				} else {
-					thatPi = (PrimitiveInstance) thatPig.getNodes().get(
-							thatPd.getName() + "_0");
-				}
-
-				boolean anyChange = false;
-
-				//
-				// The primtitives are equivalent, just copy them
-				if (sr.equals("Identical") || sr.equals("Superset")
-						|| sr.equals("Subset") || sr.equals("Overlap")
-						|| sr.equals("ForwardDependent")
-						|| sr.equals("ReverseDependent")
-						|| sr.equals("Interdependent")) {
-
-					Object[] theseClasses = thisPi.getObjects().values()
-							.toArray();
-					Object[] thoseClasses = thatPi.getObjects().values()
-							.toArray();
-
-					//
-					// Note:
-					//
-					// Need to identify the target 'thatCi' in 'thoseClasses'
-					// array.
-					// Sometimes the organization of the source and target PI
-					// might
-					// be different!
-					//
-					for (int j = 0; j < theseClasses.length; j++) {
-						ClassInstance thisCi = (ClassInstance) theseClasses[j];
-						ClassInstance thatCi = null;
-
-						for (int c = 0; c < thoseClasses.length; c++) {
-							ClassInstance tempCi = (ClassInstance) thoseClasses[c];
-							if (thisCi.getDefinition().equals(
-									tempCi.getDefinition())) {
-								thatCi = tempCi;
-							}
-						}
-
-						if (thatCi != null) {
-							Object[] theseAtts = thisCi.attributes.values()
-									.toArray();
-							Object[] thoseAtts = thatCi.attributes.values()
-									.toArray();
-
-							for (int k = 0; k < theseAtts.length; k++) {
-								AttributeInstance thisAi = (AttributeInstance) theseAtts[k];
-								AttributeInstance thatAi = (AttributeInstance) thoseAtts[k];
-
-								thatAi.setValue(thisAi.getValue());
-								changesMade = true;
-
-							}
-						}
-					}
-
-				}
-				//
-				// Need to locate the remote key and fill it in
-				else if (sr.equals("Connected") || sr.equals("Interconnected")) {
-
-					if (!matcher3.find()) {
-						throw new Exception(
-								"attributeLinkage error in viewlink");
-					}
-
-					//
-					// Locate correct role object
-					//
-					String roleName = matcher3.group(1);
-					UMLrole evr = null;
-					ArrayList<UMLrole> extraViewRoles = thisPi.getDefinition()
-							.readExtraPvRoles();
-					Iterator evrIt = extraViewRoles.iterator();
-					while (evrIt.hasNext()) {
-						evr = (UMLrole) evrIt.next();
-						if (evr.getBaseName().equals(roleName)) {
-							break;
-						}
-					}
-					if (!evr.getBaseName().equals(roleName)) {
-						throw new Exception("Can't find correct linking role");
-					}
-
-					//
-					// Is the target class a linking class?
-					//
-					UMLclass targetClass = evr.getDirectClass();
-					boolean linkingTable = false;
-					if (targetClass.getLinkAssociation() != null
-							&& targetClass.getAssociateRoles().containsKey(
-									evr.getBaseName())) {
-						targetClass = ((UMLrole) targetClass
-								.getAssociateRoles().get(evr.getBaseName()))
-								.getDirectClass();
-						linkingTable = true;
-					}
-
-					//
-					// If the linking role has a linking table,
-					// then generate a data holder and attach it to
-					// thatVi.linksToFillIn
-					//
-					ViewLinkInstance vli = null;
-					if (linkingTable) {
-						vli = new ViewLinkInstance(vl);
-						try {
-							thatVi.getLinksToFillIn().add(vli);
-						} catch (Exception e) {
-							throw new Exception(e.getMessage());
-						}
-					}
-
-					//
-					// The target class exists in our output data!
-					// Fill in the data...
-					if (thatPi.getObjects().containsKey(targetClass)) {
-
-						Iterator fkIt = evr.getFkArray().iterator();
-						while (fkIt.hasNext()) {
-
-							UMLattribute fk = (UMLattribute) fkIt.next();
-							UMLattribute pk = (UMLattribute) fk.getPk();
-
-							UMLattribute thisAd = null;
-							UMLattribute thatAd = null;
-
-							if (thisPi.getObjects().containsKey(
-									pk.getParentClass().getBaseName())
-									&& thatPi.getObjects().containsKey(
-											fk.getParentClass().getBaseName())) {
-
-								thisAd = pk;
-								thatAd = fk;
-
-							} else if (thisPi.getObjects().containsKey(
-									fk.getParentClass().getBaseName())
-									&& thatPi.getObjects().containsKey(
-											pk.getParentClass().getBaseName())) {
-
-								thisAd = fk;
-								thatAd = pk;
-
-							}
-
-							ClassInstance thisCi = (ClassInstance) thisPi
-									.getObjects().get(
-											thisAd.getParentClass()
-													.getBaseName());
-
-							ClassInstance thatCi = (ClassInstance) thatPi
-									.getObjects().get(
-											thatAd.getParentClass()
-													.getBaseName());
-
-							AttributeInstance thisAi = (AttributeInstance) thisCi.attributes
-									.get(thisAd.getBaseName());
-							AttributeInstance thatAi = (AttributeInstance) thatCi.attributes
-									.get(thatAd.getBaseName());
-
-							String data = thisAi.readValueString();
-							thatAi.writeValueString(data);
-
-							changesMade = true;
-
-						}
-
-					}
-
-				}
-
-			}
-
-		}
-
-		if (!changesMade) {
-			return null;
-		}*/
+		/*
+		 * String sr = vl.getSetRelation(); String attLink =
+		 * vl.getAttributeLinkage();
+		 * 
+		 * if (attLink == null) { return null; }
+		 * 
+		 * // // Bugfix: // // Added by Weicheng. // (NEED TO EXPLAIN THIS TO
+		 * GULLY TO MAKE SURE IT'S OKAY?) // // How to use the attribute linkage
+		 * string?? // // BUG CASE: // // When trying to insert a bibliographic
+		 * fragment from an // article, the system will use this method to spawn
+		 * a // bibliographic fragment view instance from the selected //
+		 * article view instance. // From the current view design, the 'attLink'
+		 * variable we // will get is
+		 * ']PublicationLU|Resource=]Resource|Resource'. // //
+		 * ']PublicationLU|Resource' => LeftPart // ']Resource|Resource' =>
+		 * RightPart // // Note that, without the following bugfix, the system
+		 * would // always use 'LeftPart' string to find out 'thisPd' and //
+		 * 'RightPart' string to find out 'thatPd'. IT WOULD CAUSE // ERROR! //
+		 * // Please remove the following bugfix section to re-produce // the
+		 * bug if necessary. // // WHY IT WORKS BEFORE? The reason might come
+		 * from the way we // name the Publication primitive in the Publication
+		 * and // BibliographicFragment views. //
+		 * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ if
+		 * (vl.getOutEdgeNode() == thatVd) { thisIn = false; } // End Bugfix //
+		 * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		 * 
+		 * String[] connxArray = attLink.split(","); for (int i = 0; i <
+		 * connxArray.length; i++) {
+		 * 
+		 * String addr = connxArray[i];
+		 * 
+		 * Pattern pattPv1 = null; Pattern pattPv2 = null; Pattern patt3 =
+		 * Pattern.compile("\\:(.*?)\\=");
+		 * 
+		 * if (thisIn) { pattPv1 = Pattern.compile("^](.*?)\\|.*="); pattPv2 =
+		 * Pattern.compile("=](.*?)\\|"); } else { pattPv2 =
+		 * Pattern.compile("^](.*?)\\|.*="); pattPv1 =
+		 * Pattern.compile("=](.*?)\\|"); }
+		 * 
+		 * Matcher matcher1 = pattPv1.matcher(addr); Matcher matcher2 =
+		 * pattPv2.matcher(addr); Matcher matcher3 = patt3.matcher(addr);
+		 * 
+		 * if (matcher1.find() && matcher2.find()) {
+		 * 
+		 * String thisPv = matcher1.group(1); String thatPv = matcher2.group(1);
+		 * 
+		 * PrimitiveDefinition thisPd = null; PrimitiveDefinition thatPd = null;
+		 * 
+		 * if (((PrimitiveDefinitionGraph) thisVd.getSubGraph())
+		 * .getNodes().containsKey(thisPv)) {
+		 * 
+		 * thisPd = (PrimitiveDefinition) ((PrimitiveDefinitionGraph) thisVd
+		 * .getSubGraph()).getNodes().get(thisPv);
+		 * 
+		 * } else if (((PrimitiveDefinitionGraph) thisVd.getSubGraph())
+		 * .getNodes().containsKey(thisPv + "LU")) {
+		 * 
+		 * thisPd = (PrimitiveDefinition) ((PrimitiveDefinitionGraph) thisVd
+		 * .getSubGraph()).getNodes().get(thisPv + "LU");
+		 * 
+		 * }
+		 * 
+		 * if (((PrimitiveDefinitionGraph) thatVd.getSubGraph())
+		 * .getNodes().containsKey(thatPv)) {
+		 * 
+		 * thatPd = (PrimitiveDefinition) ((PrimitiveDefinitionGraph) thatVd
+		 * .getSubGraph()).getNodes().get(thatPv);
+		 * 
+		 * } else if (((PrimitiveDefinitionGraph) thatVd.getSubGraph())
+		 * .getNodes().containsKey(thatPv + "LU")) {
+		 * 
+		 * thatPd = (PrimitiveDefinition) ((PrimitiveDefinitionGraph) thatVd
+		 * .getSubGraph()).getNodes().get(thatPv + "LU");
+		 * 
+		 * }
+		 * 
+		 * PrimitiveInstance thisPi = null; if (thisPig.getNodes().containsKey(
+		 * thisPd.getName() + "_" + thisIndex)) { thisPi = (PrimitiveInstance)
+		 * thisPig.getNodes().get( thisPd.getName() + "_" + thisIndex); } else {
+		 * thisPi = (PrimitiveInstance) thisPig.getNodes().get( thisPd.getName()
+		 * + "_0"); }
+		 * 
+		 * PrimitiveInstance thatPi = null; if (thatPig.getNodes().containsKey(
+		 * thatPd.getName() + "_" + thisIndex)) { thatPi = (PrimitiveInstance)
+		 * thatPig.getNodes().get( thatPd.getName() + "_" + thatIndex); } else {
+		 * thatPi = (PrimitiveInstance) thatPig.getNodes().get( thatPd.getName()
+		 * + "_0"); }
+		 * 
+		 * boolean anyChange = false;
+		 * 
+		 * // // The primtitives are equivalent, just copy them if
+		 * (sr.equals("Identical") || sr.equals("Superset") ||
+		 * sr.equals("Subset") || sr.equals("Overlap") ||
+		 * sr.equals("ForwardDependent") || sr.equals("ReverseDependent") ||
+		 * sr.equals("Interdependent")) {
+		 * 
+		 * Object[] theseClasses = thisPi.getObjects().values() .toArray();
+		 * Object[] thoseClasses = thatPi.getObjects().values() .toArray();
+		 * 
+		 * // // Note: // // Need to identify the target 'thatCi' in
+		 * 'thoseClasses' // array. // Sometimes the organization of the source
+		 * and target PI // might // be different! // for (int j = 0; j <
+		 * theseClasses.length; j++) { ClassInstance thisCi = (ClassInstance)
+		 * theseClasses[j]; ClassInstance thatCi = null;
+		 * 
+		 * for (int c = 0; c < thoseClasses.length; c++) { ClassInstance tempCi
+		 * = (ClassInstance) thoseClasses[c]; if (thisCi.getDefinition().equals(
+		 * tempCi.getDefinition())) { thatCi = tempCi; } }
+		 * 
+		 * if (thatCi != null) { Object[] theseAtts = thisCi.attributes.values()
+		 * .toArray(); Object[] thoseAtts = thatCi.attributes.values()
+		 * .toArray();
+		 * 
+		 * for (int k = 0; k < theseAtts.length; k++) { AttributeInstance thisAi
+		 * = (AttributeInstance) theseAtts[k]; AttributeInstance thatAi =
+		 * (AttributeInstance) thoseAtts[k];
+		 * 
+		 * thatAi.setValue(thisAi.getValue()); changesMade = true;
+		 * 
+		 * } } }
+		 * 
+		 * } // // Need to locate the remote key and fill it in else if
+		 * (sr.equals("Connected") || sr.equals("Interconnected")) {
+		 * 
+		 * if (!matcher3.find()) { throw new Exception(
+		 * "attributeLinkage error in viewlink"); }
+		 * 
+		 * // // Locate correct role object // String roleName =
+		 * matcher3.group(1); UMLrole evr = null; ArrayList<UMLrole>
+		 * extraViewRoles = thisPi.getDefinition() .readExtraPvRoles(); Iterator
+		 * evrIt = extraViewRoles.iterator(); while (evrIt.hasNext()) { evr =
+		 * (UMLrole) evrIt.next(); if (evr.getBaseName().equals(roleName)) {
+		 * break; } } if (!evr.getBaseName().equals(roleName)) { throw new
+		 * Exception("Can't find correct linking role"); }
+		 * 
+		 * // // Is the target class a linking class? // UMLclass targetClass =
+		 * evr.getDirectClass(); boolean linkingTable = false; if
+		 * (targetClass.getLinkAssociation() != null &&
+		 * targetClass.getAssociateRoles().containsKey( evr.getBaseName())) {
+		 * targetClass = ((UMLrole) targetClass
+		 * .getAssociateRoles().get(evr.getBaseName())) .getDirectClass();
+		 * linkingTable = true; }
+		 * 
+		 * // // If the linking role has a linking table, // then generate a
+		 * data holder and attach it to // thatVi.linksToFillIn //
+		 * ViewLinkInstance vli = null; if (linkingTable) { vli = new
+		 * ViewLinkInstance(vl); try { thatVi.getLinksToFillIn().add(vli); }
+		 * catch (Exception e) { throw new Exception(e.getMessage()); } }
+		 * 
+		 * // // The target class exists in our output data! // Fill in the
+		 * data... if (thatPi.getObjects().containsKey(targetClass)) {
+		 * 
+		 * Iterator fkIt = evr.getFkArray().iterator(); while (fkIt.hasNext()) {
+		 * 
+		 * UMLattribute fk = (UMLattribute) fkIt.next(); UMLattribute pk =
+		 * (UMLattribute) fk.getPk();
+		 * 
+		 * UMLattribute thisAd = null; UMLattribute thatAd = null;
+		 * 
+		 * if (thisPi.getObjects().containsKey(
+		 * pk.getParentClass().getBaseName()) &&
+		 * thatPi.getObjects().containsKey( fk.getParentClass().getBaseName()))
+		 * {
+		 * 
+		 * thisAd = pk; thatAd = fk;
+		 * 
+		 * } else if (thisPi.getObjects().containsKey(
+		 * fk.getParentClass().getBaseName()) &&
+		 * thatPi.getObjects().containsKey( pk.getParentClass().getBaseName()))
+		 * {
+		 * 
+		 * thisAd = fk; thatAd = pk;
+		 * 
+		 * }
+		 * 
+		 * ClassInstance thisCi = (ClassInstance) thisPi .getObjects().get(
+		 * thisAd.getParentClass() .getBaseName());
+		 * 
+		 * ClassInstance thatCi = (ClassInstance) thatPi .getObjects().get(
+		 * thatAd.getParentClass() .getBaseName());
+		 * 
+		 * AttributeInstance thisAi = (AttributeInstance) thisCi.attributes
+		 * .get(thisAd.getBaseName()); AttributeInstance thatAi =
+		 * (AttributeInstance) thatCi.attributes .get(thatAd.getBaseName());
+		 * 
+		 * String data = thisAi.readValueString();
+		 * thatAi.writeValueString(data);
+		 * 
+		 * changesMade = true;
+		 * 
+		 * }
+		 * 
+		 * }
+		 * 
+		 * }
+		 * 
+		 * }
+		 * 
+		 * }
+		 * 
+		 * if (!changesMade) { return null; }
+		 */
 
 		return thatVi;
 
@@ -2750,40 +2631,42 @@ public class ViewInstance extends LightViewInstance {
 
 	/**
 	 * Generates the index tuple for this view instance.
-	 * @throws VPDMfException 
+	 * 
+	 * @throws VPDMfException
 	 */
 	public String generateIndexTuple() throws VPDMfException {
 
 		String indexTuple = "";
-		
+
 		int ieCount = this.getDefinition().getIndexElements().size();
-		for(int i=0; i<ieCount; i++ ) {
-			Integer ii = new Integer(i+1);
+		for (int i = 0; i < ieCount; i++) {
+			Integer ii = new Integer(i + 1);
 			IndexElement ie = this.getDefinition().getIndexElements().get(ii);
 
 			int j = 0;
 			String pvKey = ie.getP() + "_0";
-			while( this.getSubGraph().getNodes().containsKey(pvKey) ) {
-				AttributeInstance ai = this.readAttributeInstance(ie.getP(), ie.getC(), ie.getA(), j);
+			while (this.getSubGraph().getNodes().containsKey(pvKey)) {
+				AttributeInstance ai = this.readAttributeInstance(ie.getP(),
+						ie.getC(), ie.getA(), j);
 				String idx = ai.readValueString();
-				if( idx == null || idx.length() ==0 )
+				if (idx == null || idx.length() == 0)
 					idx = "null";
-				
-				if( j > 0 )
+
+				if (j > 0)
 					indexTuple += ",";
 				indexTuple += idx;
-				
-				j++;				
+
+				j++;
 				pvKey = ie.getP() + "_" + j;
 			}
 
-			if( i < ieCount-1 )
+			if (i < ieCount - 1)
 				indexTuple += ViewInstance.INDEX_TUPLE_SEPARATOR;
-		
+
 		}
-		
+
 		return indexTuple;
-		
+
 	}
 
 	public void updateLabel() throws Exception {
@@ -2802,7 +2685,7 @@ public class ViewInstance extends LightViewInstance {
 		this.setVpdmfLabel(vpdmfLabel);
 
 	}
-	
+
 	public void updateIndexTuple() throws Exception {
 
 		String indexTuple = this.generateIndexTuple();
@@ -2813,7 +2696,7 @@ public class ViewInstance extends LightViewInstance {
 
 		AttributeInstance idxTup = this.readAttributeInstance(addrStub
 				+ ".indexTuple", 0);
-		
+
 		idxTup.writeValueString(indexTuple);
 		this.setIndexTuple(indexTuple);
 
@@ -2946,7 +2829,8 @@ public class ViewInstance extends LightViewInstance {
 	 * @throws SpawnViewException
 	 * @return Hashtable
 	 */
-	public Map<String, ViewInstance> readEnclosedViewInstances() throws Exception {
+	public Map<String, ViewInstance> readEnclosedViewInstances()
+			throws Exception {
 
 		Hashtable ht = new Hashtable();
 
@@ -2977,8 +2861,8 @@ public class ViewInstance extends LightViewInstance {
 				temp = temp.replaceAll("LU$", "");
 				ViewDefinition lVd = (ViewDefinition) top.getViews().get(temp);
 
-				Map<ViewDefinition, ViewLink> allLinkedViews = this.getDefinition()
-						.readAllLinkedViewDefinitions(true);
+				Map<ViewDefinition, ViewLink> allLinkedViews = this
+						.getDefinition().readAllLinkedViewDefinitions(true);
 
 				if (lVd != null && allLinkedViews.containsKey(lVd)) {
 
@@ -2989,9 +2873,9 @@ public class ViewInstance extends LightViewInstance {
 					}
 
 				} else {
-					
+
 					continue;
-				
+
 				}
 				tempVd = lVd;
 
@@ -3014,44 +2898,49 @@ public class ViewInstance extends LightViewInstance {
 	}
 
 	/**
-	 * If a primitive contains a ViewTable primitive and is named the same as a view. 
-	 * Then copy the primitive into a new view and regenerate the index strings 
-	 * from the primitive.
+	 * If a primitive contains a ViewTable primitive and is named the same as a
+	 * view. Then copy the primitive into a new view and regenerate the index
+	 * strings from the primitive.
 	 */
 	public void reconstructIndexStrings() throws Exception {
 
-		Set<String> viewLookup = this.getDefinition().getTop().getViews().keySet();
-		for(SuperGraphNode n: this.getDefinition().getSubGraph().getNodes().values() ) {
+		Set<String> viewLookup = this.getDefinition().getTop().getViews()
+				.keySet();
+		for (SuperGraphNode n : this.getDefinition().getSubGraph().getNodes()
+				.values()) {
 			PrimitiveDefinition pd = (PrimitiveDefinition) n;
 
-			if( !pd.isEditable() || pd == this.getDefinition().getPrimaryPrimitive() )
+			if (!pd.isEditable()
+					|| pd == this.getDefinition().getPrimaryPrimitive())
 				continue;
-			
+
 			boolean skip = true;
-			for( UMLclass c : pd.getClasses() ) {
-				if( c.getBaseName().equals("ViewTable") && viewLookup.contains(pd.getName()))
+			for (UMLclass c : pd.getClasses()) {
+				if (c.getBaseName().equals("ViewTable")
+						&& viewLookup.contains(pd.getName()))
 					skip = false;
 			}
-			
-			if( skip )
+
+			if (skip)
 				continue;
-			
-			ViewDefinition vd = this.getDefinition().getTop().getViews().get(pd.getName());
-			
+
+			ViewDefinition vd = this.getDefinition().getTop().getViews()
+					.get(pd.getName());
+
 			int piCount = this.readPrimitiveInstanceTotal(pd);
-			for(int i=0; i<piCount; i++) {
-				PrimitiveInstance pi = (PrimitiveInstance)
-						this.getSubGraph().getNodes().get(pd.getName() + "_" + i);
-				
-				if( pi.isNull() )
+			for (int i = 0; i < piCount; i++) {
+				PrimitiveInstance pi = (PrimitiveInstance) this.getSubGraph()
+						.getNodes().get(pd.getName() + "_" + i);
+
+				if (pi.isNull())
 					continue;
-				
+
 				ViewInstance vi = new ViewInstance(vd);
 				vi.getPrimaryPrimitive().suckInData(pi);
 				vi.updateLabel();
 				vi.updateIndexTuple();
 				pi.suckInData(vi.getPrimaryPrimitive());
-				
+
 			}
 
 		}
@@ -3104,9 +2993,9 @@ public class ViewInstance extends LightViewInstance {
 		this.setUIDString(uidString);
 
 	}
-	
+
 	/**
-	 * @throws AttributeAddressException 
+	 * @throws AttributeAddressException
 	 * 
 	 */
 	public void updateVpdmfId() throws AttributeAddressException {
@@ -3114,7 +3003,7 @@ public class ViewInstance extends LightViewInstance {
 		List<UMLattribute> pkArray = this.getDefinition().getPrimaryPrimitive()
 				.getPrimaryClass().getPkArray();
 		UMLattribute pk = pkArray.get(0);
-		
+
 		String pVName = this.getDefinition().getPrimaryPrimitive().getName();
 		String className = this.getDefinition().getPrimaryPrimitive()
 				.getPrimaryClass().getBaseName();
@@ -3123,8 +3012,8 @@ public class ViewInstance extends LightViewInstance {
 				+ pk.getBaseName();
 
 		AttributeInstance pkAi = this.readAttributeInstance(attAddress, 0);
-		
-		this.setVpdmfId( (Long) pkAi.getValue() );
+
+		this.setVpdmfId((Long) pkAi.getValue());
 
 	}
 

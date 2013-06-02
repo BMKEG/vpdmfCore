@@ -108,13 +108,13 @@ public class ClassInstance implements Serializable {
 		PrimitiveDefinition pd = pi.getDefinition();
 		ViewDefinition vd = vi.getDefinition();
 
-		/* 
+		/*
 		 * WHAT IS THIS? HORRIBLE HACK.
 		 * 
-		 * VPDMf top = vi.getDefinition().getTop();
-		if (top.getViews().containsKey(pd.getName())) {
-			vd = (ViewDefinition) top.getViews().get(pd.getName());
-		}*/
+		 * VPDMf top = vi.getDefinition().getTop(); if
+		 * (top.getViews().containsKey(pd.getName())) { vd = (ViewDefinition)
+		 * top.getViews().get(pd.getName()); }
+		 */
 
 		Iterator adIt = vd.getIndexElements().values().iterator();
 

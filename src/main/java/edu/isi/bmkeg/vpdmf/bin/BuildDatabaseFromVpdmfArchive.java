@@ -50,7 +50,7 @@ public class BuildDatabaseFromVpdmfArchive {
 			try {
 					builder.destroyDatabase(dbName);
 			} catch (SQLException sqlE) {		
-				
+
 				if( !sqlE.getMessage().contains("database doesn't exist") ) {
 					sqlE.printStackTrace();
 				}

@@ -1584,7 +1584,8 @@ public class ChangeEngine extends QueryEngine implements
 
 		boolean isNull = pi.isNull();
 		boolean isNullable = pi.getDefinition().isNullable();
-
+		boolean isNullExceptForFkPks = pi.isNullExceptForFkPks();
+		
 		//
 		// If we are currently updating the primary primitive of the view,
 		// AND this is an update query,
@@ -1622,31 +1623,13 @@ public class ChangeEngine extends QueryEngine implements
 
 		}
 
-		if (isNull) {
-			if (isNullable) {
-				
-				int i=0;
-
-				//
-				// Bugfix:
-				//
-				// If the current primitive instance is null and nullable,
-				// but not uniquely defined, then return without doing
-				// anything.
-				//
-				// Otherwise, go and run the query to get the data from the
-				// database and populate them into the current primitive
-				// instance.
-				//
-				// BUG CASE: When try to commit an 'Article' view instance,
-				// the ResourceType id will not be set. This bug would occur
-				// for the view defined as a specific 'type' in the system.
-				//
-				// if (!hasConditions) {
+		if( (isNullExceptForFkPks && pi.getDefinition().containsIndexElements() ) ||
+				(isNull && !pi.getDefinition().containsIndexElements() ) ){
+			
+			if (isNullable) {			
 				if (!pi.getDefinition().arePrimitiveConditionsIndexElements()) {
 					return false;
 				}
-
 			} else {
 				throw new VPDMfException("no data is set in update query: "
 						+ pi.getName());

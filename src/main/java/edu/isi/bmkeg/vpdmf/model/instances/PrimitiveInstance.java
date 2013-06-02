@@ -170,6 +170,51 @@ public class PrimitiveInstance extends SuperGraphNode {
 		return true;
 
 	}
+	
+	public boolean isNullExceptForFkPks() throws VPDMfException {
+
+		PrimitiveInstance testPi = new PrimitiveInstance(this.getDefinition());
+		testPi.fillInConditions();
+		
+		Vector addrVec = this.readAttributeAddresses();
+		Iterator addrIt = addrVec.iterator();
+		LOOP: while (addrIt.hasNext()) {
+			String addr = (String) addrIt.next();
+
+			AttributeInstance ai = this.readAttribute(addr);
+			if( ai.getConnectedKeys().size() > 0 )
+				continue;
+			
+			AttributeInstance testAi = testPi.readAttribute(addr);
+
+			//
+			// Do not use knowledge model, or any used in this primitive
+			// to determine if a primitive is null
+			//
+			String a = addr.replaceAll("\\].*?\\|", "|");
+			Iterator it = this.getDefinition().getConditionElements()
+					.iterator();
+			while (it.hasNext()) {
+				ConditionElement ce = (ConditionElement) it.next();
+				if (ai.getDefinition().getBaseName().equals("km_id")
+						|| ce.toString().indexOf(a) != -1) {
+					continue LOOP;
+				}
+			}
+
+			if (ai.readValueString() != null) {
+				if (!ai.readValueString().equals(testAi.readValueString())
+						&& !ai.readValueString().equals("%")) {
+					return false;
+				}
+			}
+
+		}
+
+		return true;
+	
+	}
+	
 
 	public boolean arePkSet() {
 		boolean pkSet = true;

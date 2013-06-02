@@ -571,6 +571,7 @@ public class CoreDaoImpl implements CoreDao {
 		}
 
 	}
+	
 
 	public <T extends ViewTable> T findById(long id, T obj, String viewTypeName)
 			throws Exception {
@@ -778,6 +779,8 @@ public class CoreDaoImpl implements CoreDao {
 
 		ViewInstance vi = getCe().executeUIDQuery(viewTypeName, id);
 
+		vi.convertImagesToStreams();
+		
 		ViewBasedObjectGraph vbog = generateVbogs().get(viewTypeName);
 		vbog.viewToObjectGraph(vi);
 		T ov = (T) vbog.readPrimaryObject();
