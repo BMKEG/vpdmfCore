@@ -149,7 +149,8 @@ public class AttributeInstance implements Serializable {
 	public void convertImagesToStreams() throws IOException {
 
 		if (this.getDefinition().getType().getBaseName().equals("image")) {
-			if (this.getValue() != null) {
+			if (this.getValue() != null && 
+					this.getValue() instanceof BufferedImage) {
 
 				BufferedImage img = (BufferedImage) this.getValue();
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -196,24 +197,28 @@ public class AttributeInstance implements Serializable {
 	    	
 	    String baseType = this.getDefinition().getType().getBaseName();
 		
-		if (baseType.equalsIgnoreCase("image")) {
+		if (baseType.equalsIgnoreCase("image") ) {
 
-			BufferedImage img = null;
+			if( this.value instanceof BufferedImage ) {
+			
+				BufferedImage img = (BufferedImage) this.value;
+	
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	
+				//
+				// Write the buffer image into output stream in the
+				// format of "PNG".
+				//
+				ImageIO.write(img, "png", baos);
+				is = new ByteArrayInputStream(baos.toByteArray());
 
-			img = (BufferedImage) this.value;
-
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-			//
-			// Write the buffer image into output stream in the
-			// format of "PNG".
-			//
-			ImageIO.write(img, "png", baos);
-			is = new ByteArrayInputStream(baos.toByteArray());
+			} else {
+			
+				is = new ByteArrayInputStream((byte[]) this.value);
+			
+			}
 
 		} else if (baseType.equalsIgnoreCase("blob")) {
-
-			BufferedImage img = null;
 
 			is = new ByteArrayInputStream((byte[]) this.value);
 

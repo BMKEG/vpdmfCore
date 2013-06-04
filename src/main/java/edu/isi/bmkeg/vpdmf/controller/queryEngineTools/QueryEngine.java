@@ -282,7 +282,7 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 
 	}
 
-	private void loadAllRemainingPrimitives(List<String> addrList) throws Exception {
+	private void loadAllRemainingPrimitives(List<String> allAddresses) throws Exception {
 
 		ViewDefinition vd = this.input.getDefinition();
 
@@ -319,7 +319,7 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 			if (pd.equals(vd.getPrimaryPrimitive()))
 				continue;
 
-			ArrayList<String> trimmedHash = new ArrayList<String>(addrList);
+			ArrayList<String> trimmedHash = new ArrayList<String>(allAddresses);
 			ArrayList<String> allAddrList = new ArrayList<String>();
 
 			allAddrList.addAll(pd.readAttributeAddresses());
@@ -332,21 +332,15 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 			//
 			// BUGFIX
 			//
-			// Use the JGraphT to trace the path between the primary primitive
-			// and
-			// the current primitive and add the primary keys to the select
-			// clause
-			// to make sure that we get the correct cardinality.
+			// Use JGraphT to trace the path between the primary primitive
+			// and the current primitive and add the primary keys to the select
+			// clause to make sure that we get the correct cardinality.
 			//
 			DijkstraShortestPath<SuperGraphNode, DefaultEdge> dij = new DijkstraShortestPath<SuperGraphNode, DefaultEdge>(
 					gg, vd.getPrimaryPrimitive(), pd);
 
 			GraphPath<SuperGraphNode, DefaultEdge> path = dij.getPath();
 
-			//
-			// Check if there exists a shortest path between nodes or not.
-			// If not, the returning path list object is null.
-			//
 			if (path == null) {
 				continue PILOOP;
 			}
@@ -362,17 +356,16 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 				pkIt = source.getPrimaryClass().getPkArray().iterator();
 				while (pkIt.hasNext()) {
 					UMLattribute pk = (UMLattribute) pkIt.next();
-					trimmedHash
-							.add("]" + source.getName() + "|"
+					trimmedHash.add("]" + source.getName() + "|"
 									+ source.getPrimaryClass() + "."
 									+ pk.getBaseName());
 				}
 			}
 
 			if (this.input.isUIDSet()) {
-				executeSelect(pi, addrList);
+				executeSelect(pi, trimmedHash);
 			} else {
-				executeSelect(this.input, addrList);
+				executeSelect(this.input, trimmedHash);
 			}
 
 			for (int i = 0; i < getDataRows(); i++) {
@@ -383,7 +376,7 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 				Long key = this.getVpdmfId(i);
 				Map<String, List<Object>> ht = hhm.get(key);
 
-				Iterator<String> addrIt = addrList.iterator();
+				Iterator<String> addrIt = trimmedHash.iterator();
 				while (addrIt.hasNext()) {
 					String addr = (String) addrIt.next();
 
@@ -576,7 +569,7 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 		loadPrimaryPrimitive();
 		
 		if( this.hhm.size() == 0 )
-			throw new Exception("ViewSpec not found " + this.input.getUIDString());
+			return null;
 			
 		loadAllRemainingPrimitives();
 
@@ -832,7 +825,15 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 
 		clearQuery();
 
+		//
+		// Here we only want to execute the query over the primary 
+		// primitive's attributes in the viewtable.
+		// If not then all columns in the primary primitive get repeated 
+		// in all subsequent primitive queries, which can cause 
+		// a memory leak
+		// - NEED TO GO OVER THE VPDMf AND DESIGN IT AS A PROPER API.
 		buildSelectHeader(ppi, addresses);
+		
 		buildSqlConditions(ppi, DatabaseEngine.ALL);
 		buildTableAliases(ppi, false);
 
@@ -1041,7 +1042,10 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 		vi.writeVpdmfId(vpdmfId);
 		
 		ViewHolder vh = this.getAllCompleteViews(vi);
-
+		
+		if( vh == null )
+			return null;
+		
 		return vh.getHeavyViewInstance(vpdmfId);
 
 	}

@@ -645,6 +645,7 @@ public class CoreDaoImpl implements CoreDao {
 				this.getCl(), viewTypeName);
 
 		ViewInstance vi1 = vbog.objectGraphToView(obj);
+
 		Map<String, Object> objMap = vbog.getObjMap();
 
 		long vpdmfId = getCe().executeUpdateQuery(vi1);
@@ -669,7 +670,9 @@ public class CoreDaoImpl implements CoreDao {
 				viewTypeName);
 
 		ViewInstance vi = vbog.objectGraphToView(obj);
+
 		vi.reconstructIndexStrings();
+		
 		Map<String, Object> objMap = vbog.getObjMap();
 
 		long vpdmfId = getCe().executeInsertQuery(vi);
@@ -779,6 +782,9 @@ public class CoreDaoImpl implements CoreDao {
 
 		ViewInstance vi = getCe().executeUIDQuery(viewTypeName, id);
 
+		if( vi == null) 
+			return null;
+		
 		vi.convertImagesToStreams();
 		
 		ViewBasedObjectGraph vbog = generateVbogs().get(viewTypeName);
