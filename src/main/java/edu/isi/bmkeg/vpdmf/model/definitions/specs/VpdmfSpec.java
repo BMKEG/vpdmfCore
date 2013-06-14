@@ -82,7 +82,7 @@ public class VpdmfSpec implements Serializable {
 		return model;
 	}
 
-	private void setModel(ModelSpec model) {
+	public void setModel(ModelSpec model) {
 		this.model = model;
 	}
 	
@@ -101,7 +101,7 @@ public class VpdmfSpec implements Serializable {
 		return data;
 	}
 
-	private void setData(DataSpec data) {
+	public void setData(DataSpec data) {
 		this.data = data;
 	}
 
