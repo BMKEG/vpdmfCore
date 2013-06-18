@@ -1,22 +1,10 @@
 package edu.isi.bmkeg.vpdmf.bin;
 
 import java.io.File;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
-import edu.isi.bmkeg.uml.model.UMLmodel;
-import edu.isi.bmkeg.uml.sources.UMLModelSimpleParser;
 import edu.isi.bmkeg.vpdmf.controller.VPDMfKnowledgeBaseBuilder;
-import edu.isi.bmkeg.vpdmf.controller.archiveBuilder.VPDMfArchiveFileBuilder;
 import edu.isi.bmkeg.vpdmf.model.definitions.VPDMf;
-import edu.isi.bmkeg.vpdmf.model.definitions.ViewDefinition;
-import edu.isi.bmkeg.vpdmf.model.definitions.specs.VpdmfSpec;
-import edu.isi.bmkeg.vpdmf.utils.VPDMfConverters;
-import edu.isi.bmkeg.vpdmf.utils.VPDMfParser;
 
 public class RebuildVpdmfModelInDb {
 
