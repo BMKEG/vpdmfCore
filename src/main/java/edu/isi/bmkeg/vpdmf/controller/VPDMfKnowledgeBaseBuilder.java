@@ -162,7 +162,7 @@ public class VPDMfKnowledgeBaseBuilder {
 				"jdbc:mysql://localhost:3306/", login, new String(password));
 
 		quickStat = dbConnection.createStatement(
-				ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+				ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
 		return this.checkIfKbExists(name, quickStat);
 	}
