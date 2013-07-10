@@ -357,7 +357,7 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 				while (pkIt.hasNext()) {
 					UMLattribute pk = (UMLattribute) pkIt.next();
 					trimmedHash.add("]" + source.getName() + "|"
-									+ source.getPrimaryClass() + "."
+									+ source.getPrimaryClass().getBaseName() + "."
 									+ pk.getBaseName());
 				}
 			}
