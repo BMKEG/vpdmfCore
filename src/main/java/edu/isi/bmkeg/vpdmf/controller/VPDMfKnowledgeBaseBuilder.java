@@ -180,7 +180,7 @@ public class VPDMfKnowledgeBaseBuilder {
 		for (int i = 1; i <= pvCount; i++) {
 			rs.absolute(i);
 			String dbName = rs.getString("Database");
-			if (dbName.equals(name)) {
+			if (dbName.toLowerCase().equals(name.toLowerCase())) {
 				return true;
 			}
 		}
@@ -1448,9 +1448,8 @@ public class VPDMfKnowledgeBaseBuilder {
 		// Make sure the specified database doesn't already exist.
 		//
 		if (!checkIfKbExists(kbName, quickStat)) {
-			logger.debug("Database " + kbName + " does not exist, can't rebuild.");
-
-			throw new Exception("Database " + kbName + " already exists");
+			logger.warn("Database " + kbName + " does not exist, can't rebuild.");
+			throw new Exception("Database " + kbName + " does not exist");
 		}
 
 		String sql = "USE " + kbName + ";";
