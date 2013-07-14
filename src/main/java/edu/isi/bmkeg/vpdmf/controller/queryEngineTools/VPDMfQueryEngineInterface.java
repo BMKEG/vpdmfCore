@@ -90,7 +90,6 @@ public interface VPDMfQueryEngineInterface extends VPDMfDatabaseEngineInterface 
 	 * @return
 	 * @throws SQLException 
 	 */
-	public ResultSet executeRawSqlQuery(String sql) throws SQLException;
-	
+	public ResultSet executeRawSqlQuery(String sql) throws SQLException;	
 	
 }

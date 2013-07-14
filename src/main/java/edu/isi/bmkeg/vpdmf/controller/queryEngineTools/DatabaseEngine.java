@@ -2788,7 +2788,7 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 		return this.verbose;
 	}
 
-	protected void prettyPrintSQL(String sql) {
+	public void prettyPrintSQL(String sql) {
 
 		if (!logger.isDebugEnabled()) return;
 		

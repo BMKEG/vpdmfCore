@@ -2494,5 +2494,12 @@ public class ChangeEngine extends QueryEngine implements
 		this.garbageCol.copyVi = vi.deepCopy();
 
 	};
+	
+	public int executeRawUpdateQuery(String sql) throws SQLException {
+
+		return this.uStat.executeUpdate(sql);
+
+	
+	}
 
 };

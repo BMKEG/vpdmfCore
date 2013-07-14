@@ -27,4 +27,6 @@ public interface VPDMfDatabaseEngineInterface {
 	
 	public List<ClassInstance> queryClass(ClassInstance obj) throws Exception;
 	
+	public void prettyPrintSQL(String sql);
+	
 }

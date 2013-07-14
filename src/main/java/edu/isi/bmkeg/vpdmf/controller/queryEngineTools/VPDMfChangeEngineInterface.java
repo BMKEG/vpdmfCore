@@ -1,5 +1,7 @@
 package edu.isi.bmkeg.vpdmf.controller.queryEngineTools;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 import edu.isi.bmkeg.vpdmf.exceptions.VPDMfException;
@@ -60,5 +62,15 @@ public interface VPDMfChangeEngineInterface extends VPDMfQueryEngineInterface {
 	public void rollbackTransaction() throws Exception;
 
 	public boolean insertObjectIntoDB(ClassInstance ci) throws Exception;
+	
+	/**
+	 * Executes a raw UPDATE query on the underlying database. Optimized for speed.
+	 * Use with Caution
+	 * @param sql
+	 * @return
+	 * @throws SQLException 
+	 */
+	public int executeRawUpdateQuery(String sql) throws SQLException;
+
 	
 }
