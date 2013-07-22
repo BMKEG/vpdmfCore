@@ -345,8 +345,11 @@ public class ViewBasedObjectGraph {
 		ViewInstance vi = (ViewInstance) pig.getSubGraphNode();
 
 		Map<String, Method> methods = this.getMethodsLookup(o.getClass());
+
 		String sortRegex = "<vpdmf-sort-(\\d+)>";
 		Pattern sortPatt = Pattern.compile(sortRegex);
+		String revsortRegex = "<vpdmf-rev-sort-(\\d+)>";
+		Pattern revsortPatt = Pattern.compile(revsortRegex);
 
 		Iterator<ClassInstance> ciIt = pi.getObjects().values().iterator();
 		while (ciIt.hasNext()) {
@@ -423,6 +426,18 @@ public class ViewBasedObjectGraph {
 								Integer key = new Integer(matcher.group(1));
 								getSortAddr().add(key, ai.getAddress() );
 								strValue = strValue.replaceAll(sortRegex, "");
+							}
+					
+						} else if( strValue.contains("<vpdmf-rev-sort") ) {
+					
+							// Are any attributes set with <vpdmf-sort-XX> values,
+							// where XX is set to a number. This is the sort mechanism
+							// for list queries.
+							Matcher matcher = revsortPatt.matcher(strValue); 
+							if( matcher.find() ) {
+								Integer key = new Integer(matcher.group(1));
+								getSortAddr().add(key, "-" + ai.getAddress() );
+								strValue = strValue.replaceAll(revsortRegex, "");
 							}
 					
 						} else {

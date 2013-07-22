@@ -68,6 +68,7 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 	//
 	// global internal attributes
 	//
+	protected List<Long> order;
 	protected Map<Long, Map<String, List<Object>>> hhm;
 	protected Map<Long, Integer>  pCountHash;
 	protected Map<String, Long> idxHash;
@@ -230,6 +231,7 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 
 	private void buildHHM(List<String> addrHash) throws InterruptException {
 		hhm = new HashMap<Long, Map<String, List<Object>>>();
+		order = new ArrayList<Long>();
 		idxHash = new HashMap<String, Long>();
 		pCountHash = new HashMap<Long, Integer>();
 
@@ -242,6 +244,7 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 			String idx = this.getVpdmfLabel(i);
 			hhm.put(key, new HashMap<String, List<Object>>());
 			idxHash.put(idx, key);
+			order.add(key);
 
 		}
 
@@ -525,7 +528,7 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 
 		loadAllRemainingPrimitives(addrHash);
 
-		return new ViewHolder(this.hhm, vd, this.pCountHash, this.idxHash);
+		return new ViewHolder(this.hhm, this.order, vd, this.pCountHash, this.idxHash);
 
 	}
 	
@@ -538,7 +541,7 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 
 		loadPrimaryPrimitive(addrHash);
 
-		return new ViewHolder(this.hhm, vd, this.pCountHash, this.idxHash);
+		return new ViewHolder(this.hhm, this.order, vd, this.pCountHash, this.idxHash);
 
 	}
 
@@ -575,7 +578,7 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 			
 		loadAllRemainingPrimitives();
 
-		return new ViewHolder(this.hhm, vd, this.pCountHash, this.idxHash);
+		return new ViewHolder(this.hhm, this.order, vd, this.pCountHash, this.idxHash);
 
 	}
 
@@ -610,7 +613,7 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 
 		loadPrimaryPrimitive();
 
-		return new ViewHolder(this.hhm, vd, this.pCountHash, this.idxHash);
+		return new ViewHolder(this.hhm, this.order, vd, this.pCountHash, this.idxHash);
 
 	}
 
@@ -689,7 +692,7 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 
 		loadIndexedPrimitives(addrHash, sortAddr);
 
-		return new ViewHolder(this.hhm, vd, this.pCountHash, this.idxHash);
+		return new ViewHolder(this.hhm, this.order, vd, this.pCountHash, this.idxHash);
 
 	}
 	
@@ -759,6 +762,22 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 		buildSelectHeader(vi, selectAddresses);
 
 		//
+		// Build the 'ORDER BY' clause of the query.
+		//
+		for(String sortAddr : sortAddresses) {
+			boolean revFlag = false;
+			if( sortAddr.startsWith("-") ) {
+				revFlag = true;
+				sortAddr = sortAddr.substring(1, sortAddr.length());
+			}
+			AttributeInstance ai = vi.readAttributeInstance(sortAddr, 0);
+			String sortKey = getAlias(ai.get_object()) + "." + ai.getDefinition().getBaseName();
+			if( revFlag )
+				sortKey += " DESC";
+			orderBy.add(sortKey);
+		}
+		
+		//
 		// When building the 'SqlConditions' and 'TableAliases', we need
 		// to check if the current view instance is allowed to skip those
 		// null primitive instances or not.
@@ -779,14 +798,6 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 
 			buildTableAliases(vi, true);
 
-		}
-
-		//
-		// Build the 'ORDER BY' clause of the query.
-		//
-		for(String sortAddr : sortAddresses) {
-			AttributeInstance ai = vi.readAttributeInstance(sortAddr, 0);
-			orderBy.add(getAlias(ai.get_object()) + "." + ai.getDefinition().getBaseName());
 		}
 
 		String sql = buildSQLSelectStatement();

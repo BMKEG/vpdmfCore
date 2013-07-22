@@ -2863,6 +2863,11 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 			matcher = patt.matcher(sql);
 			sql = matcher.replaceAll(" \nLIMIT ");
 
+			patt = Pattern.compile(" ORDER BY ");
+			matcher = patt.matcher(sql);
+			sql = matcher.replaceAll(" \nORDER BY ");
+
+			
 			String[] array = sql.split("\\n");
 			s += "\n";
 			for (int i = 0; i < array.length; i++) {

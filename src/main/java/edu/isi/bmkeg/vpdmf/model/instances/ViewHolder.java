@@ -22,6 +22,7 @@ public class ViewHolder {
 
 	private Map<Long, Map<String, List<Object>>> hhv;
 	private Map<String, Long> idxHash;
+	private List<Long> order;
 	private ViewDefinition vd;
 	private Map<Long, Integer> pCount;
 
@@ -41,11 +42,13 @@ public class ViewHolder {
 	}
 
 	public ViewHolder(Map<Long, Map<String, List<Object>>> hhv, 
+			List<Long> order,
 			ViewDefinition vd, 
 			Map<Long,Integer> pCount,
 			Map<String,Long> idxHash) {
 
 		this.hhv = hhv;
+		this.order = order;
 		this.vd = vd;
 		this.pCount = pCount;
 		this.idxHash = idxHash;
@@ -279,7 +282,7 @@ public class ViewHolder {
 
 		ArrayList<LightViewInstance> viewList = new ArrayList<LightViewInstance>();
 
-		Iterator<Long> it = this.getUIDs().iterator();
+		Iterator<Long> it = this.order.iterator();
 		while (it.hasNext()) {
 			Long vpdmfId = it.next();
 			LightViewInstance vi = this.getLightViewInstance(vpdmfId);
