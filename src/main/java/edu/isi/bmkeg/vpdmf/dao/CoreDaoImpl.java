@@ -745,7 +745,8 @@ public class CoreDaoImpl implements CoreDao {
 		ViewInstance vi = vbog.objectGraphToView(obj, false);
 
 		List<LightViewInstance> l = new ArrayList<LightViewInstance>();
-		Iterator<LightViewInstance> it = getCe().executeListQuery(vi, true,
+		Iterator<LightViewInstance> it = getCe().executeListQuery(vi, 
+				vbog.getSortAddr(), true,
 				offset, pageSize).iterator();
 		while (it.hasNext()) {
 			LightViewInstance lvi = it.next();
@@ -765,7 +766,7 @@ public class CoreDaoImpl implements CoreDao {
 		ViewInstance vi = vbog.objectGraphToView(obj, false);
 
 		List<LightViewInstance> l = new ArrayList<LightViewInstance>();
-		Iterator<LightViewInstance> it = getCe().executeListQuery(vi)
+		Iterator<LightViewInstance> it = getCe().executeListQuery(vi, vbog.getSortAddr())
 				.iterator();
 		while (it.hasNext()) {
 			LightViewInstance lvi = it.next();

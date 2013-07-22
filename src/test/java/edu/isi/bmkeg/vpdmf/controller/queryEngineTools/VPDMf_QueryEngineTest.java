@@ -3,6 +3,8 @@ package edu.isi.bmkeg.vpdmf.controller.queryEngineTools;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +55,9 @@ public class VPDMf_QueryEngineTest {
 	File buildFile;
 	
 	String sql;
+	
+	// DO WE NEED TO REBUILD THE DATABASE FROM SCRATCH AFTER EVERY TEST?
+	static boolean REBUILD_DB = false;
 
 	@Before
 	public void setUp() throws Exception {
@@ -65,32 +70,37 @@ public class VPDMf_QueryEngineTest {
 		password =  prop.getDbPassword();
 		dbName = "triage_vpdmf_test";
 		
-	    buildFile = ctx.getResource("classpath:edu/isi/bmkeg/vpdmf/triage_data_VPDMf.zip")
+	    buildFile = ctx.getResource("classpath:edu/isi/bmkeg/vpdmf/triage/triage-mysql-1-1-3-testData.zip")
 				.getFile();
 	    
 	    builder = new VPDMfKnowledgeBaseBuilder(buildFile, login, password, dbName);
 		
-		try {
-			builder.destroyDatabase(dbName);
-		} catch (SQLException sqlE) {
-			// Gully: Make sure that this runs, avoid silly issues.
-			if( !sqlE.getMessage().contains("database doesn't exist") ) {
-				sqlE.printStackTrace();
-//				throw sqlE;
+	    if( REBUILD_DB || !builder.checkIfKbExists(dbName) ) {
+
+	    	try {
+				builder.destroyDatabase(dbName);
+			} catch (SQLException sqlE) {
+				// Gully: Make sure that this runs, avoid silly issues.
+				if( !sqlE.getMessage().contains("database doesn't exist") ) {
+					sqlE.printStackTrace();
+					throw sqlE;
+				}
 			}
+			builder.buildDatabaseFromArchive();
+			
 		}
-		
-	    File jarLocation = new File(buildFile.getParent() + "/tempResource.jar" );
-		
-		builder.buildDatabaseFromArchive();
+	    
+	    File jarLocation = new File(buildFile.getParent() + "/triage-jpa-1.1.3-SNAPSHOT.jar" );
 		
 		vhf = new QueryEngine(this.login, this.password, dbName);
 		vhf.connectToDB(this.login, this.password, this.dbName);
 	 
 	    top = vhf.readTop();
 	    
-	    cl = vhf.readClassLoader(jarLocation);
-		
+		URL url = jarLocation.toURI().toURL();
+		URL[] urls = new URL[]{url};
+		cl = new URLClassLoader(urls);
+	    
 	    vhf.closeDbConnection();
 
 	}
@@ -98,11 +108,13 @@ public class VPDMf_QueryEngineTest {
 	@After
 	public void tearDown() throws Exception {
 
-		builder.destroyDatabase(dbName);
-
+		if( REBUILD_DB ) {
+			builder.destroyDatabase(dbName);
+		}
+		
 	}
 
-	@Test @Ignore("Outdated")
+	@Test // Reinstated these tests  
 	public final void testExecuteListQuery() throws Exception {
 
 		ViewDefinition vd = top.getViews().get("ArticleCitation");
@@ -110,7 +122,7 @@ public class VPDMf_QueryEngineTest {
 		ViewInstance vi = new ViewInstance(vd);
 
 		AttributeInstance ai = vi.readAttributeInstance("]Author|Person.fullName", 0);
-		ai.writeValueString("JF Chen");
+		ai.writeValueString("A Kawano");
 		
 	    vhf.connectToDB(this.login, this.password, this.dbName);
 	    
@@ -120,14 +132,14 @@ public class VPDMf_QueryEngineTest {
 	    
 	    LightViewInstance lvi = viewList.get(0);
 	    	    
-	    assertTrue("Need to find vpdmfId=32106: ", lvi.getName().equals("vpdmfId=26768"));
+	    assertTrue("Need to find vpdmfId=32106: ", lvi.getName().equals("vpdmfId=26785"));
 			    
 	}
 	
-	@Test @Ignore("Outdated")
+	@Test @Ignore("Unsure if this functionality is working")
 	public final void testExecuteFullQuery() throws Exception {
 
-		ViewDefinition vd = top.getViews().get("Article");
+		ViewDefinition vd = top.getViews().get("ArticleCitation");
 
 		ViewInstance vi = new ViewInstance(vd);
 		
@@ -137,31 +149,31 @@ public class VPDMf_QueryEngineTest {
 	    
 	    vhf.closeDbConnection();
 	    	    	    
-	    assertTrue("Should return all 50 complete articles: ", viewList.size() == 50);
+	    assertTrue("Should return all 4 complete articles: ", viewList.size() == 4);
 			    
 	}
 	
-	@Test @Ignore("Outdated")
+	@Test
 	public final void testExecuteUIDQuery() throws Exception {
 		
 	    vhf.connectToDB(this.login, this.password, this.dbName);
 		 	    
-	    ViewInstance vi = vhf.executeUIDQuery("Article", 32106L);
+	    ViewInstance vi = vhf.executeUIDQuery("ArticleCitation", 26785L);
 		
 	    vhf.closeDbConnection();
 	  
-	    assertTrue("Need to find id=32106: ", vi.getName().equals("vpdmfId=32106"));
+	    assertTrue("Need to find id=26785: ", vi.getName().equals("vpdmfId=26785"));
 	    	    
 	} 
 		
-	@Test @Ignore("Outdated")
+	@Test 
 	public final void testViewInstanceToObjectGraph() throws Exception {
 
 	    vhf.connectToDB(this.login, this.password, this.dbName);
 		 	    
-	    ViewInstance vi = vhf.executeUIDQuery("Article", 32106L);
+	    ViewInstance vi = vhf.executeUIDQuery("ArticleCitation", 26785L);
 	    
-	    String viewName = "Article";
+	    String viewName = "ArticleCitation";
 	    
 	    ViewBasedObjectGraph og = new ViewBasedObjectGraph(top, cl, viewName);
 	    
@@ -169,20 +181,20 @@ public class VPDMf_QueryEngineTest {
 		
 	    vhf.closeDbConnection();
 	  
-	    assertTrue("Should have 18 mapped objects here: ", (map.size() == 18) );
+	    assertTrue("Should have 12 mapped objects here: ", (map.size() == 12) );
 
 	} 
 
-	@Test @Ignore("Outdated")
+	@Test 
 	public final void testAndBackAgain() throws Exception {
 
 	    vhf.connectToDB(this.login, this.password, this.dbName);
 	 	 	    
-	    ViewInstance vi = vhf.executeUIDQuery("ArticleCitation", 32106L);
+	    ViewInstance vi = vhf.executeUIDQuery("ArticleCitation", 26785L);
 	    
 	    log.debug(vi.readDebugString());
 	    
-	    String viewName = "Article";
+	    String viewName = "ArticleCitation";
 	    
 	    ViewBasedObjectGraph og = new ViewBasedObjectGraph(top, cl, viewName);
 	    
@@ -196,78 +208,48 @@ public class VPDMf_QueryEngineTest {
 	    
 	    System.out.print(rebuiltVi.readDebugString());
 	       
-	    String testString = "Hagg, Ha (1970), `Cervicothalamic tract in the dog.` J Comp Neurol 139:357-74";
+	    String testString = "A Kawano, Y Hayashi, S Noguchi, H Handa, M Horikoshi, Y Yamaguchi (2011), " +
+	    		"`Global analysis for functional residues of histone variant Htz1 using the comprehensive " +
+	    		"point mutant library.` Genes Cells 16:590-607 [21470346]";
 	    assertTrue("Indexstring should be generated appropriately for the rebuilt view instance:" + testString
 	    		+ "\n != " +rebuiltVi.getVpdmfLabel() + "\n", (rebuiltVi.getVpdmfLabel().equals(testString)) );
 
 	}
 	
-	@Test @Ignore("Outdated")
-	public final void pagingListQuery() throws Exception {
+	@Test 
+	public final void testPagingListQuery() throws Exception {
 
-		ViewDefinition vd = top.getViews().get("Resource");
-
-		ViewInstance vi = new ViewInstance(vd);
-		
-	    vhf.connectToDB(this.login, this.password, this.dbName);
-		 
-	    List<LightViewInstance> viewList = vhf.executeListQuery(vi, true, 2, 5);
-	    
-	    vhf.closeDbConnection();
-	    	    	    
-	    assertTrue("Viewlist needs to have 5 views: ", viewList.size() == 5);
-	}
-	
-	@Test @Ignore("Outdated")
-	public final void pagingFullQuery() throws Exception {
-
-		ViewDefinition vd = top.getViews().get("Resource");
+		ViewDefinition vd = top.getViews().get("ArticleCitation");
 
 		ViewInstance vi = new ViewInstance(vd);
 		
 	    vhf.connectToDB(this.login, this.password, this.dbName);
 		 
-	    List<ViewInstance> viewList = vhf.executeFullQuery(vi, true, 2, 5);
+	    List<LightViewInstance> viewList = vhf.executeListQuery(vi, true, 2, 2);
 	    
 	    vhf.closeDbConnection();
 	    	    	    
-	    assertTrue("Viewlist needs to have 5 views: ", viewList.size() == 5);
+	    assertTrue("Viewlist needs to have 5 views: ", viewList.size() == 2);
+	}	
+	
+
+	@Test 
+	public final void testSortedListQuery() throws Exception {
+
+		Object tsObject = Class.forName("edu.isi.bmkeg.triage.model.qo.TriageScore_qo", true, cl).newInstance();
+		tsObject.getClass().getDeclaredMethod("setInScore", String.class).invoke(tsObject, "<vpdmf-sort-0>");
+	    
+		String viewName = "TriageScore";
+	    ViewBasedObjectGraph og = new ViewBasedObjectGraph(top, cl, viewName);	    
+	    ViewInstance vi = og.objectGraphToView(tsObject, false);
+	    
+	    vhf.connectToDB(this.login, this.password, this.dbName);
+		 
+	    List<LightViewInstance> viewList = vhf.executeListQuery(vi, og.getSortAddr());
+	    
+	    vhf.closeDbConnection();
+	    	    	    
+	    assertTrue("Viewlist needs to have 4 views: ", viewList.size() == 4);
 	}
-	
-/*	@Test
-	public final void testQueryClass() throws Exception {
-
-		List<ClassInstance> cis = null;
-		
-		QueryEngine qe = new QueryEngine(this.login, this.password, dbName);
-
-		try {
-					
-			qe.connectToDB();
-		    qe.stat.execute("set autocommit=0;");
-			 
-		    qe.local_state = VPDMfController.DISPLAY;
-		    qe.local_sourceViewInstance = null;
-		    qe.local_doPagingInQuery = false;
-		    qe.local_listOffset = 0;
-		    qe.vpdmf = top;
-		    
-	        String query = "[Article]Article|ViewTable?indexString=AAA%";
-		    
-		    cis = qe.executeClassQuery(query);
-		    
-		
-		} finally {
-
-			qe.closeDbConnection();
-			
-		}
-
-		assertTrue("Should have removed view data with ViewTableId = 32106.", true);
-
-	}*/
-	
-	
-
 	
 }

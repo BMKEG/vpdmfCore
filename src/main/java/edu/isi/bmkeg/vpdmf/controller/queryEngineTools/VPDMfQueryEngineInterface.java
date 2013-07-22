@@ -25,6 +25,7 @@ public interface VPDMfQueryEngineInterface extends VPDMfDatabaseEngineInterface 
 	 * @throws Exception
 	 */
 	public List<LightViewInstance> executeListQuery(ViewInstance vi) throws Exception;
+	public List<LightViewInstance> executeListQuery(ViewInstance vi, List<String> sortAddresses) throws Exception;
 
 	/**
 	 * Runs a list query based on criteria specified within a blank view instance
@@ -36,6 +37,7 @@ public interface VPDMfQueryEngineInterface extends VPDMfDatabaseEngineInterface 
 	 * @throws Exception
 	 */
 	public List<LightViewInstance> executeListQuery(ViewInstance vi, boolean paging, int listOffset, int pageSize) throws Exception;
+	public List<LightViewInstance> executeListQuery(ViewInstance vi, List<String> sortAddresses, boolean paging, int listOffset, int pageSize) throws Exception;
 	
 	/**
 	 * Runs a query for a specific view based on a specific id string

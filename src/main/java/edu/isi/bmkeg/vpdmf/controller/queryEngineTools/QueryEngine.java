@@ -218,11 +218,13 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 
 	}
 	
-	private void loadIndexedPrimitives(List<String> addrHash) throws Exception {
+	private void loadIndexedPrimitives(List<String> selectAddresses, 
+			List<String> sortAddresses) 
+					throws Exception {
 
-		executeSelect(this.input, addrHash);
+		executeSelect(this.input, selectAddresses, sortAddresses);
 
-		buildHHM(addrHash);
+		buildHHM(selectAddresses);
 
 	}
 
@@ -635,7 +637,8 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 	 *            ViewInstance
 	 * @throws Exception
 	 */
-	protected ViewHolder getOnlyIndexColumns(ViewInstance input) throws Exception {
+	protected ViewHolder getOnlyIndexColumns(ViewInstance input, List<String> sortAddr) 
+			throws Exception {
 
 		ViewDefinition vd = input.getDefinition();
 
@@ -684,7 +687,7 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 			}
 		}
 
-		loadIndexedPrimitives(addrHash);
+		loadIndexedPrimitives(addrHash, sortAddr);
 
 		return new ViewHolder(this.hhm, vd, this.pCountHash, this.idxHash);
 
@@ -695,12 +698,22 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 		return stat.executeQuery(sql);
 	
 	}
-	
 
-	private void executeSelect(ViewInstance vi, List<String> addresses)
+	private void executeSelect(ViewInstance vi, 
+			List<String> selectAddresses)
 			throws Exception {
 
-		String sql = buildSql(vi, addresses);
+		this.executeSelect(vi, selectAddresses, new ArrayList<String>());
+
+	}
+
+
+	private void executeSelect(ViewInstance vi, 
+			List<String> selectAddresses, 
+			List<String> sortAddresses)
+			throws Exception {
+
+		String sql = buildSql(vi, selectAddresses, sortAddresses);
 
 		long t = System.currentTimeMillis();
 		ResultSet rs = stat.executeQuery(sql);
@@ -709,13 +722,30 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 		logger.debug("    ViewHolder, ViewSpec-Based Select: " + deltaT
 					/ 1000.0 + " s\n");
 
-		RS2HHM(rs, addresses);
+		RS2HHM(rs, selectAddresses);
 
 	}
 
-	public String buildSql(ViewInstance vi, List<String> addresses)
+	public String buildSql(ViewInstance vi, 
+			List<String> selectAddresses)
 			throws Exception, VPDMfException {
-		Object[] addrArray = addresses.toArray();
+		
+		String vpdmfAddr = "]" + 
+				vi.getPrimaryPrimitive().getDefinition().getName() +
+				"|ViewTable.vpdmfLabel";
+		List<String> sortAddresses = new ArrayList<String>();
+		sortAddresses.add(vpdmfAddr);
+		
+		return buildSql(vi, selectAddresses, sortAddresses);
+		
+	}
+	
+	public String buildSql(ViewInstance vi, 
+			List<String> selectAddresses, 
+			List<String> sortAddresses)
+			throws Exception, VPDMfException {
+		
+		Object[] addrArray = selectAddresses.toArray();
 		Arrays.sort(addrArray);
 
 		lookup = new HashMap<String,Integer>();
@@ -726,12 +756,8 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 		}
 
 		clearQuery();
-		buildSelectHeader(vi, addresses);
+		buildSelectHeader(vi, selectAddresses);
 
-		//
-		// Bugfix:
-		//
-		// Added by Weicheng.
 		//
 		// When building the 'SqlConditions' and 'TableAliases', we need
 		// to check if the current view instance is allowed to skip those
@@ -740,7 +766,7 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 		// If the type of the current view instance is 'LOOKUP', then
 		// it is not allowed to skip those null primitive instances.
 		// Otherwise, it is allowed to skip.
-		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		// 
 		if (vi.getDefinition().getType() == ViewDefinition.LOOKUP) {
 
 			buildSqlConditions(vi, DatabaseEngine.ALL, false);
@@ -754,26 +780,15 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 			buildTableAliases(vi, true);
 
 		}
-		// End Bugfix
-		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-		// buildSqlConditions(vi, DatabaseEngine.ALL, true);
-
-		// buildTableAliases(vi, true);
-
-		PrimitiveInstance pi = vi.getPrimaryPrimitive();
-		String primaryClassName = pi.getDefinition().getPrimaryClass()
-				.getBaseName();
-		ClassInstance ci = (ClassInstance) pi.getObjects().get(primaryClassName);
 
 		//
-		// NOTE:
+		// Build the 'ORDER BY' clause of the query.
 		//
-		// In general, do we use label to order the
-		// query. We SHOULD use vpdmfLabel since the order the user will
-		// see nodes and views is usually determined by the vpdmfLabel.
-		//
-		orderBy.add(getAlias(ci) + ".vpdmfLabel");
+		for(String sortAddr : sortAddresses) {
+			AttributeInstance ai = vi.readAttributeInstance(sortAddr, 0);
+			orderBy.add(getAlias(ai.get_object()) + "." + ai.getDefinition().getBaseName());
+		}
+
 		String sql = buildSQLSelectStatement();
 
 		if (isDoPagingInQuery()) {
@@ -1150,7 +1165,7 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 
 						}
 
-						ViewHolder vh = this.getOnlyIndexColumns(depVi);
+						ViewHolder vh = this.getOnlyIndexColumns(depVi, new ArrayList<String>());
 						Object[] uidArray = vh.getUIDs().toArray();
 						for (int l = 0; l < uidArray.length; l++) {
 							Long uid = (Long) uidArray[l];
@@ -1632,8 +1647,10 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 
 	}
 
-	public List<LightViewInstance> executeListQuery(ViewInstance vi, boolean paging, int listOffset, int pageSize)
-			throws Exception {
+	public List<LightViewInstance> executeListQuery(ViewInstance vi, 
+			List<String> sortAddresses, 
+			boolean paging, int listOffset, int pageSize) 
+					throws Exception {
 
 		ArrayList<LightViewInstance> viewList = null;
 		
@@ -1646,14 +1663,17 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 			
 		vi.instantiateDefinition(this.vpdmf);
 
-		this.stat.execute("set autocommit=0;");
-		this.setDoPagingInQuery(paging);
-			
+		this.stat.execute("set autocommit=0;");		
 		this.setDoPagingInQuery(paging);
 		this.setListOffset(listOffset);
 		this.setListPageSize(pageSize);
-
-		ViewHolder vh = this.getOnlyIndexColumns(vi);
+		
+		if( sortAddresses.size() == 0) {
+			sortAddresses.add("]" + vi.getPrimaryPrimitive().getDefName() + 
+					"|ViewTable.vpdmfLabel");
+		}
+		
+		ViewHolder vh = this.getOnlyIndexColumns(vi, sortAddresses);
 
 		viewList = vh.getViewList();
 
@@ -1661,10 +1681,27 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 		
 	}	
 
+	public List<LightViewInstance> executeListQuery(ViewInstance vi, 
+			boolean paging, int listOffset, int pageSize) 
+					throws Exception {
+
+		return this.executeListQuery(vi, new ArrayList<String>(), paging, listOffset, pageSize);
+		
+	}	
+
+	
+	public List<LightViewInstance> executeListQuery(ViewInstance vi, 
+			List<String> sortAddresses) 
+					throws Exception {
+
+		return this.executeListQuery(vi, sortAddresses, false, 0, 0);
+		
+	}	
+
 	public List<LightViewInstance> executeListQuery(ViewInstance vi)
 			throws Exception {
 
-		return this.executeListQuery(vi, false, 0, 0);
+		return this.executeListQuery(vi, new ArrayList<String>(), false, 0, 0);
 		
 	}	
 	

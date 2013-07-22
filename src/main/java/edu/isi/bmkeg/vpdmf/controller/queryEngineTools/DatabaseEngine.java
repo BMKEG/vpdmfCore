@@ -1243,10 +1243,6 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 		if (queryType != this.NOALIAS)
 			aliasName = this.getAlias(cI);
 
-		// LEGACY BUG - REMOVE CONDITIONALITY ON STATE AMCHINE FOR QUERY
-		// FUNCTIONALITY
-		// if (state != VPDMfController.LIST
-		// && cI.attributes.containsKey("vpdmfOrder")) {
 		if (cI.attributes.containsKey("vpdmfOrder")) {
 			this.orderBy.add(aliasName + ".vpdmfOrder");
 		}
@@ -1276,6 +1272,11 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 					.getParentClass().getBaseName().equals("p"))
 					&& aD.getBaseName().equals("password")) {
 				continue;
+			}
+			
+			if ( aD.getStereotype() != null && 
+					aD.getStereotype().equals("vpdmfOrder") ) {
+				continue ATTLOOP;
 			}
 
 			if (queryType == this.INDEXONLY) {

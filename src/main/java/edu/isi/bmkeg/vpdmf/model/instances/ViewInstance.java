@@ -76,7 +76,7 @@ public class ViewInstance extends LightViewInstance {
 		this.setVpdmfUri("");
 
 		this.setDefName(defName);
-		// this.setIcon(defName);
+		
 		this.complete = false;
 
 	}

@@ -1,12 +1,15 @@
 package edu.isi.bmkeg.vpdmf.model.instances;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -16,7 +19,6 @@ import edu.isi.bmkeg.uml.model.UMLrole;
 import edu.isi.bmkeg.utils.superGraph.SuperGraphEdge;
 import edu.isi.bmkeg.utils.superGraph.SuperGraphNode;
 import edu.isi.bmkeg.utils.superGraph.SuperGraphTraversal;
-import edu.isi.bmkeg.vpdmf.controller.queryEngineTools.QueryEngine;
 import edu.isi.bmkeg.vpdmf.model.definitions.ConditionElement;
 import edu.isi.bmkeg.vpdmf.model.definitions.PrimitiveDefinition;
 import edu.isi.bmkeg.vpdmf.model.definitions.PrimitiveDefinitionGraph;
@@ -37,7 +39,9 @@ public class ViewBasedObjectGraph {
 	private ClassLoader cl;
 
 	private Map<String, Object> objMap;
-
+	
+	private List<String> sortAddr = new ArrayList<String>();
+	
 	private Set<SuperGraphNode> visitedView = new HashSet<SuperGraphNode>();
 	private Set<SuperGraphEdge> visitedLinks = new HashSet<SuperGraphEdge>();
 
@@ -341,6 +345,8 @@ public class ViewBasedObjectGraph {
 		ViewInstance vi = (ViewInstance) pig.getSubGraphNode();
 
 		Map<String, Method> methods = this.getMethodsLookup(o.getClass());
+		String sortRegex = "<vpdmf-sort-(\\d+)>";
+		Pattern sortPatt = Pattern.compile(sortRegex);
 
 		Iterator<ClassInstance> ciIt = pi.getObjects().values().iterator();
 		while (ciIt.hasNext()) {
@@ -400,13 +406,29 @@ public class ViewBasedObjectGraph {
 					//
 					if( value instanceof String ) {
 						String strValue = (String) value; 
+						
 						if( strValue.contains("<vpdmf-or>") ) {
+						
 							ai.setQueryCode( AttributeInstance.OR );
 							String[] orValues = strValue.split("<vpdmf-or>");
 							ai.setValue(orValues);
+						
+						} else if( strValue.contains("<vpdmf-sort") ) {
+					
+							// Are any attributes set with <vpdmf-sort-XX> values,
+							// where XX is set to a number. This is the sort mechanism
+							// for list queries.
+							Matcher matcher = sortPatt.matcher(strValue); 
+							if( matcher.find() ) {
+								Integer key = new Integer(matcher.group(1));
+								getSortAddr().add(key, ai.getAddress() );
+								strValue = strValue.replaceAll(sortRegex, "");
+							}
+					
 						} else {
 							ai.writeValueString(value+"");													
 						}
+						
 					} else if( ad.getType().getBaseName().equals("blob") ||
 							ad.getType().getBaseName().equals("image")) { 
 						ai.setValue(value);												
@@ -558,6 +580,14 @@ public class ViewBasedObjectGraph {
 
 	public void setObjMap(Map<String, Object> objMap) {
 		this.objMap = objMap;
+	}
+
+	public List<String> getSortAddr() {
+		return sortAddr;
+	}
+
+	public void setSortAddr(List<String> sortAddr) {
+		this.sortAddr = sortAddr;
 	}
 
 }
