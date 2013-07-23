@@ -57,7 +57,7 @@ public class VPDMf_QueryEngineTest {
 	String sql;
 	
 	// DO WE NEED TO REBUILD THE DATABASE FROM SCRATCH AFTER EVERY TEST?
-	static boolean REBUILD_DB = false;
+	static boolean REBUILD_DB = true;
 
 	@Before
 	public void setUp() throws Exception {
