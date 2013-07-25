@@ -67,7 +67,7 @@ public interface VPDMfChangeEngineInterface extends VPDMfQueryEngineInterface {
 	 * Executes a raw UPDATE query on the underlying database. Optimized for speed.
 	 * Use with Caution
 	 * @param sql
-	 * @return
+	 * @return number of rows changed. 
 	 * @throws SQLException 
 	 */
 	public int executeRawUpdateQuery(String sql) throws SQLException;

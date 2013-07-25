@@ -2495,6 +2495,10 @@ public class ChangeEngine extends QueryEngine implements
 
 	};
 	
+	/**
+	 * Executes raw SQL on the database, USE WITH CAUTION
+	 * returns the number of rows altered in the database.
+	 */
 	public int executeRawUpdateQuery(String sql) throws SQLException {
 
 		return this.uStat.executeUpdate(sql);

@@ -422,7 +422,7 @@ public class CoreDaoImpl implements CoreDao {
 	// ~~~~~~~~~~~~~~~~~~
 	// final operations
 	// ~~~~~~~~~~~~~~~~~~
-
+	
 	public <T extends ViewTable> long update(T obj, String viewTypeName)
 			throws Exception {
 
@@ -621,6 +621,27 @@ public class CoreDaoImpl implements CoreDao {
 		return count;
 
 	}
+	
+	public boolean deleteById(long id, String viewTypeName)
+			throws Exception {
+
+		try {
+
+			getCe().connectToDB();
+			getCe().turnOffAutoCommit();
+
+			return this.deleteByIdInTrans(id, viewTypeName);
+
+		} finally {
+
+			getCe().closeDbConnection();
+
+		}
+
+	}
+
+
+	
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// operations occurring within an external transaction
@@ -820,51 +841,12 @@ public class CoreDaoImpl implements CoreDao {
 		return count;
 
 	}
+	
+	public boolean deleteByIdInTrans(long id, String viewTypeName) throws Exception {
 
-	/*
-	 * public Map<PrimitiveInstance, Term>
-	 * buildTermLookupForViewInstance(ViewInstance vi) throws Exception {
-	 * 
-	 * Map<String, ViewBasedObjectGraph> vbogs = generateVbogs();
-	 * ViewBasedObjectGraph vbog = vbogs.get(vi.getDefName());
-	 * vbog.viewToObjectGraph(vi);
-	 * 
-	 * Map<PrimitiveInstance, Term> tLookup = new HashMap<PrimitiveInstance,
-	 * Term>(); PrimitiveInstanceGraph pig = (PrimitiveInstanceGraph)
-	 * vi.getSubGraph(); kmrgGraphTraversal pigTraversal = pig.readTraversal();
-	 * Iterator<kmrgGraphEdge> pliIt = pigTraversal.edgeTraversal.iterator();
-	 * while (pliIt.hasNext()) { PrimitiveLinkInstance pli =
-	 * (PrimitiveLinkInstance) pliIt.next();
-	 * 
-	 * UMLrole r = pli.getPVLinkDef().getRole(); String dClassName =
-	 * r.getDirectClass().getBaseName();
-	 * 
-	 * if( dClassName.equals("Ontology") || dClassName.equals("TermMapping") ||
-	 * dClassName.equals("Person")) continue;
-	 * 
-	 * if (dClassName.equals("Term") && (r.getBaseName().equals("ontology") ||
-	 * r.getBaseName() .equals("definitionEditor"))) continue;
-	 * 
-	 * PrimitiveInstance pi1 = (PrimitiveInstance) pli.getOutEdgeNode();
-	 * PrimitiveInstance pi2 = (PrimitiveInstance) pli.getInEdgeNode();
-	 * 
-	 * PrimitiveInstance sPi = null, tPi = null; if(
-	 * pi1.getDefinition().getPrimaryClass().getBaseName().equals("Term") ) {
-	 * sPi = pi2; tPi = pi1; } else if(
-	 * pi2.getDefinition().getPrimaryClass().getBaseName().equals("Term") ) {
-	 * sPi = pi1; tPi = pi2; } else { continue; }
-	 * 
-	 * Map<String, Object> objMap = vbog.getObjMap(); Object o =
-	 * objMap.get(tPi.getName()); if(o == null) throw new
-	 * Exception("Can't find primitive " + tPi.getDefinition().getName() );
-	 * 
-	 * Term t = (Term) o;
-	 * 
-	 * if(r.getBaseName().equals("term")) { tLookup.put(sPi, t); } else {
-	 * tLookup.put(tPi, t); }
-	 * 
-	 * } return tLookup; }
-	 */
+		return getCe().deleteView(viewTypeName, id);
+		
+	}
 
 	// ~~~~~~~~~~~~~~~~~~
 	// getters 'n setters

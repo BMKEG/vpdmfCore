@@ -48,6 +48,8 @@ public interface CoreDao {
 	
 	public <T extends ViewTable> T findById(long id, T obj, String viewTypeName) throws Exception;
 	
+	public boolean deleteById(long id, String viewTypeName) throws Exception;
+
 	public <T extends ViewTable> long insert(T ov, String viewTypeName) throws Exception;
 
 	public <T extends ViewTable> long update(T obj, String viewTypeName) throws Exception;
@@ -67,6 +69,8 @@ public interface CoreDao {
 	// ~~~~~~~~~~~~~~~~~~~~
 	
 	public <T extends ViewTable> T findByIdInTrans(long id, T obj, String viewTypeName) throws Exception;
+
+	public boolean deleteByIdInTrans(long id, String viewTypeName) throws Exception;
 	
 	public <T extends ViewTable> long insertInTrans(T obj, String viewTypeName) throws Exception;
 
