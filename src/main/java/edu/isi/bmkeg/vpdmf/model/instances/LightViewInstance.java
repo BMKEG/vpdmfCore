@@ -1,11 +1,13 @@
 package edu.isi.bmkeg.vpdmf.model.instances;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.ImageIcon;
-
 import edu.isi.bmkeg.utils.superGraph.SuperGraphNode;
+import edu.isi.bmkeg.vpdmf.model.definitions.IndexElement;
+import edu.isi.bmkeg.vpdmf.model.definitions.VPDMf;
 import edu.isi.bmkeg.vpdmf.model.definitions.ViewDefinition;
 
 public class LightViewInstance extends SuperGraphNode {
@@ -114,6 +116,31 @@ public class LightViewInstance extends SuperGraphNode {
 
 	public void setIndexTupleFields(String indexTupleFields) {
 		this.indexTupleFields = indexTupleFields;
+	}
+	
+	public Map<String, String> readIndexTupleMap(VPDMf top) throws Exception {
+		
+		String[] idxFields = this.getIndexTupleFields().split("\\<\\|\\>");
+		String[] idxValues = this.getIndexTuple().split("\\<\\|\\>");
+		Map<String, String> indexTupleMap = new HashMap<String,String>();
+		for(int i=0; i<idxFields.length; i++) {
+			
+			String[] idxCodes = idxFields[i].split("_");
+			if( idxCodes.length == 2 ) {
+				String vName = idxCodes[0];
+				Integer idxNumber = new Integer(idxCodes[1]);
+				ViewDefinition vd = top.getViews().get(vName);
+				IndexElement ie = vd.getIndexElements().get(idxNumber);
+				indexTupleMap.put("[" + vName + ie.getAttributeAddress(), idxValues[i]);				
+			} else if( idxCodes.length == 2 ) {
+				String vName = idxFields[0];
+				indexTupleMap.put("[" + vName + "]", idxValues[i]);				
+			}
+			
+		}
+		
+		return indexTupleMap; 
+		
 	}
 
 }
