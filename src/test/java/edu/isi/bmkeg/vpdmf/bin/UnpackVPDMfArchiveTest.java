@@ -45,7 +45,7 @@ public class UnpackVPDMfArchiveTest {
 			dbUrl = dbUrl.substring(l + 1, dbUrl.length());
 	
 		archiveFile = ctx.getResource(
-				"classpath:edu/isi/bmkeg/vpdmf/resource_excel_VPDMf.zip").getFile();
+				"classpath:edu/isi/bmkeg/vpdmf/triage/triage-mysql-1-1-3-testData.zip").getFile();
 		builder = new VPDMfKnowledgeBaseBuilder(archiveFile, 
 				login, password, dbUrl); 
 		
