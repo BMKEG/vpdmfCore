@@ -42,8 +42,6 @@ import edu.isi.bmkeg.vpdmf.model.instances.PrimitiveInstance;
 import edu.isi.bmkeg.vpdmf.model.instances.PrimitiveInstanceGraph;
 import edu.isi.bmkeg.vpdmf.model.instances.PrimitiveLinkInstance;
 import edu.isi.bmkeg.vpdmf.model.instances.ViewInstance;
-import edu.isi.bmkeg.vpdmf.model.instances.ViewLinkInstance;
-import edu.isi.bmkeg.vpdmf.model.instances.viewGraphInstance;
 
 /**
  * Class that makes changes to the contents of the database, by inserting,
@@ -82,7 +80,7 @@ public class ChangeEngine extends QueryEngine implements
 	 * Deletes the current view from the database and returns a Vector of
 	 * indexes of all Views that were deleted.
 	 */
-	protected boolean executeDeleteQuery(ViewInstance vi) throws Exception {
+	public boolean executeDeleteQuery(ViewInstance vi) throws Exception {
 
 		this.queryType = DELETE;
 
@@ -95,15 +93,6 @@ public class ChangeEngine extends QueryEngine implements
 
 		PrimitiveInstanceGraph pig = (PrimitiveInstanceGraph) vi.getSubGraph();
 		SuperGraphTraversal pigTraversal = pig.readTraversal();
-
-		if (this.getvGInstance() != null)
-			deleteAllViewLinksFromDB(vi);
-
-		// TODO: CHECK THIS. NEED TO FIGURE OUT HOW TO DECOUPLE DELETION STEP
-		// FROM THE DATABASE FROM THE VIEWGRAPHINSTANCE
-		// addViewToBeRemoved(vi);
-
-		viewsToRemove.add(vi);
 
 		// Deletion loop, based on arrays to permit removal of items from
 		// the underlying data structures.
@@ -152,299 +141,9 @@ public class ChangeEngine extends QueryEngine implements
 				}
 			}
 
-			//
-			// If primitives of this view also correspond to views in the
-			// graph,
-			// put them on the list to be removed.
-			//
-			ViewInstance tempVi = getViewInstanceFromGraph(pi);
-			if (tempVi != null)
-				addViewToBeRemoved(tempVi);
-
 		}
 
 		return commitFlag;
-	}
-
-	/**
-	 * @todo ChangeEngine
-	 * 
-	 * @param pi
-	 *            PrimitiveInstance
-	 * @return ViewInstance
-	 */
-	protected ViewInstance getViewInstanceFromGraph(PrimitiveInstance pi) {
-
-		if (this.getvGInstance() == null)
-			return null;
-
-		ViewInstance vi = null;
-		try {
-			AttributeInstance ai = pi.readAttribute("|ViewTable.vpdmfId");
-			vi = (ViewInstance) getvGInstance().getNodes().get(
-					"id=" + ai.getValue());
-		} catch (Exception e) {
-			// If you can't find |ViewTable.ViewTable_id, then this is not a
-			// view
-			// in the graph
-		}
-
-		return vi;
-
-	}
-
-	/**
-	 * Delete those view link instances that are internal to the input view
-	 * instance from the database.
-	 * 
-	 * @param thisLvi
-	 *            ViewInstance
-	 * @throws Exception
-	 */
-	protected void deleteViewLinksFromDB(ViewInstance thisLvi) throws Exception {
-
-		//
-		// Notes:
-		//
-		// Prepare the 'check' object that contains the uid string of the
-		// enclosed view instance that is internal to 'thisLvi'.
-		// Delete the view link instance by using the 'check' object later.
-		//
-
-		//
-		// Comment:
-		//
-		// We need to find out all the enclosed view instances from 'thisLvi'.
-		// However, the view-spawning process in the
-		// 'getLightEnclosedViewInstances()'
-		// method is operated on the basis of the primitive instance graph of
-		// 'thisLvi'. The enclosed VI(s) of 'thisLvi' would come from the data
-		// set after 'UPDATE'.
-		//
-		// WHAT ABOUT THOSE DATA SET BEFORE 'UPDATE'?
-		//
-		// We have to find out the enclosed view instances with the old copy
-		// of 'thisLvi' which contains the data before 'UPDATE' so that we can
-		// have all the enclosed VI(s).
-		//
-		HashSet check = new HashSet();
-		Iterator it = thisLvi.readLightEnclosedViewInstances().values()
-				.iterator();
-		while (it.hasNext()) {
-			ViewInstance vi = (ViewInstance) it.next();
-			check.add(vi.getUIDString());
-		}
-
-		it = this.garbageCol.copyVi.readLightEnclosedViewInstances().values()
-				.iterator();
-		while (it.hasNext()) {
-			ViewInstance vi = (ViewInstance) it.next();
-			check.add(vi.getUIDString());
-		}
-
-		Vector inIdVec = new Vector();
-		Vector outIdVec = new Vector();
-
-		// __________________________________________________________________________
-		// Possible concurrency issue here. Need to have a method for
-		// LOCKING VIEWS of the knowledge model when people are using it.
-		//
-
-		//
-		// Comment:
-		//
-		// thisLvi is any light view instance. We want to operate on the
-		// specific view instance that is contained in the vGInstance
-		// since that has all the links to other views.
-		//
-		ViewInstance vi = (ViewInstance) getvGInstance().getNodes().get(
-				thisLvi.getName());
-
-		if (vi == null)
-			return;
-
-		//
-		// Build vectors of the id values of ViewSpec Instances that send or
-		// receive links to these structures.
-		//
-		it = vi.getOutgoingEdges().values().iterator();
-		while (it.hasNext()) {
-			ViewLinkInstance lvi = (ViewLinkInstance) it.next();
-
-			ViewInstance inVi = (ViewInstance) lvi.getInEdgeNode();
-			ViewInstance outVi = (ViewInstance) lvi.getOutEdgeNode();
-
-			//
-			// Skip those external remote view instances.
-			// nb: if check has not been accurately
-			// filled in, then we will incorrectly skip
-			// data that needs to be removed.
-			//
-			if (!check.contains(inVi.getUIDString()))
-				continue;
-
-			inIdVec.add(inVi.readUIDValue() + "");
-			outIdVec.add(outVi.readUIDValue() + "");
-		}
-
-		it = vi.getIncomingEdges().values().iterator();
-		while (it.hasNext()) {
-			ViewLinkInstance lvi = (ViewLinkInstance) it.next();
-
-			ViewInstance inVi = (ViewInstance) lvi.getInEdgeNode();
-			ViewInstance outVi = (ViewInstance) lvi.getOutEdgeNode();
-
-			// Skip those external remote view instances.
-			if (!check.contains(outVi.getUIDString()))
-				continue;
-
-			inIdVec.add(inVi.readUIDValue() + "");
-			outIdVec.add(outVi.readUIDValue() + "");
-		}
-
-		logger.debug("CHECK: Internal views to be deleted");
-		for (int ii = 0; ii < inIdVec.size(); ii++) {
-			logger.debug("ViewSpec Link Instance: " + outIdVec.get(ii) + "->"
-					+ inIdVec.get(ii));
-		}
-		logger.debug("ENDCHECK\n");
-
-		//
-		// Having obtained the uid values for all links, delete them.
-		//
-		UMLmodel m = this.vpdmf.getUmlModel();
-		String rootCatAddr = m.getTopPackage().getPkgAddress();
-		UMLclass cd = (UMLclass) m.lookupClass("ViewLinkTable").iterator()
-				.next();
-
-		for (int i = 0; i < inIdVec.size(); i++) {
-			String inId = (String) inIdVec.get(i);
-			String outId = (String) outIdVec.get(i);
-
-			//
-			// run the forward delete query.
-			//
-			ClassInstance ci = new ClassInstance(cd);
-			AttributeInstance ai = (AttributeInstance) ci.attributes
-					.get("from_id");
-			ai.writeValueString(outId);
-
-			ai = (AttributeInstance) ci.attributes.get("to_id");
-			ai.writeValueString(inId);
-
-			//
-			// only delete the links & leave all the other relations alone.
-			//
-			ai = (AttributeInstance) ci.attributes.get("linkType");
-			ai.writeValueString("d");
-
-			String deleteSql = this.buildSQLDeleteStatement(ci, this.ALL);
-			if (deleteSql == null) {
-				throw new VPDMfException(
-						"Error generating sql to perform delete");
-			}
-
-			this.prettyPrintSQL(deleteSql);
-
-			if (this.lc)
-				this.executeOnStatement(uStat, deleteSql.toLowerCase());
-			else
-				this.executeOnStatement(uStat, deleteSql);
-
-			vi = (ViewInstance) getvGInstance().getNodes().get("id=" + outId);
-			ViewLinkInstance vli = (ViewLinkInstance) vi.getOutgoingEdges().get(
-					"id=" + inId);
-
-			linksToRemove.add(vli);
-
-		}
-
-	}
-
-	/**
-	 * @todo ChangeEngine
-	 * 
-	 * @param thisLvi
-	 *            ViewInstance
-	 * @throws Exception
-	 */
-	protected void deleteAllViewLinksFromDB(ViewInstance lvi) throws Exception {
-
-		UMLmodel m = this.vpdmf.getUmlModel();
-		String rootCatAddr = m.getTopPackage().getPkgAddress();
-		UMLclass cd = (UMLclass) m.lookupClass("ViewLinkTable").iterator()
-				.next();
-
-		String uid = ((String[]) lvi.getUIDString().split("="))[1];
-
-		for (int i = 0; i < 2; i++) {
-
-			//
-			// run the forward delete query.
-			//
-			ClassInstance ci = new ClassInstance(cd);
-			AttributeInstance fromAi = (AttributeInstance) ci.attributes
-					.get("from_id");
-
-			AttributeInstance toAi = (AttributeInstance) ci.attributes
-					.get("to_id");
-
-			AttributeInstance typeAi = (AttributeInstance) ci.attributes
-					.get("linkType");
-
-			if (i == 0)
-				fromAi.writeValueString(uid);
-			else
-				toAi.writeValueString(uid);
-
-			typeAi.writeValueString("d");
-
-			List<ClassInstance> vec = this.queryClass(ci);
-
-			if (vec.size() == 0)
-				continue;
-
-			Iterator it = vec.iterator();
-			while (it.hasNext()) {
-				ClassInstance tempCi = (ClassInstance) it.next();
-				AttributeInstance tempFromAi = (AttributeInstance) tempCi.attributes
-						.get("from_id");
-				String fromId = tempFromAi.readValueString();
-				AttributeInstance tempToAi = (AttributeInstance) tempCi.attributes
-						.get("to_id");
-				String toId = tempToAi.readValueString();
-
-				if (getvGInstance().getNodes().containsKey("id=" + fromId)) {
-
-					ViewInstance tempVi = (ViewInstance) getvGInstance()
-							.getNodes().get("id=" + fromId);
-
-					if (tempVi.getOutgoingEdges().containsKey("id=" + toId)) {
-
-						ViewLinkInstance tempVli = (ViewLinkInstance) tempVi
-								.getOutgoingEdges().get("id=" + toId);
-
-						linksToRemove.add(tempVli);
-
-					}
-				}
-			}
-
-			String deleteSql = this.buildSQLDeleteStatement(ci, this.ALL);
-			if (deleteSql == null) {
-				throw new VPDMfException(
-						"Error generating sql to perform delete");
-			}
-
-			this.prettyPrintSQL(deleteSql);
-
-			if (this.lc)
-				this.executeOnStatement(uStat, deleteSql.toLowerCase());
-			else
-				this.executeOnStatement(uStat, deleteSql);
-
-		}
-
 	}
 
 	protected void deletePrimitiveLinksFromDB(PrimitiveInstance pi)
@@ -616,13 +315,6 @@ public class ChangeEngine extends QueryEngine implements
 
 	}
 
-	protected void addViewToBeRemoved(ViewInstance vi) {
-		String uidString = vi.getUIDString();
-		ViewInstance lvi = (ViewInstance) getvGInstance().getNodes().get(
-				uidString);
-		viewsToRemove.add(lvi);
-	}
-
 	/**
 	 * Inserts vi into the database.
 	 */
@@ -721,38 +413,12 @@ public class ChangeEngine extends QueryEngine implements
 
 		//
 		// Final changes involved in the update / insert
-		// - Remove all view links that are *internal* to the view
 		// - Collect the garbage
+		//
 		if (queryType == UPDATE) {
-
-			if (vi.getDefinition().getType() != ViewDefinition.LINK) {
-				deleteViewLinksFromDB(vi);
-			}
 
 			garbageCol.executeCleanup(vi);
 
-		}
-
-		// ____________________________________________________________________
-		// - Put in appropriate ViewLinks
-		//
-		if (this.getvGInstance() != null
-				&& vi.getDefinition().getType() != ViewDefinition.LINK) {
-			updateViewLinks(vi);
-
-			Map<String, ViewInstance> ht = vi.readEnclosedViewInstances();
-			for( ViewInstance tempVi : ht.values() ) {
-
-				//
-				// Comment:
-				//
-				// We update the view links here for the enclosed views so
-				// that the links of the enclosed view to OTHER views in the
-				// graph are also updated.
-				//
-				updateViewLinks(tempVi);
-
-			}
 		}
 		
 		return vi.getVpdmfId();
@@ -1134,20 +800,9 @@ public class ChangeEngine extends QueryEngine implements
 			spawnVds.add((ViewDefinition) inLink.getInEdgeNode());
 		}
 
-		viewGraphInstance vgi = new viewGraphInstance(this.vpdmf.getvGraphDef());
-
-		Iterator<ViewDefinition> spIt = spawnVds.iterator();
-		while (spIt.hasNext()) {
-			ViewDefinition spVd = spIt.next();
-			ViewInstance spVi = vi.spawnViewInstance(spVd);
-			// TODO NEED TO SORT OUT VGI 
-			//vgi.addNode(spVi);
-		}
-
 		this.set_queryType(DatabaseEngine.UPDATE);
 		this.setDoPagingInQuery(false);
 		this.setListOffset(0);
-		this.setvGInstance(vgi);
 
 		return this.executeQuery(vi);
 
@@ -1847,243 +1502,6 @@ public class ChangeEngine extends QueryEngine implements
 
 	}
 
-	protected void updateViewLinks(ViewInstance thisVi) throws Exception {
-
-		UMLmodel m = this.vpdmf.getUmlModel();
-		String rootCatAddr = m.getTopPackage().getPkgAddress();
-		UMLclass cd = (UMLclass) m.lookupClass("ViewLinkTable").iterator()
-				.next();
-
-		Set<ViewLink> vlSet = thisVi.getDefinition()
-				.readAllLinkedViewLinksVector(true);
-
-		//
-		// Get the id value from the ViewTable.
-		// The UIDString from the light view instance should
-		// END with the id value
-		//
-		String s = thisVi.getUIDString();
-		String thisUid = s.substring(s.indexOf("=") + 1, s.length());
-
-		//
-		// Run through the edges in the DB and add them to the edge table.
-		//
-		Iterator vlIt = vlSet.iterator();
-		while (vlIt.hasNext()) {
-			ViewLink vl = (ViewLink) vlIt.next();
-			ViewDefinition thatVd = null;
-
-			boolean forwardFlag = true;
-			ViewDefinition thisVd = thisVi.getDefinition();
-			ViewDefinition oVd = (ViewDefinition) vl.getOutEdgeNode();
-			ViewDefinition iVd = (ViewDefinition) vl.getInEdgeNode();
-
-			if (thisVd.checkIsAChildOf(oVd) || thisVd.equals(oVd)) {
-
-				thatVd = (ViewDefinition) vl.getInEdgeNode();
-
-			} else if (thisVd.checkIsAChildOf(iVd) || thisVd.equals(iVd)) {
-
-				thatVd = (ViewDefinition) vl.getOutEdgeNode();
-				forwardFlag = false;
-
-			} else {
-				throw new Exception("oops");
-			}
-
-			//
-			// We only spawn light view instances into overlapping views.
-			Vector views = thisVi.spawnLightViewInstance(thatVd);
-			if (views == null) {
-				continue;
-			}
-
-			Iterator viewIt = views.iterator();
-			while (viewIt.hasNext()) {
-				ViewInstance thatLvi = (ViewInstance) viewIt.next();
-
-				int t = thatLvi.getDefinition().getType();
-				if (t != ViewDefinition.DATA && t != ViewDefinition.COLLECTION
-						&& t != ViewDefinition.EXTERNAL) {
-					continue;
-				}
-
-				//
-				// Get the id value from the ViewTable.
-				// The UIDString from the light view instance should
-				// END with the id value
-				//
-				s = thatLvi.getUIDString();
-				String thatUid = s.substring(s.indexOf("=") + 1, s.length());
-
-				//
-				// If a primitive is Nullable, it may spawn a view with a
-				// UIDString
-				// set to null, if this is the case, just skip it and move on.
-				//
-				if (thatUid.equals("null")) {
-					continue;
-				}
-
-				ClassInstance ci = new ClassInstance(cd);
-
-				AttributeInstance ai = null;
-
-				//
-				// Data is 'forward', i.e., from vi to new data.
-				//
-				if (forwardFlag) {
-
-					//
-					// from_id
-					ai = (AttributeInstance) ci.attributes.get("from_id");
-					ai.writeValueString(thisUid);
-
-					//
-					// to_id
-					ai = (AttributeInstance) ci.attributes.get("to_id");
-					ai.writeValueString(thatUid);
-
-					//
-					// Set linkType
-					//
-					ai = (AttributeInstance) ci.attributes.get("linkType");
-					ai.writeValueString("d");
-
-					ViewInstance vi = (ViewInstance) getvGInstance().getNodes()
-							.get("id=" + thisUid);
-
-					ViewLinkInstance vli = null;
-					if (vi != null)
-						vli = (ViewLinkInstance) vi.getOutgoingEdges().get(
-								"id=" + thatUid);
-
-					if (vli != null)
-						linksToRemove.remove(vli);
-
-				} else {
-
-					//
-					// from_id
-					ai = (AttributeInstance) ci.attributes.get("from_id");
-					ai.writeValueString(thatUid);
-
-					//
-					// to_id
-					ai = (AttributeInstance) ci.attributes.get("to_id");
-					ai.writeValueString(thisUid);
-
-					//
-					// Set linkType
-					//
-					ai = (AttributeInstance) ci.attributes.get("linkType");
-					ai.writeValueString("d");
-
-					ViewInstance vi = (ViewInstance) getvGInstance().getNodes()
-							.get("id=" + thatUid);
-
-					ViewLinkInstance vli = null;
-					if (vi != null)
-						vli = (ViewLinkInstance) vi.getOutgoingEdges().get(
-								"id=" + thisUid);
-
-					if (vli != null)
-						linksToRemove.remove(vli);
-
-				}
-
-				//
-				// ==================================================================
-				// Check the existence of this view link instance before
-				// insertion.
-				//
-				// NOTE:
-				// The view link instance is identified by the following
-				// attributes:
-				// - 'from_id'
-				// - 'to_id
-				// - 'linkType'
-				//
-				// We SHOULD NOT include 'indexString' and 'machineIndex' in
-				// this
-				// query because, in some case, those indexes might not
-				// quarantee
-				// the view identity.
-				//
-				// For ex: When updating a 'fragment' view by changing an
-				// existing
-				// 'excerpt' primitive instance, the inconsistency between view
-				// identity and its indexes would occur!! The identity of this
-				// fragment view instance remains the same; However, the index
-				// of
-				// this view has been changed because it consists of the
-				// attributes
-				// from excerpt primitives.
-				//
-				ResultSet rs = this.queryObject(ci);
-				rs.last();
-
-				//
-				// Set up the indexes for for this view link instance.
-				//
-				HashMap<String, AttributeInstance> attHash = ci.attributes;
-				if (forwardFlag) {
-
-					String idx = thisVi.getVpdmfLabel() + " >>> link >>> "
-							+ thatLvi.getVpdmfLabel();
-					ai = (AttributeInstance) attHash.get("vpdmfLabel");
-					ai.writeValueString(idx);
-
-				} else {
-
-					String idx = thatLvi.getVpdmfLabel() + " >>> (link) >>> "
-							+ thisVi.getVpdmfLabel();
-					ai = (AttributeInstance) attHash.get("vpdmfLabel");
-					ai.writeValueString(idx);
-
-				}
-
-				//
-				// Make changes of the view link instance in DB
-				// according to the existence of it:
-				// - No one exists, then insert a new view link instance.
-				// - One exists, then update it if necessary.
-				// - More than one exists, then throw an error.
-				//
-				if (rs.getRow() == 0) {
-
-					this.insertObjectIntoDB(ci);
-
-				} else if (rs.getRow() == 1) {
-
-					//
-					// Retrieve the PK from DB and put it back into the class
-					// instance.
-					//
-					this.updateObjectFromDb(ci, rs);
-
-					//
-					// Update the view link instance into DB if necessary.
-					//
-					// if (ci.hasChanged()) {
-					this.updateObjectInDB(ci);
-					// }
-
-				} else {
-
-					ai = (AttributeInstance) attHash.get("machineIndex");
-					throw new VPDMfException(
-							"Ambiguous view link instance update! "
-									+ ai.readValueString());
-
-				}
-
-			}
-
-		}
-
-	}
-
 	protected void updateDataInRS(ResultSet rs, UMLattribute ad, Object data_obj)
 			throws Exception {
 
@@ -2214,21 +1632,7 @@ public class ChangeEngine extends QueryEngine implements
 
 	}
 
-	public boolean deleteView(ViewInstance vi) throws Exception {
-
-		VPDMf top = this.readTop();
-
-		this.setvGInstance(new viewGraphInstance(top.getvGraphDef()));
-		this.queryLocalGraph(vi);
-
-		this.setListOffset(0);
-		this.vpdmf = top;
-
-		return this.executeDeleteQuery(vi);
-
-	}
-
-	public boolean deleteView(String viewType, Long id) throws Exception {
+	public boolean executeDeleteQuery(String viewType, Long id) throws Exception {
 
 		VPDMf top = this.readTop();
 
@@ -2238,11 +1642,8 @@ public class ChangeEngine extends QueryEngine implements
 
 		this.setDoPagingInQuery(false);
 		this.setListOffset(0);
-		this.setvGInstance(new viewGraphInstance(top.getvGraphDef()));
-
+	
 		ViewInstance vi = this.executeUIDQuery(vd, id);
-
-		viewGraphInstance vgi = this.queryLocalGraph(vi);
 
 		this.setListOffset(0);
 		this.vpdmf = top;
@@ -2433,21 +1834,6 @@ public class ChangeEngine extends QueryEngine implements
 					 */
 				} catch (Exception e) {
 					// Woo hoo... can't delete this one... let it go...
-				}
-
-				try {
-
-					AttributeInstance ai = pi
-							.readAttribute("|ViewTable.vpdmfId");
-					vi = (ViewInstance) getvGInstance().getNodes().get(
-							"id=" + ai.getValue());
-
-					addViewToBeRemoved(vi);
-
-				} catch (Exception ex) {
-					// This PI doesn't contain the ViewTable class... let it
-					// go...
-					// (Example: DescriptionFragment view's excerpt primitives!)
 				}
 
 			}

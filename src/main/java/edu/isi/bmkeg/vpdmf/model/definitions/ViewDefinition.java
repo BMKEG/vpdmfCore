@@ -1186,7 +1186,7 @@ public class ViewDefinition extends SuperGraphNode {
 
 	}
 	
-	public String readViewtypeString() {
+	public String readViewtypeString() throws Exception {
 
 		ViewDefinition tempVd = this;
 		//
@@ -1196,9 +1196,9 @@ public class ViewDefinition extends SuperGraphNode {
 	  	//
 	  	if( this.getType() == ViewDefinition.LOOKUP) {
 		  
-	  		String viewName = this.getName();
-		  	viewName = viewName.replaceAll("LU$", "");
-  			return "." + viewName + ".%";
+	  		UMLclass c = this.getPrimaryPrimitive().readIdentityClass();
+		  	String viewName = c.getBaseName();
+  			return "%." + viewName + ".%";
 
 	  	}
 	  
@@ -1215,7 +1215,7 @@ public class ViewDefinition extends SuperGraphNode {
 	public void buildViewTypeConditions() throws Exception {
 
 		if ( !(this.getType() == ViewDefinition.DATA
-				//|| this.getType() == ViewDefinition.LOOKUP
+				|| this.getType() == ViewDefinition.LOOKUP
 				|| this.getType() == ViewDefinition.COLLECTION
 				|| this.getType() == ViewDefinition.EXTERNAL) ) {
 			return;

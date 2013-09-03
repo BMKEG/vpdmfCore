@@ -50,13 +50,9 @@ public class ViewInstance extends LightViewInstance {
 
 	private Map<String, Integer> piTotals = new HashMap<String, Integer>();
 
-	private HashSet<ViewLinkInstance> linksToFillIn = new HashSet<ViewLinkInstance>();
-
 	private PrimitiveInstance primaryPrimitive;
 
 	private PrimitiveInstanceGraph subGraph;
-
-	private viewGraphInstance graph;
 
 	public ViewInstance() {
 		super();
@@ -119,14 +115,6 @@ public class ViewInstance extends LightViewInstance {
 		return visible;
 	}
 
-	public HashSet<ViewLinkInstance> getLinksToFillIn() {
-		return linksToFillIn;
-	}
-
-	public void setLinksToFillIn(HashSet<ViewLinkInstance> linksToFillIn) {
-		this.linksToFillIn = linksToFillIn;
-	}
-
 	public Map<String, Integer> getPiTotals() {
 		return piTotals;
 	}
@@ -161,15 +149,6 @@ public class ViewInstance extends LightViewInstance {
 	public void setSubGraph(PrimitiveInstanceGraph pig) {
 		this.subGraph = pig;
 		// super.setSubGraph(pig);
-	}
-
-	public viewGraphInstance getGraph() {
-		return this.graph;
-	}
-
-	public void setGraph(viewGraphInstance vgi) {
-		this.graph = vgi;
-		// super.setGraph(vgi);
 	}
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1053,7 +1032,6 @@ public class ViewInstance extends LightViewInstance {
 		// Added by Weicheng.
 		//
 		// ===================================
-		this.setLinksToFillIn(null);
 		// this.thumbnail = null;
 		this.setVpdmfLabel(null);
 		this.setUIDString(null);
@@ -2042,24 +2020,6 @@ public class ViewInstance extends LightViewInstance {
 		this.kmID = kmID;
 	}
 
-	public void computeCompletionOfNeighbors(boolean complete) {
-
-		Iterator it = this.getIncomingEdges().values().iterator();
-		while (it.hasNext()) {
-			ViewLinkInstance vli = (ViewLinkInstance) it.next();
-			ViewInstance vi = (ViewInstance) vli.getOutEdgeNode();
-			vi.setComplete(complete);
-		}
-
-		it = this.getOutgoingEdges().values().iterator();
-		while (it.hasNext()) {
-			ViewLinkInstance vli = (ViewLinkInstance) it.next();
-			ViewInstance vi = (ViewInstance) vli.getInEdgeNode();
-			vi.setComplete(complete);
-		}
-
-	}
-
 	public Vector spawnLightViewInstance(ViewDefinition thatVd)
 			throws Exception {
 		Vector lightViewInsVec = new Vector();
@@ -3039,21 +2999,6 @@ public class ViewInstance extends LightViewInstance {
 				ai.writeValueString("false");
 			}
 		}
-	}
-
-	public ArrayList readAllLinkedViews() {
-		ArrayList nodes = new ArrayList();
-		Iterator vliIt = this.getOutgoingEdges().values().iterator();
-		while (vliIt.hasNext()) {
-			ViewLinkInstance vli = (ViewLinkInstance) vliIt.next();
-			nodes.add(vli.getInEdgeNode());
-		}
-		vliIt = this.getIncomingEdges().values().iterator();
-		while (vliIt.hasNext()) {
-			ViewLinkInstance vli = (ViewLinkInstance) vliIt.next();
-			nodes.add(vli.getOutEdgeNode());
-		}
-		return nodes;
 	}
 
 };

@@ -67,8 +67,6 @@ import edu.isi.bmkeg.vpdmf.model.instances.PrimitiveInstance;
 import edu.isi.bmkeg.vpdmf.model.instances.PrimitiveInstanceGraph;
 import edu.isi.bmkeg.vpdmf.model.instances.PrimitiveLinkInstance;
 import edu.isi.bmkeg.vpdmf.model.instances.ViewInstance;
-import edu.isi.bmkeg.vpdmf.model.instances.ViewLinkInstance;
-import edu.isi.bmkeg.vpdmf.model.instances.viewGraphInstance;
 import edu.isi.bmkeg.vpdmf.utils.VPDMfConverters;
 
 public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
@@ -131,9 +129,6 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 	protected VPDMf vpdmf;
 	protected ClassLoader cl;
 
-	// local view instance variables
-	private viewGraphInstance vGInstance;
-
 	// jar file containing all pojo definitions.
 	protected File vpdmfJarFile;
 
@@ -162,13 +157,6 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 	private int listOffset;
 	private int listCount;
 	private boolean doPagingInQuery;
-
-	// view instance graph management variables
-	// - Views & Links 'to add' involve ViewInstance & ViewLinkInstance objects
-	protected LinkedHashSet<ViewInstance> viewsToAdd = new LinkedHashSet();
-	protected Set<ViewLinkInstance> linksToAdd = new HashSet<ViewLinkInstance>();
-	protected Set<ViewInstance> viewsToRemove = new HashSet<ViewInstance>();
-	protected Set<ViewLinkInstance> linksToRemove = new HashSet<ViewLinkInstance>();
 
 	// ____________________________________________________________________________
 
@@ -3722,14 +3710,6 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 
 	public void setListCount(int listCount) {
 		this.listCount = listCount;
-	}
-
-	public viewGraphInstance getvGInstance() {
-		return vGInstance;
-	}
-
-	public void setvGInstance(viewGraphInstance vGInstance) {
-		this.vGInstance = vGInstance;
 	}
 
 	public String getLookupIndex() {

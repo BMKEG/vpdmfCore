@@ -4,7 +4,6 @@ import edu.isi.bmkeg.utils.events.BmkegState;
 import edu.isi.bmkeg.vpdmf.model.definitions.VPDMf;
 import edu.isi.bmkeg.vpdmf.model.instances.ViewHolder;
 import edu.isi.bmkeg.vpdmf.model.instances.ViewInstance;
-import edu.isi.bmkeg.vpdmf.model.instances.viewGraphInstance;
 
 public class VPDMfState extends BmkegState {
 	
@@ -22,10 +21,7 @@ public class VPDMfState extends BmkegState {
 	
 	// All the schema
 	private VPDMf top;
-	
-	// The currently loaded model
-	private viewGraphInstance vgi;
-	
+		
 	// The name of the current ViewDefinitions
 	private String currentViewType;	
 	
@@ -51,14 +47,6 @@ public class VPDMfState extends BmkegState {
 
 	public void setTop(VPDMf top) {
 		this.top = top;
-	}
-
-	public viewGraphInstance getVgi() {
-		return vgi;
-	}
-
-	public void setVgi(viewGraphInstance vgi) {
-		this.vgi = vgi;
 	}
 
 	public String getCurrentViewType() {

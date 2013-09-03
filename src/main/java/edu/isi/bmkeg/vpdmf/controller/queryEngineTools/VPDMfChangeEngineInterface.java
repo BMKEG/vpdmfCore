@@ -41,7 +41,7 @@ public interface VPDMfChangeEngineInterface extends VPDMfQueryEngineInterface {
 	 * @return 
 	 * @throws Exception
 	 */
-	public boolean deleteView(String viewType, Long id) throws Exception;
+	public boolean executeDeleteQuery(String viewType, Long id) throws Exception;
 	
 	/**
 	 * Deletes a view from the database
@@ -49,7 +49,7 @@ public interface VPDMfChangeEngineInterface extends VPDMfQueryEngineInterface {
 	 * @return true if deletion was successful
 	 * @throws Exception
 	 */
-	public boolean deleteView(ViewInstance vi) throws Exception;
+	public boolean executeDeleteQuery(ViewInstance vi) throws Exception;
 
 	public void deleteObject(ClassInstance ci) throws VPDMfException, Exception;
 	

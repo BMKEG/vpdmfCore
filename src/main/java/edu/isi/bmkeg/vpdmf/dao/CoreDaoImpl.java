@@ -844,7 +844,7 @@ public class CoreDaoImpl implements CoreDao {
 	
 	public boolean deleteByIdInTrans(long id, String viewTypeName) throws Exception {
 
-		return getCe().deleteView(viewTypeName, id);
+		return getCe().executeDeleteQuery(viewTypeName, id);
 		
 	}
 

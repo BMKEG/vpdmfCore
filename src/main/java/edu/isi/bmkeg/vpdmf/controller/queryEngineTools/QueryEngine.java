@@ -50,7 +50,6 @@ import edu.isi.bmkeg.vpdmf.model.instances.PrimitiveInstanceGraph;
 import edu.isi.bmkeg.vpdmf.model.instances.PrimitiveLinkInstance;
 import edu.isi.bmkeg.vpdmf.model.instances.ViewHolder;
 import edu.isi.bmkeg.vpdmf.model.instances.ViewInstance;
-import edu.isi.bmkeg.vpdmf.model.instances.viewGraphInstance;
 
 public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineInterface {
 
@@ -666,13 +665,20 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 		Iterator<UMLattribute> aIt = pcd.getAttributes().iterator();
 		while (aIt.hasNext()) {
 			UMLattribute a = aIt.next();
-			if (a.getBaseName().equals("viewType")) {
-				addrHash.add("]" + ppd.getName() + "|" + pcd.getBaseName()
-						+ ".viewType");
-			} else if (a.getBaseName().equals("thumbnail")) {
-				addrHash.add("]" + ppd.getName() + "|" + pcd.getBaseName()
-						+ ".thumbnail");
-			} 
+			String addr = "]" + ppd.getName() + "|" + pcd.getBaseName()
+					+ "." + a.getBaseName();
+			if ( (addr.endsWith(".viewType") || addr.endsWith(".thumbnail")) 
+					&& !addrHash.contains(addr)  ) {
+				addrHash.add(addr);
+			}
+		}
+			
+		for(UMLclass c: ppd.getClasses()) {
+			if( c != pcd ) {
+				String addr = "]" + ppd.getName() + "|" + c.getBaseName()
+						+ ".vpdmfId";
+				addrHash.add(addr);
+			}
 		}
 		
 		//
@@ -778,6 +784,9 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 		}
 		
 		//
+		// TODO: NEED TO UPDATE THIS. WE ARE NOW DOING 
+		// MORE SOPHISTICATED STUFF WITH THE QUERYENGINE
+		//
 		// When building the 'SqlConditions' and 'TableAliases', we need
 		// to check if the current view instance is allowed to skip those
 		// null primitive instances or not.
@@ -786,19 +795,19 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 		// it is not allowed to skip those null primitive instances.
 		// Otherwise, it is allowed to skip.
 		// 
-		if (vi.getDefinition().getType() == ViewDefinition.LOOKUP) {
+		/*if (vi.getDefinition().getType() == ViewDefinition.LOOKUP) {
 
 			buildSqlConditions(vi, DatabaseEngine.ALL, false);
 
 			buildTableAliases(vi, false);
 
-		} else {
+		} else {*/
 
 			buildSqlConditions(vi, DatabaseEngine.ALL, true);
 
 			buildTableAliases(vi, true);
 
-		}
+		//}
 
 		String sql = buildSQLSelectStatement();
 
@@ -1234,355 +1243,6 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 		
 		return lVi;
 		
-	}
-	
-	public viewGraphInstance queryLocalGraph(String viewType, Long id)
-			throws Exception {
-		
-		ViewDefinition vd = this.vpdmf.getViews().get(viewType);
-
-		ViewInstance vi = new ViewInstance(vd);
-
-		AttributeInstance ai = vi.readAttributeInstance(
-				"]Resource|ViewTable.vpdmfId", 0);
-		ai.setValue(id);
-
-		this.setDoPagingInQuery(false);
-		this.setListOffset(0);
-		this.setvGInstance(new viewGraphInstance(this.vpdmf.getvGraphDef()));
-
-		vi = this.executeUIDQuery(viewType, id);
-
-		viewGraphInstance vgi = this.queryLocalGraph(vi);
-		
-		vgi.removeDefinitions();
-
-		return vgi;
-	}
-
-	public viewGraphInstance queryLocalGraph(ViewInstance vi) throws Exception {
-
-		if( this.getvGInstance() == null ) {
-		    this.setvGInstance(new viewGraphInstance(this.vpdmf.getvGraphDef()));
-		}
-		
-		//
-		// We are turning paging in the query off definitively.
-		// Do we need this anywhere else?
-		//
-		setDoPagingInQuery(false);
-
-		this.viewsToAdd.add(vi);
-
-		ViewDefinition vd = vi.getDefinition();
-
-		//
-		// Get ALL the view definition nodes from 'vd' with out-edge
-		// connected. Need to consider 'inheritence' and
-		// 'relation-type links'!!
-		//
-		Iterator outVlIt = vd.readOutputViewDefinitions(true).values()
-				.iterator();
-
-		while (outVlIt.hasNext()) {
-			ViewLink outVl = (ViewLink) outVlIt.next();
-			ViewDefinition outVd = (ViewDefinition) outVl.getInEdgeNode();
-
-			this.getNeighborsFromDB(vi, true, outVd);
-
-		}
-
-		//
-		// Get ALL the view definition nodes from 'vd' with in-edge
-		// connected. Need to consider 'inheritence' and
-		// 'relation-type links'!!
-		//
-		Iterator inVlIt = vd.readInputViewDefinitions(true).values().iterator();
-		while (inVlIt.hasNext()) {
-			ViewLink inVl = (ViewLink) inVlIt.next();
-			ViewDefinition inVd = (ViewDefinition) inVl.getOutEdgeNode();
-
-			this.getNeighborsFromDB(vi, false, inVd);
-
-		}
-
-		vi.setComplete(true);
-
-		if (viewsToAdd.size() > 0)
-			fillInVGILinks_local(new HashSet(viewsToAdd));
-	
-		// TODO: WE ARE NOT USING VGI structures at all. Are they actually useful? 
-//		this.getvGInstance().modifyVGI(new HashSet(viewsToAdd), this.linksToAdd);
-		
-		return this.getvGInstance();
-		
-	}
-	
-	/**
-	 * 
-	 * Note:
-	 * 
-	 * This function now is responsible for adding the links and the edges in
-	 * the system...
-	 * 
-	 * @param vi
-	 *            ViewInstance
-	 * @param forwardFlag
-	 *            boolean
-	 * @param targetVd
-	 *            ViewDefinition
-	 * @return Vector
-	 */
-	private LinkedHashSet<ViewInstance> getNeighborsFromDB(ViewInstance vi, boolean forwardFlag,
-			ViewDefinition targetVd) throws Exception {
-
-		//
-		// Handling the target view type in the list query.
-		// Therefore, we can get the neighbor nodes with a specific type.
-		//
-		String vType = null;
-		if (targetVd != null) {
-
-			//
-			// Bugfix:
-			//
-			// The 'conditions' of the primary primitive might contain multiple
-			// condition strings that are separated by '&' charactor.
-			//
-			String search = "";
-			if (targetVd.getType() == ViewDefinition.LINK) {
-				search = "linkType";
-			} else {
-				search = "viewType";
-			}
-
-			Iterator<ConditionElement> it = targetVd.getPrimaryPrimitive().getConditionElements()
-					.iterator();
-			while (it.hasNext()) {
-				ConditionElement ce = (ConditionElement) it.next();
-				if (ce.getAttName().equals(search)) {
-					vType = ce.getValue();
-				}
-			}
-
-			/*
-			 * vType = targetVd.getPrimaryPrimitive().get_Conditions(); vType =
-			 * vType.substring( vType.indexOf(search) + search.length() + 1,
-			 * vType.length() ); int endParse = vType.indexOf("&"); if( endParse
-			 * != -1 ) { vType = vType.substring(0, endParse); } vType =
-			 * vType.replaceAll("'", "");
-			 */
-
-		}
-
-		String thisFromTo = "";
-		String thatFromTo = "";
-
-		//
-		// Note:
-		//
-		// Need to consider input 'vi' as DATA or LINK view types.
-		//
-		String s = null;
-		if (vi.getDefinition().getType() == ViewDefinition.LINK) {
-
-			/*String mi = vi.getMachineIndex();
-
-			if (forwardFlag) {
-				s = mi.substring(0, mi.indexOf(">>>"));
-			} else {
-				s = mi.substring(mi.lastIndexOf(">>>") + 3, mi.length());
-			}*/
-
-		} else {
-
-			s = vi.getUIDString();
-
-		}
-
-		String uid = s.substring(s.indexOf("=") + 1, s.length());
-
-		VPDMf top = vi.getDefinition().getTop();
-		ViewInstance linkVi = null;
-		List<String> extras = new ArrayList<String>();
-
-		if (forwardFlag) {
-			thisFromTo = "From";
-			thatFromTo = "To";
-		} else {
-			thisFromTo = "To";
-			thatFromTo = "From";
-		}
-
-		logger.debug("\n\n        finding " + thisFromTo + " - "
-				+ thatFromTo + " neighbors of " + vi.getVpdmfLabel() + "\n\n");
-
-		ViewDefinition linkVd = (ViewDefinition) top.getViews().get(
-				thatFromTo + "View");
-		linkVi = new ViewInstance(linkVd);
-		AttributeInstance ai = linkVi.readAttributeInstance("]" + thisFromTo
-				+ "View|ViewTable.vpdmfId", 0);
-		ai.writeValueString(uid);
-
-		//
-		// Note:
-		//
-		// Also consider the LINK type view instance and need to
-		// transfer the required attribute from input 'vi' to
-		// the 'linkVi'.
-		//
-		if (vi.getDefinition().getType() == ViewDefinition.LINK) {
-			s = vi.getUIDString();
-			uid = s.substring(s.indexOf("=") + 1, s.length());
-			ai = linkVi.readAttributeInstance("]" + thisFromTo
-					+ "View|ViewLinkTable.vpdmfId", 0);
-			ai.writeValueString(uid);
-		}
-
-		//
-		// Note:
-		//
-		// How we set the input value for the type of view in this query
-		// depends on whether we are querying for a LINK or a DATA view.
-		//
-		if (vType != null) {
-			if (targetVd.getType() == ViewDefinition.LINK) {
-				ai = linkVi.readAttributeInstance("]" + thisFromTo
-						+ "View|ViewLinkTable.linkType", 0);
-				ai.writeValueString(vType);
-			} else {
-				ai = linkVi.readAttributeInstance("]" + thatFromTo
-						+ "View|ViewTable.viewType", 0);
-				ai.writeValueString(vType);
-			}
-		}
-
-		String hi_addr = "]" + thatFromTo + "View|ViewTable.vpdmfLabel";
-		String id_addr = "]" + thatFromTo + "View|ViewTable.vpdmfId";
-		String th_addr = "]" + thatFromTo + "View|ViewTable.thumbnail";
-		String vt_addr = "]" + thatFromTo + "View|ViewTable.viewType";
-
-		String vltHi_addr = "]" + thisFromTo + "View|ViewLinkTable.vpdmfLabel";
-		String vltId_addr = "]" + thisFromTo
-				+ "View|ViewLinkTable.vpdmfId";
-		String vltLt_addr = "]" + thisFromTo + "View|ViewLinkTable.linkType";
-
-		extras.add(hi_addr);
-		extras.add(id_addr);
-		extras.add(th_addr);
-		extras.add(vt_addr);
-
-		extras.add(vltHi_addr);
-		extras.add(vltId_addr);
-		extras.add(vltLt_addr);
-
-		int max = getMaxReturnedInQuery();
-		setMaxReturnedInQuery(getMaxNeighbors());
-
-		Map<String, List<Object>> lnkHash = this.getTable(linkVi, extras);
-
-		if (lnkHash == null)
-			return null;
-
-		setMaxReturnedInQuery(max);
-
-		List<Object> hiVec = lnkHash.get(hi_addr);
-		List<Object> idVec = lnkHash.get(id_addr);
-		List<Object> thVec = lnkHash.get(th_addr);
-		List<Object> vtVec = lnkHash.get(vt_addr);
-
-		List<Object> vltHiVec = lnkHash.get(vltHi_addr);
-		List<Object> vltIdVec = lnkHash.get(vltId_addr);
-		List<Object> vltLtVec = lnkHash.get(vltLt_addr);
-
-		for (int i = 0; i < hiVec.size(); i++) {
-
-			if (this.isCancelled())
-				throw new InterruptException("Thread has been cancelled");
-
-			//
-			// Note:
-			//
-			// Add all the nodes returned in this query
-			// to the list of nodes to be added.
-			//
-			String hi = (String) hiVec.get(i);
-			Long id = (Long) idVec.get(i);
-			String vt = (String) vtVec.get(i);
-			BufferedImage bi = (BufferedImage) thVec.get(i);
-
-			ImageIcon th = null;
-			if (bi != null)
-				th = new ImageIcon(bi);
-
-			String vltHi = (String) vltHiVec.get(i);
-			Long vltId = (Long) vltIdVec.get(i);
-			String vltLt = (String) vltLtVec.get(i);
-
-			String defName = vt.replaceAll("\\.%$", "");
-
-			if (defName.indexOf(".%.") != -1) {
-				defName = defName.replaceAll("^.*\\.\\%\\.", "");
-			}
-
-			// Some extra cleanup functions...
-			if (defName.startsWith(".")) {
-				defName = defName.replaceAll("^\\.", "");
-			}
-			// else {
-			// defName = defName.substring(1, defName.length());
-			// }
-
-			defName = defName.replaceAll(" \\.+ to \\.+ ", "");
-
-			Pattern p = Pattern.compile("\\b(\\S+)$");
-			Matcher m = p.matcher(vltLt);
-			String lDefName = "";
-			if (m.find())
-				lDefName = m.group(1);
-			else
-				throw new Exception("Error specifying linkType");
-
-			ViewInstance lvi = new ViewInstance(defName);
-
-			if (!top.getViews().containsKey(defName))
-				throw new Exception("Error in specifying viewType: " + defName);
-
-			lvi.setDefName(defName);
-			lvi.setVpdmfLabel(hi);
-//			lvi.set_thumbnail(th);
-
-			if (lDefName.equals("d") || defName.equals("link")) {
-
-				lvi.setName(hi);
-				lvi.setVpdmfLabel(hi);
-				// lvi.set_sourceNode(vi);
-				// lvi.set_isProxyForward(!forwardFlag);
-
-			}
-			//
-			// These nodes use the proxy node mechanism
-			//
-			/*
-			 * else {
-			 * 
-			 * lvi.set_humanIndex(hi); lvi.set_Name(hi);
-			 * lvi.set_defName(lDefName); lvi.set_sourceNode(vi);
-			 * lvi.set_isProxyForward(!forwardFlag);
-			 * 
-			 * }
-			 */
-
-			ViewDefinition vd = (ViewDefinition) top.getViews().get(
-					lvi.getDefName());
-			lvi.setDefinition(vd);
-
-			this.viewsToAdd.add(lvi);
-
-		}
-		
-		return this.viewsToAdd;
-
 	}
 
 	private ClassInstance getLinkToAdd(Integer vltId, String fromId,

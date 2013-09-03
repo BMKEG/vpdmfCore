@@ -25,7 +25,6 @@ import edu.isi.bmkeg.vpdmf.model.definitions.ViewDefinition;
 import edu.isi.bmkeg.vpdmf.model.instances.AttributeInstance;
 import edu.isi.bmkeg.vpdmf.model.instances.LightViewInstance;
 import edu.isi.bmkeg.vpdmf.model.instances.ViewInstance;
-import edu.isi.bmkeg.vpdmf.model.instances.viewGraphInstance;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "/edu/isi/bmkeg/vpdmf/appCtx-VPDMfTest.xml" })
@@ -48,7 +47,6 @@ public class VPDMf_ChangeEngineTest {
 
 	ViewDefinition vd;
 	ViewInstance vi;
-	viewGraphInstance vgi;
 
 	String sql;
 
@@ -355,7 +353,7 @@ public class VPDMf_ChangeEngineTest {
 			//
 			ce.connectToDB(this.login, this.password, dbName);
 			ce.turnOffAutoCommit();
-			ce.deleteView("Article", 32106L);
+			ce.executeDeleteQuery("Article", 32106L);
 			ce.commitTransaction();
 
 		} catch (Exception e) {
