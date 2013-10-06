@@ -365,4 +365,12 @@ public class ClassInstance implements Serializable {
 		this.defName = defName;
 	}
 
+	public String toString() {
+		String s = this.getDefName() + "\n";
+		for( AttributeInstance ai : this.attributes.values() ) {
+			s += ai.toString() + "\n";
+		}
+		return s;
+	}
+	
 };

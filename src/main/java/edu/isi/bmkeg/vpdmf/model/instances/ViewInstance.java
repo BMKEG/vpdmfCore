@@ -77,7 +77,7 @@ public class ViewInstance extends LightViewInstance {
 
 	}
 
-	public ViewInstance(ViewInstance vi) {
+	public ViewInstance(ViewInstance vi) throws Exception {
 
 		super();
 
@@ -97,7 +97,7 @@ public class ViewInstance extends LightViewInstance {
 
 	}
 
-	public ViewInstance(ViewDefinition vd) {
+	public ViewInstance(ViewDefinition vd) throws Exception {
 
 		super();
 
@@ -153,7 +153,7 @@ public class ViewInstance extends LightViewInstance {
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	private void init(ViewDefinition vd) {
+	private void init(ViewDefinition vd) throws Exception {
 
 		this.setDefName(vd.getName());
 		// this.setIcon(defName);
@@ -187,35 +187,25 @@ public class ViewInstance extends LightViewInstance {
 				this.setPrimaryPrimitive(pI);
 			}
 
-			try {
-
-				pig.addPvInstance(pI);
-				pI.fillInConditions();
-
-			} catch (Exception e) {
-
-				e.printStackTrace();
-
-			}
+			pig.addPvInstance(pI);
+			pI.fillInConditions();
 
 		}
 
 		Iterator j = pdg.getEdges().iterator();
 		while (j.hasNext()) {
-			PrimitiveLink currentPvLink = (PrimitiveLink) j.next();
+			PrimitiveLink pl = (PrimitiveLink) j.next();
 
-			PrimitiveDefinition fromPvDef = (PrimitiveDefinition) currentPvLink
+			PrimitiveDefinition fromPvDef = (PrimitiveDefinition) pl
 					.getOutEdgeNode();
 
-			PrimitiveDefinition toPvDef = (PrimitiveDefinition) currentPvLink
+			PrimitiveDefinition toPvDef = (PrimitiveDefinition) pl
 					.getInEdgeNode();
 
-			try {
-				pig.addPvInstanceLink(fromPvDef.getName() + "_0",
+			if( !pl.isCrossLink() ) {
+				pig.addPvInstanceLink(pl,
+						fromPvDef.getName() + "_0",
 						toPvDef.getName() + "_0");
-
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
 
 		}
@@ -244,7 +234,7 @@ public class ViewInstance extends LightViewInstance {
 			return false;
 	}
 
-	public ViewInstance convertLight2Heavy() throws VPDMfException {
+	public ViewInstance convertLight2Heavy() throws Exception {
 
 		ViewInstance lVi = this;
 
@@ -396,7 +386,7 @@ public class ViewInstance extends LightViewInstance {
 
 	}
 
-	public void addNewPrimitiveRecursively(PrimitiveInstance sourcePI,
+	public void addNewPrimitiveRecursively(PrimitiveLink pl, PrimitiveInstance sourcePI,
 			PrimitiveDefinition pd, int j, boolean forwardFlag)
 			throws Exception {
 
@@ -408,9 +398,9 @@ public class ViewInstance extends LightViewInstance {
 		//
 		if (pd.isUnique()) {
 			if (forwardFlag) {
-				pig.addPvInstanceLink(sourcePI.getName(), pd.getName() + "_0");
+				pig.addPvInstanceLink(pl, sourcePI.getName(), pd.getName() + "_0");
 			} else {
-				pig.addPvInstanceLink(pd.getName() + "_0", sourcePI.getName());
+				pig.addPvInstanceLink(pl, pd.getName() + "_0", sourcePI.getName());
 			}
 			return;
 		}
@@ -428,37 +418,39 @@ public class ViewInstance extends LightViewInstance {
 		newPI.linkAttributeInstances();
 
 		if (forwardFlag) {
-			pig.addPvInstanceLink(sourcePI.getName(), newName);
+			pig.addPvInstanceLink(pl, sourcePI.getName(), newName);
 		} else {
-			pig.addPvInstanceLink(newName, sourcePI.getName());
+			pig.addPvInstanceLink(pl, newName, sourcePI.getName());
 		}
 
 		//
-		// Does the new Pi have any links to any primitives.
-		// other than the source primtiive? We need to add those
+		// Add any new links to any primitives (that are NOT crossLinks).
+		// other than the source primitive? We need to add those
 		// too.
 		//
 		Iterator it = newPI.getDefinition().getOutgoingEdges().values()
 				.iterator();
 		while (it.hasNext()) {
-			PrimitiveLink pl = (PrimitiveLink) it.next();
-			PrimitiveDefinition otherPd = (PrimitiveDefinition) pl
+			PrimitiveLink pl2 = (PrimitiveLink) it.next();
+			PrimitiveDefinition otherPd = (PrimitiveDefinition) pl2
 					.getInEdgeNode();
-			if (!otherPd.equals(sourcePI.getDefinition())) {
+			if (!otherPd.equals(sourcePI.getDefinition()) && 
+					!pl2.isCrossLink()) {
 
-				this.addNewPrimitiveRecursively(newPI, otherPd, j, true);
+				this.addNewPrimitiveRecursively(pl2, newPI, otherPd, j, true);
 
 			}
 		}
 
 		it = newPI.getDefinition().getIncomingEdges().values().iterator();
 		while (it.hasNext()) {
-			PrimitiveLink pl = (PrimitiveLink) it.next();
-			PrimitiveDefinition otherPd = (PrimitiveDefinition) pl
+			PrimitiveLink pl2 = (PrimitiveLink) it.next();
+			PrimitiveDefinition otherPd = (PrimitiveDefinition) pl2
 					.getOutEdgeNode();
-			if (!otherPd.equals(sourcePI.getDefinition())) {
+			if (!otherPd.equals(sourcePI.getDefinition()) && 
+					!pl2.isCrossLink()) {
 
-				this.addNewPrimitiveRecursively(newPI, otherPd, j, false);
+				this.addNewPrimitiveRecursively(pl2, newPI, otherPd, j, false);
 
 			}
 		}
@@ -486,25 +478,7 @@ public class ViewInstance extends LightViewInstance {
 		newPI.setGraph(pig);
 		newPI.fillInConditions();
 		newPI.linkAttributeInstances();
-
-		// what's the path from the primary primitive to this node
-		PrimitiveDefinition ppd = this.getDefinition().getPrimaryPrimitive();
-		PrimitiveDefinitionGraph pdg = (PrimitiveDefinitionGraph) this
-				.getDefinition().getSubGraph();
-
-		Iterator<PrimitiveDefinition> pdIt = pdg.readPrimitivesToTarget(pd)
-				.iterator();
-		PrimitiveDefinition lastPd = pdIt.next();
-		while (pdIt.hasNext()) {
-			PrimitiveDefinition thisPd = (PrimitiveDefinition) pdIt.next();
-			if (thisPd.equals(pd)) {
-				pig.addPvInstanceLink(lastPd.getName() + "_" + 0,
-						thisPd.getName() + "_" + j);
-			}
-			int i = 0;
-			lastPd = thisPd;
-		}
-
+		
 	}
 
 	public void trimRepeatedPrimitives() throws Exception {
@@ -607,7 +581,8 @@ public class ViewInstance extends LightViewInstance {
 
 					if (aif.getValue().equals(ait.getValue())) {
 
-						pig.addPvInstanceLink(fPd.getName() + "_" + j,
+						pig.addPvInstanceLink(pl,
+								fPd.getName() + "_" + j,
 								tPd.getName() + "_" + k);
 
 					}
@@ -733,84 +708,11 @@ public class ViewInstance extends LightViewInstance {
 	 * Counts the number of instances of pd in the current ViewGraph
 	 * 
 	 * @throws Exception
-	 *             ß
+	 *             
 	 */
 	public int countPrimitives(String attrAddr) throws Exception {
 		PrimitiveDefinition pd = this.readPrimitiveDefinition(attrAddr);
 		return this.countPrimitives(pd);
-	}
-
-	public void confirmPrimitiveLinks(PrimitiveInstance thisPi)
-			throws Exception {
-
-		PrimitiveDefinition thisPd = thisPi.getDefinition();
-		int thisCount = this.countPrimitives(thisPd);
-		PrimitiveDefinition thatPd = null;
-
-		PrimitiveInstanceGraph pig = (PrimitiveInstanceGraph) this
-				.getSubGraph();
-
-		//
-		// Does an example of this primitiveLink exist within the view?
-		//
-		Collection<SuperGraphEdge> existingLinks = thisPi.getIncomingEdges()
-				.values();
-		existingLinks.addAll(thisPi.getOutgoingEdges().values());
-		Iterator pliIt = existingLinks.iterator();
-		while (pliIt.hasNext()) {
-			PrimitiveLinkInstance pli = (PrimitiveLinkInstance) pliIt.next();
-			PrimitiveLink plCheck = pli.getPVLinkDef();
-			if (!(plCheck.getInEdgeNode().equals(thisPd) && plCheck
-					.getOutEdgeNode().equals(thatPd))
-					&& !(plCheck.getOutEdgeNode().equals(thisPd) && plCheck
-							.getInEdgeNode().equals(thatPd)))
-				existingLinks.add(plCheck);
-
-		}
-
-		Iterator plIt = existingLinks.iterator();
-		while (plIt.hasNext()) {
-			PrimitiveLink pl = (PrimitiveLink) plIt.next();
-
-			boolean forwardFlag = true;
-
-			if (existingLinks.contains(pl))
-				continue;
-
-			PrimitiveDefinition i = (PrimitiveDefinition) pl.getInEdgeNode();
-			PrimitiveDefinition o = (PrimitiveDefinition) pl.getOutEdgeNode();
-
-			if (i.equals(thisPd)) {
-				thatPd = o;
-			} else if (o.equals(thisPd)) {
-				thatPd = i;
-				forwardFlag = false;
-			} else {
-				throw new VPDMfException("Error in Primitive Links");
-			}
-
-			int thatCount = this.countPrimitives(thatPd);
-
-			String f = "";
-			String t = "";
-			int c = 0;
-
-			if (thatCount > 1 && thatCount >= thisCount) {
-				c = thisCount - 1;
-			}
-
-			if (forwardFlag) {
-				f = thisPi.getName();
-				t = thatPd.getName() + "_" + c;
-			} else {
-				t = thisPi.getName();
-				f = thatPd.getName() + "_" + c;
-			}
-
-			pig.addPvInstanceLink(f, t);
-
-		}
-
 	}
 
 	/**
@@ -877,7 +779,7 @@ public class ViewInstance extends LightViewInstance {
 		return parentVi;
 	}
 
-	public ViewInstance deepCopy() {
+	public ViewInstance deepCopy() throws Exception {
 
 		ViewInstance copyVi = new ViewInstance(this.getDefinition());
 
@@ -912,16 +814,17 @@ public class ViewInstance extends LightViewInstance {
 
 			Iterator edgesIt = this.getSubGraph().getEdges().iterator();
 			while (edgesIt.hasNext()) {
-				PrimitiveLinkInstance pli = (PrimitiveLinkInstance) edgesIt
-						.next();
+				PrimitiveLinkInstance pli = (PrimitiveLinkInstance) 
+						edgesIt.next();
 				PrimitiveInstance fromPi = (PrimitiveInstance) pli
 						.getOutEdgeNode();
 				PrimitiveInstance toPi = (PrimitiveInstance) pli
 						.getInEdgeNode();
 
-				if (!cPig.checkForLinkInstanceExistence(fromPi.getName(),
-						toPi.getName())) {
-					cPig.addPvInstanceLink(fromPi.getName(), toPi.getName());
+				if (!cPig.checkForLinkInstanceExistence(
+						pli.getPVLinkDef(), fromPi.getName(), toPi.getName()
+						)) {
+					cPig.addPvInstanceLink(pli.getPVLinkDef(), fromPi.getName(), toPi.getName());
 				}
 
 			}

@@ -625,18 +625,32 @@ public class CoreDaoImpl implements CoreDao {
 	public boolean deleteById(long id, String viewTypeName)
 			throws Exception {
 
+		boolean complete = false;
+		
 		try {
 
 			getCe().connectToDB();
 			getCe().turnOffAutoCommit();
 
-			return this.deleteByIdInTrans(id, viewTypeName);
+			complete = this.deleteByIdInTrans(id, viewTypeName);
 
+			getCe().commitTransaction();
+
+		} catch (Exception e) {
+
+			getCe().rollbackTransaction();
+
+			complete = false;
+			
+			throw e;
+		
 		} finally {
 
 			getCe().closeDbConnection();
-
+			
 		}
+		
+		return complete;
 
 	}
 

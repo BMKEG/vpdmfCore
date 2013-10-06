@@ -346,5 +346,14 @@ public class AttributeInstance implements Serializable {
 	public void setQueryCode(String queryCode) {
 		this.queryCode = queryCode;
 	}
-
-};
+	
+	public String toString() {
+		
+		if( this.value == null )
+			return this.defName + "= null";
+		else 
+			return this.defName + "=" + this.value.toString();
+	
+	}
+	
+}

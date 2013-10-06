@@ -40,106 +40,46 @@ public class PrimitiveInstanceGraph extends SuperGraph {
 
 	}
 
-	public PrimitiveInstance addPvInstance(String pVDefName, int index) {
-		PrimitiveDefinition pVDef = (PrimitiveDefinition) this.getDefinition()
-				.getNodes().get(pVDefName);
-
-		PrimitiveInstance newPVIns = new PrimitiveInstance(pVDef, index);
-		try {
-			this.addNode(newPVIns);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-
-		Vector toNodes = new Vector();
-		Vector fromNodes = new Vector();
-
-		Iterator<SuperGraphEdge> edgeIt = pVDef.getOutgoingEdges().values()
-				.iterator();
-		while (edgeIt.hasNext()) {
-			SuperGraphEdge edge = edgeIt.next();
-			toNodes.add(edge.getInEdgeNode());
-		}
-
-		edgeIt = pVDef.getIncomingEdges().values().iterator();
-		while (edgeIt.hasNext()) {
-			SuperGraphEdge edge = edgeIt.next();
-			fromNodes.add(edge.getOutEdgeNode());
-		}
-
-		Iterator<SuperGraphNode> nodeIt = this.getNodes().values().iterator();
-		while (nodeIt.hasNext()) {
-			SuperGraphNode node = nodeIt.next();
-			PrimitiveInstance currentPVIns = (PrimitiveInstance) node;
-
-			try {
-				if (toNodes.contains(currentPVIns.getDefinition())) {
-					this.addPvInstanceLink(newPVIns.getName(),
-							currentPVIns.getName());
-
-				} else if (fromNodes.contains(currentPVIns.getDefinition())) {
-					this.addPvInstanceLink(currentPVIns.getName(),
-							newPVIns.getName());
-				}
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-		}
-
-		try {
-			newPVIns.setGraph(this);
-			this.linkAttributeInstances();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-
-		return newPVIns;
-	}
-
-	public void addPvInstanceLink(String fromNodeName, String toNodeName)
+	public void addPvInstanceLink(PrimitiveLink pl, String pi1Name, String pi2Name)
 			throws Exception {
 
-		PrimitiveInstance fromPvIns = (PrimitiveInstance) this.getNodes().get(
-				fromNodeName);
-		PrimitiveInstance toPvIns = (PrimitiveInstance) this.getNodes().get(
-				toNodeName);
+		PrimitiveInstance pi1 = (PrimitiveInstance) this.getNodes().get(
+				pi1Name);
+		PrimitiveInstance pi2 = (PrimitiveInstance) this.getNodes().get(
+				pi2Name);
 
-		if (fromPvIns == null || toPvIns == null) {
+		if (pi1 == null || pi2 == null) {
 			throw new Exception("Can't add an edge to the graph, none "
 					+ "or both of the nodes don't exist");
 		}
 
-		PrimitiveDefinition fromPvDef = (PrimitiveDefinition) fromPvIns
+		PrimitiveDefinition pd1 = (PrimitiveDefinition) pi1
 				.getDefinition();
 
-		PrimitiveDefinition toPvDef = (PrimitiveDefinition) toPvIns
-				.getDefinition();
-
-		PrimitiveLink pl = (PrimitiveLink) fromPvDef.getOutgoingEdges().get(
-				toPvDef.getName());
-
-		if (pl == null)
-			throw new Exception("Can't add pvLink to graph\n"
-					+ toPvDef.getName() + " not found in "
-					+ fromPvDef.getName());
-
+		PrimitiveDefinition pd2 = (PrimitiveDefinition) pi2
+				.getDefinition();		
+		
+		PrimitiveInstance fromPi = pi1;
+		PrimitiveInstance toPi = pi2;
+		
 		PrimitiveLinkInstance pli = new PrimitiveLinkInstance(pl);
 		pli.setGraph(this);
 		this.getEdges().add(pli);
+		
+		String key = fromPi.getName() + "." + pl.getRole().getBaseName() + "->" + toPi.getName();
+		pli.setName(key);
+		fromPi.getOutgoingEdges().put(key, pli);
+		toPi.getIncomingEdges().put(key, pli);
 
-		pli.setName(toNodeName);
-		fromPvIns.getOutgoingEdges().put(toNodeName, pli);
-		toPvIns.getIncomingEdges().put(fromNodeName, pli);
-
-		pli.setOutEdgeNode(fromPvIns);
-		pli.setInEdgeNode(toPvIns);
+		pli.setOutEdgeNode(fromPi);
+		pli.setInEdgeNode(toPi);
 		
 		// check to see if the pli has a link class with a vpdmfOrder attribute.
 		if( pli.getLinkClass() != null  && 
 				pli.getLinkClass().getAttributes().containsKey("vpdmfOrder")) {
 			
-			String toNodeIndex = toNodeName.substring(toNodeName.lastIndexOf("_")+1, toNodeName.length());
-			String fromNodeIndex = fromNodeName.substring(fromNodeName.lastIndexOf("_")+1, fromNodeName.length());
+			String toNodeIndex = toPi.getName().substring(pi2Name.lastIndexOf("_")+1, toPi.getName().length());
+			String fromNodeIndex = fromPi.getName().substring(pi1Name.lastIndexOf("_")+1, fromPi.getName().length());
 
 			Integer to = new Integer(toNodeIndex);
 			Integer from = new Integer(fromNodeIndex);
@@ -170,8 +110,9 @@ public class PrimitiveInstanceGraph extends SuperGraph {
 
 	}
 
-	public boolean checkForLinkInstanceExistence(String fromNodeName,
-			String toNodeName) throws Exception {
+	public boolean checkForLinkInstanceExistence(PrimitiveLink pl, 
+			String fromNodeName, String toNodeName) throws Exception {
+
 		PrimitiveInstance fromPvIns = (PrimitiveInstance) this.getNodes().get(
 				fromNodeName);
 
@@ -182,7 +123,9 @@ public class PrimitiveInstanceGraph extends SuperGraph {
 			return false;
 		}
 
-		if (fromPvIns.getOutgoingEdges().containsKey(toNodeName)) {
+		String key = fromNodeName + "." + pl.getRole().getBaseName() + "->" + toNodeName;
+		if( fromPvIns.getOutgoingEdges().containsKey(key) || 
+				fromPvIns.getIncomingEdges().containsKey(key) ) {
 			return true;
 		} else {
 			return false;
@@ -251,8 +194,9 @@ public class PrimitiveInstanceGraph extends SuperGraph {
 
 	/**
 	 * Link all attribute instances that require linking in the PIG
+	 * @throws Exception 
 	 */
-	public void linkAttributeInstances() {
+	public void linkAttributeInstances() throws Exception {
 		//
 		// First, remove all existing attribute links
 		//
@@ -266,33 +210,18 @@ public class PrimitiveInstanceGraph extends SuperGraph {
 		//
 		// Run through all the links in the pig and link the underlying
 		// attributes
-		try {
-			Iterator it = this.getEdges().iterator();
-			while (it.hasNext()) {
-				PrimitiveLinkInstance pli = (PrimitiveLinkInstance) it.next();
-				pli.linkAttributeInstances();
-			}
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-
+		Iterator it = this.getEdges().iterator();
+		while (it.hasNext()) {
+			PrimitiveLinkInstance pli = (PrimitiveLinkInstance) it.next();
+			pli.linkAttributeInstances();
 		}
 
 		//
 		// Run through all Primitives and link intraPrimitive attributes.
-		try {
-
-			Iterator it = this.getNodes().values().iterator();
-			while (it.hasNext()) {
-				PrimitiveInstance pi = (PrimitiveInstance) it.next();
-				pi.linkAttributeInstances();
-			}
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-
+		it = this.getNodes().values().iterator();
+		while (it.hasNext()) {
+			PrimitiveInstance pi = (PrimitiveInstance) it.next();
+			pi.linkAttributeInstances();
 		}
 
 	}

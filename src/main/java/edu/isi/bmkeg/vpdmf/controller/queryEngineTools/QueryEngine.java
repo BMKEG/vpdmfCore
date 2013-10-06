@@ -4,7 +4,6 @@ package edu.isi.bmkeg.vpdmf.controller.queryEngineTools;
  * Timestamp: Thu_Jun_19_120936_2003;
  */
 
-import java.awt.image.BufferedImage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -12,14 +11,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.swing.ImageIcon;
 
 import org.apache.log4j.Logger;
 import org.jgrapht.GraphPath;
@@ -33,15 +27,14 @@ import cern.colt.matrix.ObjectMatrix1D;
 import cern.colt.matrix.ObjectMatrix2D;
 import edu.isi.bmkeg.uml.model.UMLattribute;
 import edu.isi.bmkeg.uml.model.UMLclass;
+import edu.isi.bmkeg.utils.superGraph.SuperGraphEdge;
 import edu.isi.bmkeg.utils.superGraph.SuperGraphNode;
 import edu.isi.bmkeg.vpdmf.exceptions.InterruptException;
 import edu.isi.bmkeg.vpdmf.exceptions.VPDMfException;
-import edu.isi.bmkeg.vpdmf.model.definitions.ConditionElement;
 import edu.isi.bmkeg.vpdmf.model.definitions.PrimitiveDefinition;
 import edu.isi.bmkeg.vpdmf.model.definitions.PrimitiveDefinitionGraph;
 import edu.isi.bmkeg.vpdmf.model.definitions.VPDMf;
 import edu.isi.bmkeg.vpdmf.model.definitions.ViewDefinition;
-import edu.isi.bmkeg.vpdmf.model.definitions.ViewLink;
 import edu.isi.bmkeg.vpdmf.model.instances.AttributeInstance;
 import edu.isi.bmkeg.vpdmf.model.instances.ClassInstance;
 import edu.isi.bmkeg.vpdmf.model.instances.LightViewInstance;
@@ -878,9 +871,10 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 		DijkstraShortestPath<SuperGraphNode, DefaultEdge> dij = new DijkstraShortestPath<SuperGraphNode, DefaultEdge>(
 				gg, vi.getPrimaryPrimitive(), pi);
 
+		List<DefaultEdge> pathEdgeList = dij.getPathEdgeList();
+		
 		GraphPath<SuperGraphNode, DefaultEdge> path = dij.getPath();
-
-		List<SuperGraphNode> ll = Graphs.getPathVertexList(dij.getPath());
+		List<SuperGraphNode> ll = Graphs.getPathVertexList(path);
 
 		for(int i = 1; i<ll.size(); i++) {
 			PrimitiveInstance s = (PrimitiveInstance) ll.get(i-1);
@@ -889,19 +883,31 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 			if(s==null)
 				continue;
 			
+			//
+			// Note that this procedure just builds an SQL query 
+			// based on the shortest linkage to the primitive. 
+			// This assumption works quite well since we simply want 
+			// to establish the existence of data within the graph, 
+			// not the extra convoluted connections when things join up.
+			//
 			PrimitiveLinkInstance pli = null;
-			if (s.getOutgoingEdges().containsKey(t.getName())) {
-				pli = (PrimitiveLinkInstance) s.getOutgoingEdges().get(
-						t.getName());
-			} else if (s.getIncomingEdges().containsKey(t.getName())) {
-				pli = (PrimitiveLinkInstance) s.getIncomingEdges().get(
-						t.getName());
-			} else if (t.getOutgoingEdges().containsKey(s.getName())) {
-				pli = (PrimitiveLinkInstance) t.getOutgoingEdges().get(
-						s.getName());
-			} else if (t.getIncomingEdges().containsKey(s.getName())) {
-				pli = (PrimitiveLinkInstance) t.getIncomingEdges().get(
-						s.getName());
+			for( SuperGraphEdge e : s.getOutgoingEdges().values() ) {
+				if( (e.getOutEdgeNode() == s && e.getInEdgeNode() == t) ||
+						(e.getInEdgeNode() == s && e.getOutEdgeNode() == t)) {
+					pli = (PrimitiveLinkInstance) e;
+					break;
+				}
+			}
+			if( pli == null ) {
+				for( SuperGraphEdge e : s.getIncomingEdges().values() ) {
+					if( (e.getOutEdgeNode() == s && e.getInEdgeNode() == t) ||
+							(e.getInEdgeNode() == s && e.getOutEdgeNode() == t)) {
+						pli = (PrimitiveLinkInstance) e;
+						break;
+					}
+				}
+				if( pli == null ) 
+					throw new Exception("Error: can't link" + s.getName() + " to " + t.getName());
 			}
 			buildSqlConditions(pli, ALL);
 			buildTableAliases(pli, false);

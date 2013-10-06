@@ -12,8 +12,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class PrimitiveLinkSpec implements Serializable {
 	static final long serialVersionUID = 8047039304729208683L;
 
-	private boolean paged = true;
-		
+	private boolean paged = false;
+
+	private boolean crossLink = false;
+
 	private String c1;
 	
 	private String role;
@@ -40,6 +42,15 @@ public class PrimitiveLinkSpec implements Serializable {
 		this.paged = paged;
 	}
 	
+	@XmlAttribute
+	public boolean isCrossLink() {
+		return crossLink;
+	}
+
+	public void setCrossLink(boolean crossLink) {
+		this.crossLink = crossLink;
+	}
+
 	@XmlAttribute
 	public String getC1() {
 		return c1;

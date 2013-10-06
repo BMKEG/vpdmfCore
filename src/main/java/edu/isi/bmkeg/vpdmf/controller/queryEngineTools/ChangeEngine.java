@@ -1645,6 +1645,9 @@ public class ChangeEngine extends QueryEngine implements
 	
 		ViewInstance vi = this.executeUIDQuery(vd, id);
 
+		if( vi == null ) 
+			return false;
+		
 		this.setListOffset(0);
 		this.vpdmf = top;
 

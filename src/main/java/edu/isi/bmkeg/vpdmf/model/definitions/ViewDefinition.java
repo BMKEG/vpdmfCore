@@ -1392,6 +1392,7 @@ public class ViewDefinition extends SuperGraphNode {
 				String c2 = plSpec.getC2();
 				
 				boolean paged = plSpec.isPaged();
+				boolean crossLink = plSpec.isCrossLink();
 		
 				UMLrole r = null;
 				
@@ -1508,7 +1509,7 @@ public class ViewDefinition extends SuperGraphNode {
 				if (!pv1.equals(pv2)) {
 					PrimitiveDefinitionGraph pdg = (PrimitiveDefinitionGraph) this
 							.getSubGraph();
-					pdg.addPrimitiveLink(pv1, pv2, r, paged);
+					pdg.addPrimitiveLink(pv1, pv2, r, paged, crossLink);
 				} else {
 					pv1.getInternalRoles().add(r);
 				}

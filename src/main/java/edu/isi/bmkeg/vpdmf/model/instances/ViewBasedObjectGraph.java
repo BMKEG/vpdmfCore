@@ -520,7 +520,7 @@ public class ViewBasedObjectGraph {
 					else {
 
 						int newI = remoteCount + i - 1;
-						vi.addNewPrimitiveRecursively(pi, remotePv, newI,
+						vi.addNewPrimitiveRecursively(pl, pi, remotePv, newI,
 								forwardFlag);
 						PrimitiveInstance remotePi = (PrimitiveInstance) vi
 								.readPrimitiveInstance("]" + remotePv.getName(), newI);

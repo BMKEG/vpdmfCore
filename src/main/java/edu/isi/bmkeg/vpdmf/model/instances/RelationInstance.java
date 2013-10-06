@@ -16,7 +16,7 @@ public class RelationInstance extends SuperGraphEdge {
 		super();
 	}
 
-	public RelationInstance(ViewDefinition definition) {
+	public RelationInstance(ViewDefinition definition) throws Exception {
 		super();
 		this.rlnView = new ViewInstance(definition);
 	}

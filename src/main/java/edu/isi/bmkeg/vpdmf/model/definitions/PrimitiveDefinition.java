@@ -52,7 +52,7 @@ public class PrimitiveDefinition extends SuperGraphNode {
 	 * with respect to the primary primitive in the view.
 	 * @return
 	 */
-	public boolean isMultiple() {
+	public boolean isMultiple() throws Exception {
 		
 		if( multipleSet )
 			return multiple;

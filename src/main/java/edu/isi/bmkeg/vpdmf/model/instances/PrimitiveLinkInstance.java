@@ -36,7 +36,8 @@ public class PrimitiveLinkInstance extends SuperGraphEdge {
 		super();
 		this.setPVLinkDef(pL);
 
-		this.defName = pL.getOutEdgeNode().getName() + " "
+		this.defName = pL.getOutEdgeNode().getName() + "." 
+				+ pL.getRole().getBaseName() + "->"
 				+ pL.getInEdgeNode().getName();
 
 		if (pL.getRole() != null && pL.getRole().getImplementedBy().size() > 0) {
@@ -230,12 +231,12 @@ public class PrimitiveLinkInstance extends SuperGraphEdge {
 
 	public void instantiateDefinition(ViewDefinition vd) throws Exception {
 
-		String[] pdNames = this.defName.split(" ");
+		String pdName = defName.substring(0,defName.indexOf("."));
 
 		PrimitiveDefinition pd = (PrimitiveDefinition) vd.getSubGraph()
-				.getNodes().get(pdNames[0]);
+				.getNodes().get(pdName);
 
-		PrimitiveLink pl = (PrimitiveLink) pd.getOutgoingEdges().get(pdNames[1]);
+		PrimitiveLink pl = (PrimitiveLink) pd.getOutgoingEdges().get(defName);
 
 		this.setPVLinkDef(pl);
 
@@ -289,9 +290,10 @@ public class PrimitiveLinkInstance extends SuperGraphEdge {
 
 	/**
 	 * Create a light copy of the current primitive link instance
+	 * @throws Exception 
 	 * 
 	 */
-	public PrimitiveLinkInstance lightCopy() {
+	public PrimitiveLinkInstance lightCopy() throws Exception {
 		PrimitiveInstanceGraph pig = (PrimitiveInstanceGraph) this.getGraph();
 		ViewInstance vi = (ViewInstance) pig.getSubGraphNode();
 		ViewInstance viCopy = vi.deepCopy();

@@ -688,4 +688,12 @@ public class PrimitiveInstance extends SuperGraphNode {
 		this.objects = objects;
 	}
 
+	public String toString() {
+		String s = this.getDefName() + "\n";
+		for( ClassInstance ci : this.objects.values() ) {
+			s += ci.toString() + "\n~~~~~~~~~~~~~~~~~\n";
+		}
+		return s;
+	}
+	
 };

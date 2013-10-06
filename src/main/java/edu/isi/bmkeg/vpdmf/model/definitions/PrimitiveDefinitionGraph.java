@@ -26,7 +26,7 @@ public class PrimitiveDefinitionGraph extends SuperGraph {
 	static final long serialVersionUID = 6192677979673230342L;
 	
 	public void addPrimitiveLink(PrimitiveDefinition pv1,
-			PrimitiveDefinition pv2, UMLrole role, boolean paged) {
+			PrimitiveDefinition pv2, UMLrole role, boolean paged, boolean crossLink) {
 
 		PrimitiveDefinition fromPv = null;
 		PrimitiveDefinition toPv = null;
@@ -91,24 +91,22 @@ public class PrimitiveDefinitionGraph extends SuperGraph {
 		if (role != null) {
 			edge = new PrimitiveLink();
 			edge.setPaged(paged);
+			edge.setCrossLink(crossLink);
 			edge.setDirected(true);
 			edge.setRole(role);
 		} else {
 			edge = new PrimitiveLink();
 			edge.setPaged(paged);
+			edge.setCrossLink(crossLink);
 			edge.setDirected(true);
 		}
 
-		try {
-			this.getEdges().add(edge);
+		this.getEdges().add(edge);
 			
-			edge.setName(toPv.getName());
-			fromPv.getOutgoingEdges().put(toPv.getName(), edge);
-			toPv.getIncomingEdges().put(fromPv.getName(), edge);
+		edge.setName(fromPv.getName() + "." + role.getBaseName() + "->" + toPv.getName());
+		fromPv.getOutgoingEdges().put(edge.getName(), edge);
+		toPv.getIncomingEdges().put(edge.getName(), edge);
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 		edge.setInEdgeNode(toPv);
 		edge.setOutEdgeNode(fromPv);
 
@@ -155,14 +153,23 @@ public class PrimitiveDefinitionGraph extends SuperGraph {
 		for(int i=1; i<list.size(); i++) {
 			PrimitiveDefinition target = (PrimitiveDefinition) list.get(i);
 
-			PrimitiveLink pl = (PrimitiveLink) source.getOutgoingEdges().get(target.getName());
-			if( pl == null ) 
-				pl = (PrimitiveLink) source.getIncomingEdges().get(target.getName());
-	
-			if( pl == null ) {
-				throw new Exception("Can't find primitive path to " + pd.getName());
+			PrimitiveLink pl = null;
+			for( SuperGraphEdge e : source.getOutgoingEdges().values() ) {
+				if( e.getOutEdgeNode() == source && e.getInEdgeNode() == target) {
+					pl = (PrimitiveLink) e;
+					break;
+				}
 			}
-			
+			if( pl == null ) {
+				for( SuperGraphEdge e : source.getIncomingEdges().values() ) {
+					if( e.getInEdgeNode() == source && e.getOutEdgeNode() == target) {
+						pl = (PrimitiveLink) e;
+						break;
+					}
+				}
+				if( pl == null ) 
+					throw new Exception("Error: can't link" + source.getName() + " to " + target.getName());
+			}			
 			plList.add(pl);
 						
 			source = target;

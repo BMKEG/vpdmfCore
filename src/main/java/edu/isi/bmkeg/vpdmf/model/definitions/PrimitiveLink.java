@@ -21,6 +21,8 @@ public class PrimitiveLink extends SuperGraphEdge {
 	private UMLrole role;
 
 	private boolean paged;
+
+	private boolean crossLink;
 	
 	/**
 	 * returns a vector of umlAttributes for the foreign keys for this link
@@ -103,6 +105,14 @@ public class PrimitiveLink extends SuperGraphEdge {
 
 	public void setPaged(boolean paged) {
 		this.paged = paged;
+	}
+
+	public boolean isCrossLink() {
+		return crossLink;
+	}
+
+	public void setCrossLink(boolean crossLink) {
+		this.crossLink = crossLink;
 	}
 
 };

@@ -67,16 +67,21 @@
 			<version>0.1.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.1</version>
 			<scope>provided</scope>
 		</dependency>
-		
 
 		<!-- SOLR LIBRARIES -->
+<!--	<dependency>
+			<groupId>org.sindice.siren</groupId>
+			<artifactId>siren-aggregator</artifactId>
+			<version>0.2.3-RC2</version>
+		</dependency>-->
+		
 		<dependency>
 			<groupId>org.apache.solr</groupId>
 			<artifactId>solr-solrj</artifactId>
