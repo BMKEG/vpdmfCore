@@ -20,6 +20,7 @@ import edu.isi.bmkeg.uml.sources.UMLModelSimpleParser;
 import edu.isi.bmkeg.utils.springContext.AppContext;
 import edu.isi.bmkeg.utils.springContext.BmkegProperties;
 import edu.isi.bmkeg.vpdmf.controller.VPDMfKnowledgeBaseBuilder;
+import edu.isi.bmkeg.vpdmf.exceptions.AttributeAddressException;
 import edu.isi.bmkeg.vpdmf.model.definitions.VPDMf;
 import edu.isi.bmkeg.vpdmf.model.definitions.ViewDefinition;
 import edu.isi.bmkeg.vpdmf.model.instances.AttributeInstance;
@@ -41,7 +42,7 @@ public class VPDMf_ChangeEngineTest {
 	String password;
 
 	VPDMfChangeEngineInterface ce;
-	
+
 	VPDMfKnowledgeBaseBuilder builder;
 	File buildFile;
 
@@ -56,30 +57,33 @@ public class VPDMf_ChangeEngineTest {
 		ctx = AppContext.getApplicationContext();
 
 		BmkegProperties prop = (BmkegProperties) ctx.getBean("bmkegProperties");
-			
-		login = prop.getDbUser();
-		password =  prop.getDbPassword();
-		dbName = "resource_vpdmf_test";
 
-	    buildFile = ctx.getResource("classpath:edu/isi/bmkeg/vpdmf/resource_excel_VPDMf.zip")
+		login = prop.getDbUser();
+		password = prop.getDbPassword();
+		dbName = "basic_vpdmf_test";
+
+		buildFile = ctx
+				.getResource(
+						"classpath:edu/isi/bmkeg/vpdmf/people/people-mysql-1.1.5-SNAPSHOT.zip")
 				.getFile();
 
-	    builder = new VPDMfKnowledgeBaseBuilder(buildFile, login, password, dbName);
+		builder = new VPDMfKnowledgeBaseBuilder(buildFile, login, password,
+				dbName);
 		builder.setLogin(login);
 		builder.setPassword(password);
-		
+
 		try {
 			builder.destroyDatabase(dbName);
 		} catch (SQLException sqlE) {
-			if( !sqlE.getMessage().contains("database doesn't exist") ) {
+			if (!sqlE.getMessage().contains("database doesn't exist")) {
 				sqlE.printStackTrace();
 				// Gully, avoids unnecessary isssues.
 				// throw sqlE;
 			}
 		}
-		
+
 		builder.buildDatabaseFromArchive();
-				
+
 		ce = new ChangeEngine(this.login, this.password, dbName);
 		ce.connectToDB();
 
@@ -92,101 +96,28 @@ public class VPDMf_ChangeEngineTest {
 	@After
 	public void tearDown() throws Exception {
 
-		builder.destroyDatabase(dbName);	
+		builder.destroyDatabase(dbName);
 
 	}
 
-	@Test @Ignore("Outdated")
-	public final void testExecuteUIDQuery() throws Exception {
-
-		ce.connectToDB(this.login, this.password, dbName);
-		ce.turnOffAutoCommit();
+	@Test
+	public final void testInsertAndDeleteQuery() throws Exception {
 
 		try {
-			
-			ViewInstance vi = ce.executeUIDQuery("Article", 32106L);
-			
-			ce.storeViewInstanceForUpdate(vi);
 
-			AttributeInstance ai = vi.readAttributeInstance("]Scientist|Person.lastName", 0);
-			ai.writeValueString("Watts");
-
-			ai = vi.readAttributeInstance("]Scientist|Person.initials", 0);
-			ai.writeValueString("AG");
-		
-			ce.executeUpdateQuery(vi);
-			ce.commitTransaction();
-						
-			vi = ce.executeUIDQuery("Article", 32106L);
-
-			ai = vi.readAttributeInstance("]Scientist|Person.vpdmfId", 0);
-
-		} catch (Exception e) {
-
-			e.printStackTrace();			
-			ce.rollbackTransaction();
-			
-			throw e;
-
-		} finally {
-
-			ce.closeDbConnection();
-
-		}
-	
-	}
-	
-	
-	@Test @Ignore("Outdated")
-	public final void testExecuteInsertQuery() throws Exception {
-
-		try {
-			
-			vd = top.getViews().get("Article");
-			vi = new ViewInstance(vd);
-
-			vi.readAttributeInstance("]Scientist|Person.initials", 0)
-					.writeValueString("TEST");
-			vi.readAttributeInstance("]Scientist|Person.lastName", 0)
-					.writeValueString("TEST");
-			vi.readAttributeInstance("]Scientist|Person.affiliation", 0)
-					.writeValueString("TEST");
-			vi.readAttributeInstance("]Resource|Resource.abstractText", 0)
-					.writeValueString("TEST");
-			vi.readAttributeInstance("]Resource|Resource.title", 0).writeValueString(
-					"TEST");
-			vi.readAttributeInstance("]Resource|Resource.pubYear", 0)
-					.writeValueString("0000");
-			vi.readAttributeInstance("]Resource|Resource.checksum", 0)
-					.writeValueString("TEST");
-			vi.readAttributeInstance("]Resource|Resource.pages", 0).writeValueString(
-					"TEST");
-			vi.readAttributeInstance("]Resource|Article.volume", 0).writeValueString(
-					"0");
-			vi.readAttributeInstance("]JournalLU|Journal.abbr", 0).writeValueString(
-					"J Comp Neurol");
-			vi.readAttributeInstance("]JournalLU|Journal.ISSN", 0).writeValueString(
-					"0021-9967");
-			vi.readAttributeInstance("]ResourceType|CV.context", 0).writeValueString(
-					"Resource.ResourceType");
-			vi.readAttributeInstance("]ResourceType|CV.name", 0).writeValueString(
-					"Bibliographic");
-			vi.readAttributeInstance("]Keyword|Keyword.value", 0).writeValueString(
-					"TEST");
-			vi.readAttributeInstance("]URI|URI.uri", 0).writeValueString("TEST");
-			vi.readAttributeInstance("]UID|UID.uidValue", 0).writeValueString("TEST");
+			ViewInstance vi = buildDummyView("TEST");
 
 			ce.connectToDB(this.login, this.password, dbName);
 			ce.turnOffAutoCommit();
 			ce.executeInsertQuery(vi);
 			ce.commitTransaction();
 			ce.turnOnAutoCommit();
-			
+
 		} catch (Exception e) {
 
 			e.printStackTrace();
 			ce.rollbackTransaction();
-			
+
 			System.out.println("        *** transaction rolled back ***");
 			throw e;
 
@@ -196,158 +127,116 @@ public class VPDMf_ChangeEngineTest {
 
 		}
 
-		// Need to run a query to check if the insert actually worked. 
+		// Need to run a query to check if the insert actually worked.
+		ViewDefinition vd = top.getViews().get("Person");
 		vi = new ViewInstance(vd);
-		vi.readAttributeInstance("]Resource|Resource.pubYear", 0).writeValueString("0000");
+		vi.readAttributeInstance("]Person|Person.initials", 0)
+				.writeValueString("TEST");
 
 		ce.connectToDB(this.login, this.password, dbName);
-		 
-		List<LightViewInstance> viewList = ce.executeListQuery(vi);
-	    
-	    ce.closeDbConnection();
-		
-	    LightViewInstance newVi = viewList.get(0);
 
-		assertTrue("Inserted UID value should be vpdmfId=32320, ",
-				newVi.getUIDString().equals("vpdmfId=32320"));
+		List<LightViewInstance> viewList = ce.executeListQuery(vi);
+
+		ce.closeDbConnection();
+
+		LightViewInstance newVi = viewList.get(0);
+
+		assertTrue("Inserted UID value should be vpdmfId=1, ", newVi
+				.getUIDString().equals("vpdmfId=1"));
 
 	}
-	
-	
-	@Test @Ignore("Outdated")
+
+	private ViewInstance buildDummyView(String temp) throws Exception,
+			AttributeAddressException {
+		ViewDefinition vd = top.getViews().get("Person");
+		ViewInstance vi = new ViewInstance(vd);
+
+		vi.readAttributeInstance("]Person|Person.initials", 0)
+				.writeValueString(temp);
+		vi.readAttributeInstance("]Person|Person.surname", 0).writeValueString(
+				temp);
+		vi.readAttributeInstance("]Person|Person.affiliation", 0)
+				.writeValueString(temp);
+		return vi;
+	}
+
+	@Test
 	public final void testRollback() throws Exception {
 
-		try {
-			
-			vd = top.getViews().get("Article");
-			vi = new ViewInstance(vd);
-
-			vi.readAttributeInstance("]Scientist|Person.initials", 0)
-					.writeValueString("TEST");
-			vi.readAttributeInstance("]Scientist|Person.lastName", 0)
-					.writeValueString("TEST");
-			vi.readAttributeInstance("]Scientist|Person.affiliation", 0)
-					.writeValueString("TEST");
-			vi.readAttributeInstance("]Resource|Resource.abstractText", 0)
-					.writeValueString("TEST");
-			vi.readAttributeInstance("]Resource|Resource.title", 0).writeValueString(
-					"TEST");
-			vi.readAttributeInstance("]Resource|Resource.pubYear", 0)
-					.writeValueString("0000");
-			vi.readAttributeInstance("]Resource|Resource.checksum", 0)
-					.writeValueString("TEST");
-			vi.readAttributeInstance("]Resource|Resource.pages", 0).writeValueString(
-					"TEST");
-			vi.readAttributeInstance("]Resource|Article.volume", 0).writeValueString(
-					"0");
-			vi.readAttributeInstance("]JournalLU|Journal.abbr", 0).writeValueString(
-					"J Comp Neurol");
-			vi.readAttributeInstance("]JournalLU|Journal.ISSN", 0).writeValueString(
-					"0021-9967");
-			vi.readAttributeInstance("]ResourceType|CV.context", 0).writeValueString(
-					"Resource.ResourceType");
-			vi.readAttributeInstance("]ResourceType|CV.name", 0).writeValueString(
-					"Bibliographic");
-			vi.readAttributeInstance("]Keyword|Keyword.value", 0).writeValueString(
-					"TEST");
-			vi.readAttributeInstance("]URI|URI.uri", 0).writeValueString("TEST");
-			vi.readAttributeInstance("]UID|UID.uidValue", 0).writeValueString("TEST");
-
-			ce.connectToDB(this.login, this.password, dbName);
-			ce.turnOffAutoCommit();
-			ce.executeInsertQuery(vi);
-			ce.rollbackTransaction();
-			ce.turnOnAutoCommit();
-			
-		} catch (Exception e) {
-
-			e.printStackTrace();
-			ce.rollbackTransaction();
-			
-			System.out.println("        *** transaction rolled back ***");
-			throw e;
-
-		} finally {
-
-			ce.closeDbConnection();
-
-		}
-
-		// Need to run a query to check if the insert actually worked. 
-		vi = new ViewInstance(vd);
-		vi.readAttributeInstance("]Resource|Resource.pubYear", 0).writeValueString("0000");
-
-		ce.connectToDB(this.login, this.password, dbName);
-		 
-		List<LightViewInstance> viewList = ce.executeListQuery(vi);
-	    
-	    ce.closeDbConnection();
-		
-		assertTrue("There should be no entry in the database after the rollback, list size = " 
-				+ viewList.size(), viewList.size() == 0);
-
-	}
-	
-	@Test @Ignore("Outdated")
-	public final void testExecuteUpdateQuery() throws Exception {
+		ViewInstance vi1 = buildDummyView("TEST1");
 
 		ce.connectToDB(this.login, this.password, dbName);
 		ce.turnOffAutoCommit();
+		ce.executeInsertQuery(vi1);
+		ce.rollbackTransaction();
+		ce.turnOnAutoCommit();
 
-		try {
-			
-			ViewInstance vi = ce.executeUIDQuery("Article", 32106L);
-			
-			ce.storeViewInstanceForUpdate(vi);
+		//
+		// Need to run a query to check if the rollback actually worked.
+		//
+		ViewDefinition vd = top.getViews().get("Person");
+		ViewInstance vi2 = new ViewInstance(vd);
+		vi2.readAttributeInstance("]Person|Person.initials", 0)
+				.writeValueString("TEMP");
 
-			AttributeInstance ai = vi.readAttributeInstance("]Scientist|Person.lastName", 0);
-			ai.writeValueString("Watts");
+		ce.connectToDB(this.login, this.password, dbName);
 
-			ai = vi.readAttributeInstance("]Scientist|Person.initials", 0);
-			ai.writeValueString("AG");
-		
-			ce.executeUpdateQuery(vi);
-			
-			System.out.println("        *** transaction committed ***");
-			
-			vi = ce.executeUIDQuery("Article", 32106L);
+		int c = ce.executeCountQuery(vi2);
 
-			ai = vi.readAttributeInstance("]Scientist|Person.vpdmfId", 0);
-			
-			int i=0;
-			i++;
+		ce.closeDbConnection();
 
-		} catch (Exception e) {
+		assertTrue("There should be no entry in the database after the rollback, list size = "
+						+ c, c == 0);
 
-			e.printStackTrace();
-						
-			System.out.println("        *** transaction rolled back ***");
-			
-			throw e;
-
-		} finally {
-
-			ce.closeDbConnection();
-
-		}
-	
 	}
 
-	@Test @Ignore("Outdated")
+	@Test
+	public final void testExecuteUpdateQuery() throws Exception {
+
+		ViewInstance vi1 = buildDummyView("TEST1");
+
+		ce.connectToDB(this.login, this.password, dbName);
+		ce.turnOffAutoCommit();
+		ce.executeInsertQuery(vi1);
+		ce.turnOnAutoCommit();
+
+		ce.storeViewInstanceForUpdate(vi1);
+
+		//
+		// Need to run a query to check if the rollback actually worked.
+		//
+		vi1.readAttributeInstance("]Person|Person.initials", 0)
+				.writeValueString("NEW_VALUE");
+
+		ce.executeUpdateQuery(vi1);
+
+		ViewInstance vi2 = ce.executeUIDQuery("Person", 1L);
+		
+		assertTrue("label should be changed: " 
+				+ vi2.getVpdmfLabel(), vi2.getVpdmfLabel().startsWith("NEW_VALUE"));
+		
+	}
+
+	@Test
+	@Ignore("Outdated")
+	//
+	// TODO: Deletion is not done very well at all, need to improve from a generic view-based perspective
+	//
 	public final void testDeleteView() throws Exception {
 
 		try {
-			
+
 			ViewDefinition vd = top.getViews().get("Article");
 			ViewInstance vi = new ViewInstance(vd);
-			AttributeInstance ai = vi.readAttributeInstance("]Resource|ViewTable.vpdmfId", 0);
+			AttributeInstance ai = vi.readAttributeInstance(
+					"]Resource|ViewTable.vpdmfId", 0);
 			ai.writeValueString("32106");
-			
+
 			QueryEngine vhf = new QueryEngine(this.login, this.password, dbName);
 
 			vhf.connectToDB();
-		    vhf.stat.execute("set autocommit=0;");
-			 		
+			vhf.stat.execute("set autocommit=0;");
+
 			//
 			// Then delete the data
 			//
@@ -357,27 +246,29 @@ public class VPDMf_ChangeEngineTest {
 			ce.commitTransaction();
 
 		} catch (Exception e) {
-			
+
 			e.printStackTrace();
 			ce.rollbackTransaction();
 
 		} finally {
 
 			ce.closeDbConnection();
-			
+
 		}
 
 		ViewDefinition vd = top.getViews().get("Article");
 		ViewInstance vi = new ViewInstance(vd);
-		AttributeInstance ai = vi.readAttributeInstance("]Resource|Resource.vpdmfId", 0);
+		AttributeInstance ai = vi.readAttributeInstance(
+				"]Resource|Resource.vpdmfId", 0);
 		ai.writeValueString("32106");
-						
-	    ce.connectToDB(this.login, this.password, dbName);		 
-	    
-	    List<LightViewInstance> viewList = ce.executeListQuery(vi);
 
-		assertTrue("Should have removed view data with ViewTableId = 32106.", viewList.size() == 0);
+		ce.connectToDB(this.login, this.password, dbName);
+
+		List<LightViewInstance> viewList = ce.executeListQuery(vi);
+
+		assertTrue("Should have removed view data with ViewTableId = 32106.",
+				viewList.size() == 0);
 
 	}
-	
+
 }

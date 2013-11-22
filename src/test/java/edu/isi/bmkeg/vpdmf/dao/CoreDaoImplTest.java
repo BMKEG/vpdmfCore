@@ -1,12 +1,9 @@
 package edu.isi.bmkeg.vpdmf.dao;
 
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.SQLException;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -23,16 +20,12 @@ import edu.isi.bmkeg.utils.springContext.AppContext;
 import edu.isi.bmkeg.utils.springContext.BmkegProperties;
 import edu.isi.bmkeg.vpdmf.controller.VPDMfKnowledgeBaseBuilder;
 import edu.isi.bmkeg.vpdmf.model.definitions.VPDMf;
-import edu.isi.bmkeg.vpdmf.model.instances.LightViewInstance;
-import edu.isi.bmkeg.vpdmf.model.instances.ViewBasedObjectGraph;
-import edu.isi.bmkeg.vpdmf.model.instances.ViewInstance;
-import edu.isi.bmkeg.vpdmf.model.qo.ViewTable_qo;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "/edu/isi/bmkeg/vpdmf/appCtx-VPDMfTest.xml" })
 public class CoreDaoImplTest {
 
-	Logger log = Logger.getLogger("edu.isi.bmkeg.vpdmf.controller.queryEngineTools.VPDMf_QueryEngineTest");
+	Logger log = Logger.getLogger("edu.isi.bmkeg.vpdmf.dao.CoreDaoImplTest");
 
 	ApplicationContext ctx;
 
@@ -54,7 +47,7 @@ public class CoreDaoImplTest {
 	String sql;
 	
 	// DO WE NEED TO REBUILD THE DATABASE FROM SCRATCH AFTER EVERY TEST?
-	static boolean REBUILD_DB = false;
+	static boolean REBUILD_DB = true;
 
 	@Before
 	public void setUp() throws Exception {
@@ -65,9 +58,11 @@ public class CoreDaoImplTest {
 		
 		login = prop.getDbUser();
 		password =  prop.getDbPassword();
-		dbName = "triage_vpdmf_test";
+		dbName = "basic_vpdmf_test";
 		
-	    buildFile = ctx.getResource("classpath:edu/isi/bmkeg/vpdmf/triage/triage-mysql-1-1-3-testData.zip")
+		buildFile = ctx
+				.getResource(
+						"classpath:edu/isi/bmkeg/vpdmf/people/people-mysql-1.1.5-SNAPSHOT.zip")
 				.getFile();
 	    
 	    builder = new VPDMfKnowledgeBaseBuilder(buildFile, login, password, dbName);
@@ -87,7 +82,7 @@ public class CoreDaoImplTest {
 			
 		}
 	    
-	    File jarLocation = new File(buildFile.getParent() + "/triage-jpa-1.1.3-SNAPSHOT.jar" );
+	    File jarLocation = new File(buildFile.getParent() + "/people-jpa-1.1.5-SNAPSHOT.jar" );
 		
 	    coreDao = new CoreDaoImpl();
 		coreDao.init(login, password, dbName);
@@ -107,7 +102,6 @@ public class CoreDaoImplTest {
 		
 	}
 
-	// TODO: CHECK THE LATEST TRIAGE MODEL TO FIX THIS
 	@Test 
 	public final void testSortedListQuery() throws Exception {}
 
