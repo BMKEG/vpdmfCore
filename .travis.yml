@@ -2,5 +2,5 @@ language: java
 jdk:
   - openjdk6
 before_install:
-  - echo "CREATE USER 'build'@'localhost' IDENTIFIED BY 'LP-U88ht';\nCREATE USER 'build'@'localhost' IDENTIFIED BY 'LP-U88ht';\nFLUSH PRIVILEGES;\n" | mysql -u root
+  - echo "CREATE USER 'build'@'localhost' IDENTIFIED BY 'LP-U88ht';\nFLUSH PRIVILEGES;\n" | mysql -u root
   - git clone https://github.com/BMKEG/bmkeg-parent ../bmkeg-parent
