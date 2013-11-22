@@ -2,7 +2,7 @@ language: java
 jdk:
   - openjdk6
 before_install:
-  - mysql -u travis -p -e "CREATE USER 'build'@'localhost' IDENTIFIED BY 'LP-U88ht';"
-  - mysql -u travis -p -e "GRANT ALL PRIVILEGES ON * . * TO 'build'@'localhost';"
-  - mysql -u travis -p -e "FLUSH PRIVILEGES;"
+  - mysql -u travis -p "" -e "CREATE USER 'build'@'localhost' IDENTIFIED BY 'LP-U88ht';"
+  - mysql -u travis -p "" -e "GRANT ALL PRIVILEGES ON * . * TO 'build'@'localhost';"
+  - mysql -u travis -p "" -e "FLUSH PRIVILEGES;"
   - git clone https://github.com/BMKEG/bmkeg-parent ../bmkeg-parent
