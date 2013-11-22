@@ -3,7 +3,5 @@ jdk:
   - openjdk6
 before_install:
   - echo "USE mysql;\nUPDATE user SET password=PASSWORD('password') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
-  - mysql -u root -p password -e "CREATE USER 'build'@'localhost' IDENTIFIED BY 'LP-U88ht';"
-  - mysql -u root -p password -e "GRANT ALL PRIVILEGES ON * . * TO 'build'@'localhost';"
-  - mysql -u root -p password -e "FLUSH PRIVILEGES;"
+  - echo "CREATE USER 'build'@'localhost' IDENTIFIED BY 'LP-U88ht';\nCREATE USER 'build'@'localhost' IDENTIFIED BY 'LP-U88ht';\nFLUSH PRIVILEGES;\n" | mysql -u root
   - git clone https://github.com/BMKEG/bmkeg-parent ../bmkeg-parent
