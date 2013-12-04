@@ -834,7 +834,7 @@ public class ChangeEngine extends QueryEngine implements
 			// Low level gate to avoid inserting passwords into database
 			//
 			String cName = obj.getDefinition().getBaseName();
-			if ((cName.equals("p") || cName.equals("vpdmfUser"))
+			if ((cName.equals("p") || cName.equals("VpdmfUser"))
 					&& aD.getBaseName().equals("password"))
 				continue;
 

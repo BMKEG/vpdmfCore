@@ -1256,7 +1256,7 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 				continue;				
 			}
 			
-			if ((aD.getParentClass().getBaseName().equals("vpdmfUser") || aD
+			if ((aD.getParentClass().getBaseName().equals("VpdmfUser") || aD
 					.getParentClass().getBaseName().equals("p"))
 					&& aD.getBaseName().equals("password")) {
 				continue;

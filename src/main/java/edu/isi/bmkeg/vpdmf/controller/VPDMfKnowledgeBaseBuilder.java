@@ -399,7 +399,7 @@ public class VPDMfKnowledgeBaseBuilder {
 	private Set<String> getUsers(Statement quickStat) throws SQLException {
 		Set<String> lookup = new HashSet<String>();
 		String sql = "select distinct login from " + this.kbName
-				+ ".vpdmfUser;";
+				+ ".VpdmfUser;";
 
 		if (this.lc)
 			sql = sql.toLowerCase();

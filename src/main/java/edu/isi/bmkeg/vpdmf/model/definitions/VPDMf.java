@@ -209,7 +209,7 @@ public class VPDMf implements Serializable {
 
 		String rootPath = model.getTopPackage().getPkgAddress();
 
-		if (model.checkClassExistence("vpdmfUser")) {
+		if (model.checkClassExistence("VpdmfUser")) {
 			// generateVpdmfUserSpec(specDirectory);
 		}
 
