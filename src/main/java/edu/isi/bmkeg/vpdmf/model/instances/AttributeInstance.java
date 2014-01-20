@@ -13,13 +13,15 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
 import edu.isi.bmkeg.uml.model.UMLattribute;
 import edu.isi.bmkeg.uml.model.UMLclass;
 import edu.isi.bmkeg.uml.utils.UMLDataConverters;
+import edu.isi.bmkeg.vpdmf.exceptions.VPDMfException;
 
 /**
  * AttributeInstances will have three attributes
@@ -36,15 +38,22 @@ public class AttributeInstance implements Serializable {
 	private String defName;
 	private boolean notNull;
 
-	private String queryCode = EQ;
-	public static String EQ = "equalTo";
+	private String andOrCode = AND;
 	public static String OR = "or";
 	public static String AND = "and";
-	public static String NOT = "not";
-	public static String GT = "greaterThan";
-	public static String GTEQ = "greaterThanOrEqualTo";
-	public static String LT = "lessThan";
-	public static String LTEQ = "lessThanOrEqualTo";
+	
+	private String[] queryCode = {EQ};
+	public static String EQ = "<vpdmf-eq>";
+	public static String NOT = "<vpdmf-not>";
+	public static String GT = "<vpdmf-gt>";
+	public static String GTEQ = "<vpdmf-gteq>";
+	public static String LT = "<vpdmf-lt>";
+	public static String LTEQ = "<vpdmf-lteq>";
+	public static String LIKE = "<vpdmf-like>";
+	
+	private static Pattern codePatt = Pattern.compile(
+			"(^<vpdmf-eq>|^<vpdmf-not>|^<vpdmf-gt>|^<vpdmf-gteq>|^<vpdmf-lt>|^<vpdmf-lteq>)"
+			);
 
 	private HashSet<AttributeInstance> connectedKeys = new HashSet<AttributeInstance>();
 
@@ -241,15 +250,31 @@ public class AttributeInstance implements Serializable {
 			return this.value.equals(o);
 	}
 
-	public String readValueString() {
-		String value = null;
-		try {
-			value = UMLDataConverters.convertToString(this.definition,
-					this.value);
-		} catch (Exception e) {
-			e.printStackTrace();
+	public String readValueString() throws VPDMfException {
+		
+		String valueString = null;		
+		
+		//
+		// TODO - must rewrite basic query engine. This encoding is horrible. 
+		//
+		if( this.queryCode.length > 1 || !this.queryCode[0].equals(EQ) ) {
+			valueString = "";
+			String[] valueArray = (String[]) this.value;
+			for(int i=0; i<this.queryCode.length; i++) {
+				valueString += this.queryCode[i] + valueArray[i]; 	
+			}
+			return valueString;
 		}
-		return value;
+		
+		try {
+			valueString = UMLDataConverters.convertToString(
+					this.definition,
+					this.value);
+		} catch (Exception e){
+			throw new VPDMfException(e);
+		}
+
+		return valueString;
 	}
 
 	public Object getValue() {
@@ -268,12 +293,14 @@ public class AttributeInstance implements Serializable {
 		return this.object;
 	}
 
-	public Boolean constainsBlobData() {
+	public Boolean constainsBlobData() throws Exception {
+		
 		Boolean flag = new Boolean(false);
 		String s = this.readValueString();
 		if (this.value != null && s == null)
 			flag = new Boolean(true);
 		return flag;
+	
 	}
 
 	public boolean isPrimaryKey() {
@@ -294,18 +321,71 @@ public class AttributeInstance implements Serializable {
 
 	}
 
-	public void writeValueString(String value) {
-		try {
-
-			Object data = UMLDataConverters.convertToType(this.definition,
-					value);
-			this.setValue(data);
-
-		} catch (Exception e) {
-			e.printStackTrace();
+	public void writeValueString(String value) throws Exception {
+		
+		if( value == null ) {
+			return;
 		}
-	}
+		
+		if( value.contains("<vpdmf-or>") ) {
+		
+			this.setAndOrCode( AttributeInstance.OR );
+			String[] orValues = value.split("<vpdmf-or>");
+			this.queryCode = new String[orValues.length];
+			for( int i=0; i<orValues.length; i++) {
+				String code = this.checkForConditions(orValues[i]);
+				if( code.length() > 0 ) {
+					orValues[i] = orValues[i].replaceAll(code, "");
+					this.queryCode[i] = code;
+				} else {
+					this.queryCode[i] = AttributeInstance.EQ;
+				}	
+			}
 
+			this.setValue(orValues);
+		
+		} else if( value.contains("<vpdmf-and>") ) {
+		
+			this.setAndOrCode( AttributeInstance.AND );
+			String[] andValues = value.split("<vpdmf-and>");
+			this.queryCode = new String[andValues.length];
+			for( int i=0; i<andValues.length; i++) {
+				String code = this.checkForConditions(andValues[i]);
+				if( code.length() > 0 ) {
+					andValues[i] = andValues[i].replaceAll(code, "");
+					this.queryCode[i] = code;
+				} else {
+					this.queryCode[i] = AttributeInstance.EQ;
+				}	
+			}
+
+			this.setValue(andValues);
+		
+		} else {
+
+			String code = this.checkForConditions(value);
+			if( code.length() > 0 ) {
+				value = value.replaceAll(code, "");
+				this.queryCode[0] = code;
+			} else {
+				this.queryCode[0] = AttributeInstance.EQ;
+			}	
+			Object data = UMLDataConverters.convertToType(this.definition, value);
+			this.setValue(data);
+			
+		}
+	
+	}
+	
+	private String checkForConditions(String value) {
+		String code = "";
+		Matcher m = codePatt.matcher(value);
+		if( m.find() ) {
+			code = m.group(1);
+		}
+		return code;
+	}
+	
 	public void setValue(Object value) {
 		this.value = value;
 
@@ -338,14 +418,6 @@ public class AttributeInstance implements Serializable {
 	public void setObject(ClassInstance object) {
 		this.object = object;
 	}
-
-	public String getQueryCode() {
-		return queryCode;
-	}
-
-	public void setQueryCode(String queryCode) {
-		this.queryCode = queryCode;
-	}
 	
 	public String toString() {
 		
@@ -354,6 +426,22 @@ public class AttributeInstance implements Serializable {
 		else 
 			return this.defName + "=" + this.value.toString();
 	
+	}
+
+	public String getAndOrCode() {
+		return andOrCode;
+	}
+
+	public void setAndOrCode(String andOrCode) {
+		this.andOrCode = andOrCode;
+	}
+
+	public String[] getQueryCode() {
+		return queryCode;
+	}
+
+	public void setQueryCode(String[] queryCode) {
+		this.queryCode = queryCode;
 	}
 	
 }

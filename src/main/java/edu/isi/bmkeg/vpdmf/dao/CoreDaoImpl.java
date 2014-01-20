@@ -1,28 +1,27 @@
 package edu.isi.bmkeg.vpdmf.dao;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import org.semanticweb.owlapi.model.OWLOntology;
-
+import edu.isi.bmkeg.uml.model.UMLattribute;
 import edu.isi.bmkeg.uml.model.UMLclass;
-import edu.isi.bmkeg.uml.utils.OwlAPIUtility;
+import edu.isi.bmkeg.utils.Converters;
 import edu.isi.bmkeg.vpdmf.controller.queryEngineTools.ChangeEngine;
 import edu.isi.bmkeg.vpdmf.controller.queryEngineTools.VPDMfChangeEngineInterface;
-import edu.isi.bmkeg.vpdmf.model.ViewTable;
-import edu.isi.bmkeg.vpdmf.model.definitions.PrimitiveDefinition;
 import edu.isi.bmkeg.vpdmf.model.definitions.VPDMf;
-import edu.isi.bmkeg.vpdmf.model.definitions.ViewDefinition;
 import edu.isi.bmkeg.vpdmf.model.instances.AttributeInstance;
 import edu.isi.bmkeg.vpdmf.model.instances.ClassInstance;
 import edu.isi.bmkeg.vpdmf.model.instances.LightViewInstance;
 import edu.isi.bmkeg.vpdmf.model.instances.PrimitiveInstance;
 import edu.isi.bmkeg.vpdmf.model.instances.ViewBasedObjectGraph;
 import edu.isi.bmkeg.vpdmf.model.instances.ViewInstance;
-import edu.isi.bmkeg.vpdmf.model.qo.ViewTable_qo;
+import edu.isi.bmkeg.vpdmf.model.instances.VpdmfObject;
+import edu.isi.bmkeg.vpdmf.model.instances.VpdmfQueryObject;
 
 /**
  * Base class for canonical factories used in KEfED. Sets up the persistence and
@@ -45,12 +44,7 @@ public class CoreDaoImpl implements CoreDao {
 
 	private VPDMfChangeEngineInterface ce;
 
-	private OwlAPIUtility owlUtil;
-
-	private Map<String, ViewBasedObjectGraph> vbogs;
-
 	public CoreDaoImpl() throws Exception {
-		this.owlUtil = new OwlAPIUtility();
 		this.cl = this.getClass().getClassLoader();
 	}
 
@@ -64,7 +58,7 @@ public class CoreDaoImpl implements CoreDao {
 		this.ce = new ChangeEngine(login, password, uri);
 		this.ce.connectToDB();
 		this.top = this.ce.readTop();
-		// this.cl = this.ce.provideClassLoaderForModel();
+		//this.cl = this.ce.provideClassLoaderForModel();
 		this.ce.closeDbConnection();
 
 	}
@@ -93,7 +87,7 @@ public class CoreDaoImpl implements CoreDao {
 		this.cl = cl;
 	}
 
-	public void saveViewInstanceToOntology(OWLOntology o, String uri,
+	/*public void saveViewInstanceToOntology(OWLOntology o, String uri,
 			ViewInstance vi) throws Exception {
 
 		Map<String, ViewBasedObjectGraph> vbogs = generateVbogs();
@@ -136,294 +130,42 @@ public class CoreDaoImpl implements CoreDao {
 
 		// }
 
+	}*/
+	
+	@Override
+	public void connectToDb() throws Exception {
+
+		this.ce.connectToDB();
+		this.ce.turnOffAutoCommit();
+	
 	}
 
-	public Map<String, ViewBasedObjectGraph> regenerateVbogs() throws Exception {
-
-		vbogs = null;
-		return this.generateVbogs();
-
+	@Override
+	public void commitTransaction() throws Exception {
+	
+		this.ce.commitTransaction();
+	
 	}
 
-	public Map<String, ViewBasedObjectGraph> generateVbogs() throws Exception {
-
-		if (vbogs != null) {
-			return vbogs;
-		}
-
-		Map<String, ViewBasedObjectGraph> vbogs = new HashMap<String, ViewBasedObjectGraph>();
-
-		Iterator<String> keysIt = getTop().getViews().keySet().iterator();
-		while (keysIt.hasNext()) {
-			String key = keysIt.next();
-			vbogs.put(key, new ViewBasedObjectGraph(getTop(), getCl(), key));
-		}
-
-		this.vbogs = vbogs;
-
-		return vbogs;
+	@Override
+	public void rollbackTransaction() throws Exception {
+	
+		this.ce.rollbackTransaction();
+		
 	}
 
-	public List<LightViewInstance> goGetLightViewList(String viewName,
-			String attrAddr, String attrVal) throws Exception {
-
-		Map<String, ViewBasedObjectGraph> vbogs = generateVbogs();
-
-		ViewDefinition vd = getTop().getViews().get(viewName);
-		ViewInstance qVi = new ViewInstance(vd);
-		AttributeInstance ai = qVi.readAttributeInstance(attrAddr, 0);
-		ai.writeValueString(attrVal);
-		List<LightViewInstance> l = getCe().executeListQuery(qVi);
-
-		return l;
-
-	}
-
-	public List<ViewInstance> goGetHeavyViewList(String viewName,
-			String attrAddr, String attrVal) throws Exception {
-
-		Map<String, ViewBasedObjectGraph> vbogs = generateVbogs();
-
-		ViewDefinition vd = getTop().getViews().get(viewName);
-		ViewInstance qVi = new ViewInstance(vd);
-		AttributeInstance ai = qVi.readAttributeInstance(attrAddr, 0);
-		ai.writeValueString(attrVal);
-		List<ViewInstance> l = getCe().executeFullQuery(qVi);
-
-		return l;
-
-	}
-
-	public List<LightViewInstance> listAllViews(String viewName)
-			throws Exception {
-
-		ViewDefinition vd = getTop().getViews().get(viewName);
-		ViewInstance qVi = new ViewInstance(vd);
-
-		getCe().connectToDB();
-
-		List<LightViewInstance> viewList = getCe().executeListQuery(qVi);
-
-		getCe().closeDbConnection();
-
-		return viewList;
-
-	}
-
-	public List<LightViewInstance> listAllViews(String viewName,
-			boolean paging, int start, int pageSize) throws Exception {
-
-		ViewDefinition vd = getTop().getViews().get(viewName);
-		ViewInstance qVi = new ViewInstance(vd);
-
-		getCe().connectToDB();
-		List<LightViewInstance> viewList = null;
-		if (paging) {
-			viewList = getCe().executeListQuery(qVi, paging, start, pageSize);
-		} else {
-			viewList = getCe().executeListQuery(qVi);
-		}
-		getCe().closeDbConnection();
-
-		return viewList;
-
-	}
-
-	public long insertVBOG(Object ov, String viewName) throws Exception {
-
-		long vpdmfId = 0;
-
-		try {
-
-			getCe().connectToDB();
-			getCe().turnOffAutoCommit();
-
-			ViewBasedObjectGraph vbog = new ViewBasedObjectGraph(getTop(),
-					getCl(), viewName);
-
-			ViewInstance vi = vbog.objectGraphToView(ov);
-			vi.reconstructIndexStrings();
-			Map<String, Object> objMap = vbog.getObjMap();
-
-			vpdmfId = getCe().executeInsertQuery(vi);
-
-			// TODO move the following recurring fragment to some Utils class
-			Iterator<String> keyIt = objMap.keySet().iterator();
-			while (keyIt.hasNext()) {
-				String key = keyIt.next();
-				PrimitiveInstance pi = (PrimitiveInstance) vi.getSubGraph()
-						.getNodes().get(key);
-				Object o = objMap.get(key);
-				vbog.primitiveToObject(pi, o, true);
-			}
-
-			getCe().commitTransaction();
-
-		} catch (Exception e) {
-
-			getCe().rollbackTransaction();
-
-			throw e;
-
-		} finally {
-
-			getCe().closeDbConnection();
-
-		}
-
-		return vpdmfId;
-	}
-
-	public Object findVBOGById(long id, String viewName) throws Exception {
-
-		try {
-
-			getCe().connectToDB();
-			getCe().turnOffAutoCommit();
-
-			ViewInstance vi = getCe().executeUIDQuery(viewName, id);
-
-			ViewBasedObjectGraph vbog = generateVbogs().get(viewName);
-			vbog.viewToObjectGraph(vi);
-			Object ov = vbog.readPrimaryObject();
-
-			return ov;
-
-		} finally {
-			getCe().closeDbConnection();
-		}
-
-	}
-
-	/**
-	 * Finds a view instances matching the condition:
-	 * <viewName>]<primitiveName>|<className>.<attributeName> = <attributeValue>
-	 * and converts them into a VBOG
-	 */
-	public Object findVBOGByAttributeValue(String viewName,
-			String primitiveName, String className, String attributeName,
-			String attributeValue) throws Exception {
-
-		try {
-
-			getCe().connectToDB();
-			getCe().turnOffAutoCommit();
-
-			ViewDefinition vd = getTop().getViews().get(viewName);
-			ViewBasedObjectGraph vbog = generateVbogs().get(viewName);
-
-			ViewInstance qvi = new ViewInstance(vd);
-
-			AttributeInstance ai = qvi.readAttributeInstance("]" + primitiveName
-					+ "|" + className + "." + attributeName, 0);
-			ai.writeValueString(attributeValue);
-
-			Object o = null;
-
-			List<LightViewInstance> l = getCe().executeListQuery(qvi, true, 0, 1);
-			if (l.size() == 1) {
-				LightViewInstance lvi = l.get(0);
-				ViewInstance vi = getCe().executeUIDQuery(lvi);
-				vbog.viewToObjectGraph(vi);
-				o = vbog.readPrimaryObject();
-			}
-			
-			return o;
-
-		} finally {
-			getCe().closeDbConnection();
-		}
-
-	}
-
-	/**
-	 * Retrieves view instances matching the condition:
-	 * <viewName>]<primitiveName>|<className>.<attributeName> = <attributeValue>
-	 * and converts them into a list of VBOGs
-	 */
-	public List<?> retrieveVBOGsByAttributeValue(String viewName,
-			String primitiveName, String className, String attributeName,
-			String attributeValue, int offset, int pageSize) throws Exception {
-		try {
-
-			getCe().connectToDB();
-			getCe().turnOffAutoCommit();
-
-			ViewDefinition vd = getTop().getViews().get(viewName);
-			ViewBasedObjectGraph vbog = generateVbogs().get(viewName);
-
-			ViewInstance vi = new ViewInstance(vd);
-
-			AttributeInstance ai = vi.readAttributeInstance("]" + primitiveName
-					+ "|" + className + "." + attributeName, 0);
-			ai.writeValueString(attributeValue);
-
-			List<Object> l = new ArrayList<Object>();
-
-			Iterator<ViewInstance> it = getCe().executeFullQuery(vi, true,
-					offset, pageSize).iterator();
-			while (it.hasNext()) {
-				ViewInstance lvi = it.next();
-
-				vbog.viewToObjectGraph(lvi);
-				Object o = vbog.readPrimaryObject();
-				l.add(o);
-
-			}
-
-			return l;
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-
-		} finally {
-			getCe().closeDbConnection();
-		}
-	}
-
-	/**
-	 * Returns the complete object graph of any view given a vpdmfId string.
-	 * 
-	 * @param vpdmfId
-	 *            Must be formatted as a string: "bmkeg=1234"
-	 * @param viewType
-	 *            An instance of the object of the primary primitive of the view
-	 * @return The complete object graph of that particular view.
-	 * @throws Exception
-	 */
-	public <T> T loadViewBasedObject(Long vpdmfId, T viewType) throws Exception {
-
-		String viewTypeName = viewType.getClass().getSimpleName();
-
-		ViewBasedObjectGraph vbog = new ViewBasedObjectGraph(this.getTop(),
-				this.getCl(), viewTypeName);
-
-		this.getCe().connectToDB();
-		ViewInstance vi = this.getCe().executeUIDQuery(viewTypeName, vpdmfId);
-		this.getCe().closeDbConnection();
-
-		Map<String, Object> objMap = vbog.viewToObjectGraph(vi);
-		Iterator<String> keyIt = objMap.keySet().iterator();
-		while (keyIt.hasNext()) {
-			String key = keyIt.next();
-			PrimitiveInstance pi = (PrimitiveInstance) vi.getSubGraph()
-					.getNodes().get(key);
-			Object o = objMap.get(key);
-			vbog.primitiveToObject(pi, o, true);
-		}
-
-		T o = (T) vbog.readPrimaryObject();
-
-		return o;
-
+	@Override
+	public void closeDbConnection() throws Exception {
+		
+		this.ce.closeDbConnection();
+		
 	}
 
 	// ~~~~~~~~~~~~~~~~~~
 	// final operations
 	// ~~~~~~~~~~~~~~~~~~
-	
-	public <T extends ViewTable> long update(T obj, String viewTypeName)
+	@Override
+	public <T extends VpdmfObject> long update(T obj, String viewTypeName)
 			throws Exception {
 
 		long vpdmfId = 0;
@@ -453,7 +195,8 @@ public class CoreDaoImpl implements CoreDao {
 
 	}
 
-	public <T extends ViewTable> long insert(T obj, String viewTypeName)
+	@Override
+	public <T extends VpdmfObject> long insert(T obj, String viewTypeName)
 			throws Exception {
 
 		long vpdmfId = 0;
@@ -481,8 +224,9 @@ public class CoreDaoImpl implements CoreDao {
 
 		return vpdmfId;
 	}
-
-	public <T extends ViewTable> List<T> retrieve(T obj, String viewTypeName,
+	
+	@Override
+	public <T extends VpdmfObject> List<T> retrieve(T obj, String viewTypeName,
 			int offset, int pageSize) throws Exception {
 
 		try {
@@ -502,8 +246,9 @@ public class CoreDaoImpl implements CoreDao {
 		}
 
 	}
-
-	public <T extends ViewTable> List<T> retrieve(T obj, String viewTypeName)
+	
+	@Override
+	public <T extends VpdmfObject> List<T> retrieve(T obj, String viewTypeName)
 			throws Exception {
 
 		try {
@@ -522,8 +267,9 @@ public class CoreDaoImpl implements CoreDao {
 		}
 
 	}
-
-	public <T extends ViewTable_qo> List<LightViewInstance> list(T obj,
+	
+	@Override
+	public <T extends VpdmfQueryObject> List<LightViewInstance> list(T obj,
 			String viewTypeName, int offset, int pageSize) throws Exception {
 
 		if (!this.getTop().getViews().containsKey(viewTypeName)) {
@@ -548,7 +294,8 @@ public class CoreDaoImpl implements CoreDao {
 
 	}
 
-	public <T extends ViewTable_qo> List<LightViewInstance> list(T obj,
+	@Override
+	public <T extends VpdmfQueryObject> List<LightViewInstance> list(T obj,
 			String viewTypeName) throws Exception {
 
 		if (!this.getTop().getViews().containsKey(viewTypeName)) {
@@ -572,8 +319,8 @@ public class CoreDaoImpl implements CoreDao {
 
 	}
 	
-
-	public <T extends ViewTable> T findById(long id, T obj, String viewTypeName)
+	@Override
+	public <T extends VpdmfObject> T findById(long id, T obj, String viewTypeName)
 			throws Exception {
 
 		try {
@@ -592,22 +339,10 @@ public class CoreDaoImpl implements CoreDao {
 		}
 
 	}
+	
 
-	public int countView(String viewTypeName) throws Exception {
-
-		if (!this.getTop().getViews().containsKey(viewTypeName)) {
-			throw new Exception(viewTypeName + " view not found!");
-		}
-
-		this.getCe().connectToDB();
-		int count = this.countViewInTrans(viewTypeName);
-		this.getCe().closeDbConnection();
-
-		return count;
-
-	}
-
-	public <T extends ViewTable_qo> int countView(T obj, String viewTypeName)
+	@Override
+	public <T extends VpdmfQueryObject> int countView(T obj, String viewTypeName)
 			throws Exception {
 
 		if (!this.getTop().getViews().containsKey(viewTypeName)) {
@@ -622,6 +357,7 @@ public class CoreDaoImpl implements CoreDao {
 
 	}
 	
+	@Override
 	public boolean deleteById(long id, String viewTypeName)
 			throws Exception {
 
@@ -655,13 +391,12 @@ public class CoreDaoImpl implements CoreDao {
 	}
 
 
-	
-
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// operations occurring within an external transaction
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	public <T extends ViewTable> long updateInTrans(T obj, String viewTypeName)
+	@Override
+	public <T extends VpdmfObject> long updateInTrans(T obj, String viewTypeName)
 			throws Exception {
 
 		ViewInstance vi0;
@@ -698,7 +433,8 @@ public class CoreDaoImpl implements CoreDao {
 
 	}
 
-	public <T extends ViewTable> long insertInTrans(T obj, String viewTypeName)
+	@Override
+	public <T extends VpdmfObject> long insertInTrans(T obj, String viewTypeName)
 			throws Exception {
 
 		ViewBasedObjectGraph vbog = new ViewBasedObjectGraph(getTop(), getCl(),
@@ -726,7 +462,8 @@ public class CoreDaoImpl implements CoreDao {
 
 	}
 
-	public <T extends ViewTable> List<T> retrieveInTrans(T obj,
+	@Override
+	public <T extends VpdmfObject> List<T> retrieveInTrans(T obj,
 			String viewTypeName, int offset, int pageSize) throws Exception {
 
 		ViewBasedObjectGraph vbog = new ViewBasedObjectGraph(this.getTop(),
@@ -750,7 +487,8 @@ public class CoreDaoImpl implements CoreDao {
 
 	}
 
-	public <T extends ViewTable> List<T> retrieveInTrans(T obj, String viewTypeName) throws Exception {
+	@Override
+	public <T extends VpdmfObject> List<T> retrieveInTrans(T obj, String viewTypeName) throws Exception {
 
 		ViewBasedObjectGraph vbog = new ViewBasedObjectGraph(this.getTop(),
 				this.getCl(), viewTypeName);
@@ -772,16 +510,22 @@ public class CoreDaoImpl implements CoreDao {
 
 	}
 
-	public <T extends ViewTable_qo> List<LightViewInstance> listInTrans(T obj,
+	@Override
+	public <T extends VpdmfQueryObject> List<LightViewInstance> listInTrans(T obj,
 			String viewTypeName, int offset, int pageSize) throws Exception {
 
 		ViewBasedObjectGraph vbog = new ViewBasedObjectGraph(this.getTop(),
 				this.getCl(), viewTypeName);
 		ViewInstance vi = vbog.objectGraphToView(obj, false);
 
+		List<String> sortAddr = new ArrayList<String>();
+		for(Integer ii : Converters.asSortedList(vbog.getSortAddr().keySet()) ) {
+			sortAddr.add(vbog.getSortAddr().get(ii));
+		}
+
 		List<LightViewInstance> l = new ArrayList<LightViewInstance>();
 		Iterator<LightViewInstance> it = getCe().executeListQuery(vi, 
-				vbog.getSortAddr(), true,
+				sortAddr, true,
 				offset, pageSize).iterator();
 		while (it.hasNext()) {
 			LightViewInstance lvi = it.next();
@@ -792,8 +536,9 @@ public class CoreDaoImpl implements CoreDao {
 		return l;
 
 	}
-
-	public <T extends ViewTable_qo> List<LightViewInstance> listInTrans(T obj,
+	
+	@Override
+	public <T extends VpdmfQueryObject> List<LightViewInstance> listInTrans(T obj,
 			String viewTypeName) throws Exception {
 
 		ViewBasedObjectGraph vbog = new ViewBasedObjectGraph(this.getTop(),
@@ -801,7 +546,13 @@ public class CoreDaoImpl implements CoreDao {
 		ViewInstance vi = vbog.objectGraphToView(obj, false);
 
 		List<LightViewInstance> l = new ArrayList<LightViewInstance>();
-		Iterator<LightViewInstance> it = getCe().executeListQuery(vi, vbog.getSortAddr())
+		
+		List<String> sortAddr = new ArrayList<String>();
+		for(Integer ii : Converters.asSortedList(vbog.getSortAddr().keySet()) ) {
+			sortAddr.add(vbog.getSortAddr().get(ii));
+		}
+		
+		Iterator<LightViewInstance> it = getCe().executeListQuery(vi, sortAddr)
 				.iterator();
 		while (it.hasNext()) {
 			LightViewInstance lvi = it.next();
@@ -813,7 +564,8 @@ public class CoreDaoImpl implements CoreDao {
 
 	}
 
-	public <T extends ViewTable> T findByIdInTrans(long id, T obj,
+	@Override
+	public <T extends VpdmfObject> T findByIdInTrans(long id, T obj,
 			String viewTypeName) throws Exception {
 
 		ViewInstance vi = getCe().executeUIDQuery(viewTypeName, id);
@@ -823,7 +575,9 @@ public class CoreDaoImpl implements CoreDao {
 		
 		vi.convertImagesToStreams();
 		
-		ViewBasedObjectGraph vbog = generateVbogs().get(viewTypeName);
+		ViewBasedObjectGraph vbog = new ViewBasedObjectGraph(getTop(), 
+				getCl(), 
+				viewTypeName);
 		vbog.viewToObjectGraph(vi);
 		T ov = (T) vbog.readPrimaryObject();
 
@@ -831,18 +585,8 @@ public class CoreDaoImpl implements CoreDao {
 
 	}
 
-	public int countViewInTrans(String viewTypeName) throws Exception {
-
-		ViewDefinition vd = this.getTop().getViews().get(viewTypeName);
-		ViewInstance vi = new ViewInstance(vd);
-
-		int count = this.getCe().executeCountQuery(vi);
-
-		return count;
-
-	}
-
-	public <T extends ViewTable_qo> int countViewInTrans(T obj, String viewTypeName)
+	@Override
+	public <T extends VpdmfQueryObject> int countViewInTrans(T obj, String viewTypeName)
 			throws Exception {
 
 		ViewBasedObjectGraph vbog = new ViewBasedObjectGraph(this.getTop(),
@@ -856,31 +600,96 @@ public class CoreDaoImpl implements CoreDao {
 
 	}
 	
+	@Override
 	public boolean deleteByIdInTrans(long id, String viewTypeName) throws Exception {
 
 		return getCe().executeDeleteQuery(viewTypeName, id);
 		
 	}
+	
+	// ~~~~~~~~~~~~~~~~~~~~~~
+	// class level operations 
+	// ~~~~~~~~~~~~~~~~~~~~~~
+	@Override
+	public <T1 extends VpdmfQueryObject, T2> List<T2> listClassInTrans(T1 qObj, T2 rObj) 
+			throws Exception {
+		
+		VPDMf top = getCe().readTop();
+		
+		String qoName = qObj.getClass().getSimpleName();
+		Map<String, Method> methods = new HashMap<String, Method>();
+		Method mArray[] = qObj.getClass().getMethods();
+		for (int i = 0; i < mArray.length; i++) {
+			Method m = mArray[i];
+			String mName = m.getName();
+			methods.put(mName, m);
+		}
+		
+		String cName = qoName.replaceAll("_qo", "");
+		if( !cName.equals(rObj.getClass().getSimpleName() ) ) {
+			throw new Exception("Classnames for query object (" + 
+						qObj.getClass().getSimpleName() + 
+						") and returned object (" + 
+						rObj.getClass().getSimpleName() + 
+						")do not match");
+		}
+		
+		Set<UMLclass> cSet = top.getUmlModel().lookupClass(cName);
+		
+		if( cSet.size() != 1 ) {
+			throw new Exception("Can't find unique reference to class: " + qoName );
+		}
+		
+		UMLclass c = cSet.iterator().next();
+		ClassInstance ci = new ClassInstance(c);
+
+		for( String attName : ci.getAttributes().keySet() ) {
+			AttributeInstance ai = ci.getAttributes().get(attName);
+			
+			String getterName = "get"
+					+ attName.substring(0, 1).toUpperCase()
+					+ attName.substring(1, attName.length());
+			Method m = methods.get(getterName);
+			if (m == null) {
+				continue;
+			}			
+			Object value = m.invoke(qObj);
+			ai.writeValueString((String)value);
+
+		}
+
+		List<ClassInstance> lci = getCe().queryClass(ci);
+		List<T2> rList = new ArrayList<T2>();
+		
+		for( ClassInstance rCi : lci ) {
+			T2 o2 = (T2) rObj.getClass().newInstance();
+			
+			for( String attName : rCi.getAttributes().keySet() ) {
+				AttributeInstance ai = ci.getAttributes().get(attName);
+				
+				String setterName = "set"
+						+ attName.substring(0, 1).toUpperCase()
+						+ attName.substring(1, attName.length());
+				Method m = methods.get(setterName);
+				if (m == null) {
+					throw new Exception("No method " + qoName + "." + setterName);
+				}			
+				m.invoke(o2, ai.getValue());
+				
+			}
+			
+			rList.add(o2);
+			
+		}
+
+		return rList;
+		
+	}
+
 
 	// ~~~~~~~~~~~~~~~~~~
 	// getters 'n setters
 	// ~~~~~~~~~~~~~~~~~~
-
-	public Map<String, ViewBasedObjectGraph> getVbogs() {
-		return vbogs;
-	}
-
-	public void setVbogs(Map<String, ViewBasedObjectGraph> vbogs) {
-		this.vbogs = vbogs;
-	}
-
-	public OwlAPIUtility getOwlUtil() {
-		return owlUtil;
-	}
-
-	public void setOwlUtil(OwlAPIUtility owlUtil) {
-		this.owlUtil = owlUtil;
-	}
 
 	public String getLogin() {
 		return login;

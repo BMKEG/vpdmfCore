@@ -107,16 +107,27 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- annotations are not needed for plugin execution so you can remove 
+			this dependency for execution with using provided scope -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-web</artifactId>
-			<version>3.1.4.RELEASE</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-config</artifactId>
-			<version>3.1.4.RELEASE</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>javax.persistence</groupId>
+		    <artifactId>com.springsource.javax.persistence</artifactId>
+	   	    <version>2.0.0</version>
 		</dependency>
 
 	</dependencies>

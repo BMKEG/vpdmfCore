@@ -97,36 +97,6 @@ public class VPDMfParser {
 		
 	}
 	
-	public VPDMf buildVpdmfSystemViews() throws Exception {
-
-		String specsPath = ClassLoader.getSystemResource(
-				"edu/isi/bmkeg/vpdmf/vpdmfSystem/vpdmfSystem_vpdmfSpec.xml"
-				).getFile();		
-		File specsFile = new File(specsPath);
-		List<File> viewFiles = new ArrayList<File>();
-		
-		//
-		// parse the specs files
-		//
-		VpdmfSpec vpdmfSpec = VPDMfConverters.readVpdmfSpecFromFile(specsFile);
-
-		// Model file
-		String modelPath = vpdmfSpec.getModel().getPath();
-		String modelType = vpdmfSpec.getModel().getType();
-		File modelFile = new File(specsFile.getParent() + "/" + modelPath);	
-		UMLModelSimpleParser p = new UMLModelSimpleParser(UMLmodel.XMI_MAGICDRAW);
-		p.parseUMLModelFile(modelFile);
-		UMLmodel m = p.getUmlModels().get(0);
-
-		// View directory
-		String viewsPath = vpdmfSpec.getViewsPath();
-		File viewsDir = new File(specsFile.getParent() + "/" + viewsPath);	
-		viewFiles.addAll( VPDMfParser.getAllSpecFiles(viewsDir) );
-		
-		return this.buildAllViews(vpdmfSpec, m, viewFiles);
-		
-	}
-	
 	public VPDMf buildAllViews(VpdmfSpec vpdmfSpec, 
 			UMLmodel model, 
 			List<File> allSpecFiles,
@@ -453,6 +423,10 @@ public class VPDMfParser {
 			ie.setP( ieSpec.getP() ) ;
 			ie.setC( ieSpec.getC() );
 			ie.setA( ieSpec.getA() );
+
+			if( ieSpec.getNullable() != null ) {
+				ie.setNullable( ieSpec.getNullable() );
+			}
 			
 			if( ieSpec.getUniqueKey() != null ) {
 				ie.setUniqueKey( ieSpec.getUniqueKey() );

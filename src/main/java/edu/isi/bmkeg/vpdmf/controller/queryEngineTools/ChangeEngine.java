@@ -830,14 +830,6 @@ public class ChangeEngine extends QueryEngine implements
 				continue;
 			}
 
-			//
-			// Low level gate to avoid inserting passwords into database
-			//
-			String cName = obj.getDefinition().getBaseName();
-			if ((cName.equals("p") || cName.equals("VpdmfUser"))
-					&& aD.getBaseName().equals("password"))
-				continue;
-
 			if (aD.getType().getBaseName().equals("serial")) {
 
 				pks.add(ai);
@@ -1239,7 +1231,6 @@ public class ChangeEngine extends QueryEngine implements
 
 		boolean isNull = pi.isNull();
 		boolean isNullable = pi.getDefinition().isNullable();
-		boolean isNullExceptForFkPks = pi.isNullExceptForFkPks();
 		
 		//
 		// If we are currently updating the primary primitive of the view,
@@ -1278,8 +1269,12 @@ public class ChangeEngine extends QueryEngine implements
 
 		}
 
-		if( (isNullExceptForFkPks && pi.getDefinition().containsIndexElements() ) ||
-				(isNull && !pi.getDefinition().containsIndexElements() ) ){
+		//
+		// TODO: NOT ENTIRELY CLEAR IF THIS IS OK.
+		//
+		if( pi.isNullExceptForFks() ) {
+//		if( (isNullExceptForFkPks && pi.getDefinition().containsIndexElements() ) ||
+//				(isNull && !pi.getDefinition().containsIndexElements() ) ){
 			
 			if (isNullable) {			
 				if (!pi.getDefinition().arePrimitiveConditionsIndexElements()) {

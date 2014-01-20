@@ -25,6 +25,7 @@ public class PrimitiveInstance extends SuperGraphNode {
 	static final long serialVersionUID = 2593554832580697147L;
 
 	private PrimitiveDefinition definition;
+	
 	private String defName;
 
 	private HashMap<String, ClassInstance> objects = new HashMap<String, ClassInstance>();
@@ -171,7 +172,7 @@ public class PrimitiveInstance extends SuperGraphNode {
 
 	}
 	
-	public boolean isNullExceptForFkPks() throws VPDMfException {
+	public boolean isNullExceptForFks() throws VPDMfException {
 
 		PrimitiveInstance testPi = new PrimitiveInstance(this.getDefinition());
 		testPi.fillInConditions();
@@ -182,7 +183,9 @@ public class PrimitiveInstance extends SuperGraphNode {
 			String addr = (String) addrIt.next();
 
 			AttributeInstance ai = this.readAttribute(addr);
-			if( ai.getConnectedKeys().size() > 0 )
+			if( ai.getConnectedKeys().size() > 0 && 
+					(ai.getDefinition().getStereotype() != null &&
+					!ai.getDefinition().getStereotype().contains("PK")))
 				continue;
 			
 			AttributeInstance testAi = testPi.readAttribute(addr);

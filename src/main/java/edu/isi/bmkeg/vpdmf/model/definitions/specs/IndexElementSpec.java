@@ -22,6 +22,8 @@ public class IndexElementSpec implements Serializable {
 
 	private Boolean uniqueKey;
 
+	private Boolean nullable;
+
 	@XmlAttribute
 	public int getPos() {
 		return pos;
@@ -65,6 +67,15 @@ public class IndexElementSpec implements Serializable {
 
 	public void setUniqueKey(Boolean uniqueKey) {
 		this.uniqueKey = uniqueKey;
+	}
+
+	@XmlAttribute
+	public Boolean getNullable() {
+		return nullable;
+	}
+
+	public void setNullable(Boolean nullable) {
+		this.nullable = nullable;
 	}
 		
 }

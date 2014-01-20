@@ -1252,7 +1252,7 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 	}
 
 	private ClassInstance getLinkToAdd(Integer vltId, String fromId,
-			String toId, String linkType, String vltHi, String vltMi) {
+			String toId, String linkType, String vltHi, String vltMi) throws Exception {
 
 		UMLclass cd = this.vpdmf.getUmlModel().lookupClass("ViewLinkTable")
 				.iterator().next();
@@ -1347,7 +1347,8 @@ public class QueryEngine extends DataHolderFactory implements VPDMfQueryEngineIn
 		
 		if( sortAddresses.size() == 0) {
 			sortAddresses.add("]" + vi.getPrimaryPrimitive().getDefName() + 
-					"|ViewTable.vpdmfLabel");
+					"|" + vi.getPrimaryPrimitive().getDefinition().getPrimaryClass().getImplName() 
+					+ ".vpdmfLabel");
 		}
 		
 		ViewHolder vh = this.getOnlyIndexColumns(vi, sortAddresses);

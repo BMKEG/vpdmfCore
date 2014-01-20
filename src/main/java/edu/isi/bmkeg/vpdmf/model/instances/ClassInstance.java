@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 
 import edu.isi.bmkeg.uml.model.UMLattribute;
 import edu.isi.bmkeg.uml.model.UMLclass;
+import edu.isi.bmkeg.vpdmf.exceptions.VPDMfException;
 import edu.isi.bmkeg.vpdmf.model.definitions.IndexElement;
 import edu.isi.bmkeg.vpdmf.model.definitions.PrimitiveDefinition;
 import edu.isi.bmkeg.vpdmf.model.definitions.PrimitiveLink;
@@ -75,7 +76,7 @@ public class ClassInstance implements Serializable {
 	 * vpdmfLabel columns.
 	 * 
 	 */
-	public List<UMLattribute> buildIndexVector() {
+	public List<UMLattribute> buildIndexVector() throws VPDMfException {
 		List<UMLattribute> idxVec = new ArrayList<UMLattribute>();
 
 		PrimitiveInstance pi = (PrimitiveInstance) this.getPrimitive();

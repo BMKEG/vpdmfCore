@@ -337,8 +337,9 @@ public class VPDMf implements Serializable {
 		String vt = viewType.replaceAll("\\.\\%$", "");
 		if (vt.indexOf(".%") != -1)
 			vt = vt.substring(vt.lastIndexOf(".%") + 3, vt.length());
-		else
+		else if(vt.indexOf(".") != -1) 
 			vt = vt.substring(1, vt.length());			
+
 		if (this.getViews().containsKey(vt)) {
 			return (ViewDefinition) this.getViews().get(vt);
 		} else {

@@ -373,7 +373,9 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 	 *            int
 	 * @return Vector
 	 */
-	public Vector getLinkKeyString(PrimitiveLinkInstance pli, int type) {
+	public Vector getLinkKeyString(PrimitiveLinkInstance pli, int type) 
+			throws VPDMfException {
+
 		Vector attrs = new Vector();
 		attrs.add(0, "");
 		attrs.add(1, "");
@@ -536,8 +538,16 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 
 	public void closeDbConnection() throws Exception {
 
-		this.stat.close();
-		this.stat = null;
+		if( stat != null ) {
+			
+			this.stat.close();
+			this.stat = null;
+		
+		} else {
+			
+			logger.warn("Closing connection when the 'stat' is null, probably has an error in the query.");
+			
+		}
 		
 		this.dbConnection.close();
 
@@ -1201,7 +1211,7 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 	 * @param queryType
 	 *            the type of query being processed
 	 */
-	protected boolean buildSqlConditions(ClassInstance cI, int queryType) {
+	protected boolean buildSqlConditions(ClassInstance cI, int queryType) throws VPDMfException {
 		boolean dataSet = false;
 		String result = "";
 		String temp = "";
@@ -1237,54 +1247,54 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 
 		Iterator aDIt = cDef.getAttributes().iterator();
 		ATTLOOP: while (aDIt.hasNext()) {
-			UMLattribute aD = (UMLattribute) aDIt.next();
+			UMLattribute aDefn = (UMLattribute) aDIt.next();
 
-			if (!aD.getToImplement())
+			if (!aDefn.getToImplement())
 				continue;
 			
-			AttributeInstance aI = (AttributeInstance) cI.attributes.get(aD
+			AttributeInstance ai = (AttributeInstance) cI.attributes.get(aDefn
 					.getBaseName());
 
 			// Let's cut to the chase.
-			if (aI.getValue() == null) {
+			if (ai.getValue() == null) {
 				continue;
 			} 
 
-			if ( !aD.getBaseName().equals("vpdmfLabel") &&
-					aD.getType().getBaseName().equals("longString") ) {
-				logger.debug("Ignoring query condition on long string attribute: " + aD.getBaseName());
+			if ( !aDefn.getBaseName().equals("vpdmfLabel") &&
+					aDefn.getType().getBaseName().equals("longString") ) {
+				logger.debug("Ignoring query condition on long string attribute: " + aDefn.getBaseName());
 				continue;				
 			}
 			
-			if ((aD.getParentClass().getBaseName().equals("VpdmfUser") || aD
+			if ((aDefn.getParentClass().getBaseName().equals("VpdmfUser") || aDefn
 					.getParentClass().getBaseName().equals("p"))
-					&& aD.getBaseName().equals("password")) {
+					&& aDefn.getBaseName().equals("password")) {
 				continue;
 			}
 			
-			if ( aD.getStereotype() != null && 
-					aD.getStereotype().equals("vpdmfOrder") ) {
+			if ( aDefn.getStereotype() != null && 
+					aDefn.getStereotype().equals("vpdmfOrder") ) {
 				continue ATTLOOP;
 			}
 
 			if (queryType == this.INDEXONLY) {
 
-				if (!idxVec.contains(aD))
+				if (!idxVec.contains(aDefn))
 					continue ATTLOOP;
 
 			} else if (queryType == this.NOPK) {
 
-				if (pks.contains(aD))
+				if (pks.contains(aDefn))
 					continue ATTLOOP;
 
 			} else if (queryType == this.PKONLY) {
 
-				if (!pks.contains(aD))
+				if (!pks.contains(aDefn))
 					continue ATTLOOP;
 
 			} else if (queryType == this.FKONLY) {
 
-				String s = aD.getStereotype();
+				String s = aDefn.getStereotype();
 
 				//
 				// Bugfix
@@ -1301,40 +1311,54 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 			//
 			// We introduce the situation where we can perform -OR- queries
 			// by setting the value of the attribute instance to a String[] array
+			// and setting the aI
 			//
 			// This is the only situation where this is permissible.
 			//
 			String cond = "";
-			if (aI.getValue() instanceof String[]) {
-				String[] strArray = (String[]) aI.getValue();
+			String[] qCodeArray = ai.getQueryCode();
+			
+			if (ai.getValue() instanceof String[]) {
+
+				String[] strArray = (String[]) ai.getValue();
+				
 				cond = "(";
 				for(int i=0; i<strArray.length; i++) {
 					String c = strArray[i];
+					String qc = qCodeArray[i];
 					if (!cond.endsWith("(")) {
-						cond += " OR ";
+						if( ai.getAndOrCode().equals(AttributeInstance.OR) )
+							cond += " OR ";
+						else if( ai.getAndOrCode().equals(AttributeInstance.AND) )
+							cond += " AND ";
+						else 
+							throw new VPDMfException("Multi-Data in " + ai.getAddress() + " incorrectly formed.");
 					}
-					cond += this.getSQLConditionString(aD, aliasName, c);
+					cond += this.getSQLConditionString(aDefn, aliasName, c, qc);
 				}
 				cond += ")";
-			} else if (aI.getValue() instanceof ObjectMatrix1D) {
-				ObjectMatrix1D aa = (ObjectMatrix1D) aI.getValue();
-				Object[] a = aa.toArray();
-				cond = "(";
 
+			} else if (ai.getValue() instanceof ObjectMatrix1D) {
+			
+				ObjectMatrix1D aa = (ObjectMatrix1D) ai.getValue();
+				Object[] a = aa.toArray();
+				
+				cond = "(";
 				for (int i = 0; i < a.length; i++) {
 					Object o = a[i];
 					String c = o.toString();
+					String qc = qCodeArray[i];
 					if (!cond.endsWith("(")) {
 						cond += " OR ";
 					}
-					cond += this.getSQLConditionString(aD, aliasName, c);
+					cond += this.getSQLConditionString(aDefn, aliasName, c, qc);
 				}
 				cond += ")";
 
 			} else {
 
-				String c = aI.readValueString();
-				cond = this.getSQLConditionString(aD, aliasName, c);
+				String c = ai.readValueString();
+				cond = this.getSQLConditionString(aDefn, aliasName, c, qCodeArray[0]);
 
 			}
 
@@ -1360,12 +1384,32 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 	 *            String
 	 * @return String
 	 */
-	protected String getSQLConditionString(UMLattribute ad, String aliasName,
-			String c) {
-		//
+	protected String getSQLConditionString(
+			UMLattribute ad, 
+			String aliasName,
+			String v,
+			String qc) {
+
+		String op = "=";
+		if( qc.equals(AttributeInstance.GT) ) {
+			op = ">";
+		} else if( qc.equals(AttributeInstance.GT) ) {
+			op = ">";
+		} else if( qc.equals(AttributeInstance.GTEQ) ) {
+			op = ">=";
+		} else if( qc.equals(AttributeInstance.LT) ) {
+			op = "<";
+		} else if( qc.equals(AttributeInstance.LTEQ) ) {
+			op = "<=";
+		} else if( qc.equals(AttributeInstance.NOT) ) {
+			op = "!=";
+		} else if( qc.equals(AttributeInstance.LIKE) ) {
+			op = "LIKE";
+		} 		
+				//
 		// Be careful of strings that are too long
 		//
-		if (c == null || ad.getType().getBaseName().equalsIgnoreCase("image")
+		if (v == null || ad.getType().getBaseName().equalsIgnoreCase("image")
 				|| ad.getType().getBaseName().equalsIgnoreCase("blob")) {
 			return "";
 		}
@@ -1379,12 +1423,15 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 
 		String q = UMLDataConverters.getQuote(ad);
 
-		String value = this.validateDataStatement(c);
+		String value = this.validateDataStatement(v);
 
 		String eq = "";
 
 		String cond = null;
 
+		//
+		// TODO: NEED TO CLEAN THIS UP AND GET RID OF THE INTERVAL QUERY MECHANISM.
+		//
 		Pattern pattern = Pattern.compile("(.*) \\.\\.\\. to \\.\\.\\. (.*)");
 		Matcher matcher = pattern.matcher(value);
 		if (matcher.find()) {
@@ -1397,12 +1444,20 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 			cond += aliasName + "." + ad.getBaseName() + "<=" + q + intervalTo
 					+ "zzz" + q;
 
-		} else if (value.indexOf("%") != -1) {
-			cond = aliasName + "." + ad.getBaseName() + " LIKE " + q + value
-					+ q;
+		} 
+		//
+		// TODO: Currently, we permit wildcard queries just by including a '%' character.
+		// 			Need to formalize and improve this. 
+		//
+		else if (value.indexOf("%") != -1) {
+
+			cond = aliasName + "." + ad.getBaseName() + " LIKE " + q + value + q;
+		
 		} else {
-			cond = aliasName + "." + ad.getBaseName() + " = " + q + value + q;
-		}
+		
+			cond = aliasName + "." + ad.getBaseName() + " " + op + " " + q + value + q;
+
+		} 
 
 		return cond;
 
@@ -1415,7 +1470,7 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 	 *            PrimitiveInstance
 	 * @return boolean
 	 */
-	protected boolean buildSqlConditions(PrimitiveInstance pi) {
+	protected boolean buildSqlConditions(PrimitiveInstance pi) throws VPDMfException {
 		return this.buildSqlConditions(pi, this.ALL);
 	}
 
@@ -1463,7 +1518,7 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 	 *            int
 	 * @return boolean
 	 */
-	protected boolean buildSqlConditions(PrimitiveInstance pI, int queryType) {
+	protected boolean buildSqlConditions(PrimitiveInstance pI, int queryType) throws VPDMfException {
 		String tableName;
 		String queryTableName;
 		AttributeInstance aI;
@@ -1841,7 +1896,7 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 				// aliases if the table alias of the current 'pi' is not built.
 				// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 				if (!this.isInSelectClause(pi) 
-						&& pi.isNull()
+						&& pi.isNullExceptForFks()
 						&& skipNulls) {
 					continue;
 				}
@@ -2005,7 +2060,7 @@ public class DatabaseEngine implements VPDMfDatabaseEngineInterface {
 				// aliases if the table alias of the current 'pi' is not built.
 				// =================================================================
 				if (!this.isInSelectClause(pi) 
-						&& pi.isNull()
+						&& pi.isNullExceptForFks()
 						&& skipNulls) {
 
 					continue;

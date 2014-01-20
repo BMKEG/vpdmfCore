@@ -18,7 +18,7 @@ public class LightViewInstance extends SuperGraphNode {
 	
 	private String vpdmfLabel = "";
 
-	public static String INDEX_TUPLE_SEPARATOR = "<|>";
+	public static String INDEX_TUPLE_SEPARATOR = "{|}";
 
 	private String indexTuple = "";
 	
@@ -120,8 +120,8 @@ public class LightViewInstance extends SuperGraphNode {
 	
 	public Map<String, String> readIndexTupleMap(VPDMf top) throws Exception {
 		
-		String[] idxFields = this.getIndexTupleFields().split("\\<\\|\\>");
-		String[] idxValues = this.getIndexTuple().split("\\<\\|\\>");
+		String[] idxFields = this.getIndexTupleFields().split("\\{\\|\\}");
+		String[] idxValues = this.getIndexTuple().split("\\{\\|\\}");
 		Map<String, String> indexTupleMap = new HashMap<String,String>();
 		for(int i=0; i<idxFields.length; i++) {
 			

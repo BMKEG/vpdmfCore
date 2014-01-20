@@ -240,8 +240,11 @@ public class ViewHolder {
 					idxTuple += LightViewInstance.INDEX_TUPLE_SEPARATOR;
 				idxTuple += (String) idxTupleList.get(0); 
 				
-				List<Object> viewTypeList = hv.get(key2);				
-				String viewType = (String) viewTypeList.get(0); 
+				List<Object> viewTypeList = hv.get(key2);		
+				String viewType = this.vd.getName();
+				if( viewTypeList != null && viewTypeList.size() > 0 ) 
+					viewType = (String) viewTypeList.get(0); 
+				
 				ViewDefinition vd2 = top.readViewDefinitionFromViewTypeString(viewType);
 				
 				if( key.endsWith(".indexTuple") ) {

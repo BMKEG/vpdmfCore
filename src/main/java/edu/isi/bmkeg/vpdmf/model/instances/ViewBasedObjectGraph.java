@@ -40,7 +40,7 @@ public class ViewBasedObjectGraph {
 
 	private Map<String, Object> objMap;
 	
-	private List<String> sortAddr = new ArrayList<String>();
+	private Map<Integer,String> sortAddr = new HashMap<Integer,String>();
 	
 	private Set<SuperGraphNode> visitedView = new HashSet<SuperGraphNode>();
 	private Set<SuperGraphEdge> visitedLinks = new HashSet<SuperGraphEdge>();
@@ -405,18 +405,13 @@ public class ViewBasedObjectGraph {
 				if( ad.getType().isDataType() && value != null) {
 					
 					//
-					// provide a mechanism to perform -or- queries for a single variable from a view.
+					// provide a mechanism to perform -or- & -and- 
+					// queries for a single variable from a view.
 					//
 					if( value instanceof String ) {
 						String strValue = (String) value; 
 						
-						if( strValue.contains("<vpdmf-or>") ) {
-						
-							ai.setQueryCode( AttributeInstance.OR );
-							String[] orValues = strValue.split("<vpdmf-or>");
-							ai.setValue(orValues);
-						
-						} else if( strValue.contains("<vpdmf-sort") ) {
+						if( strValue.contains("<vpdmf-sort") ) {
 					
 							// Are any attributes set with <vpdmf-sort-XX> values,
 							// where XX is set to a number. This is the sort mechanism
@@ -424,7 +419,7 @@ public class ViewBasedObjectGraph {
 							Matcher matcher = sortPatt.matcher(strValue); 
 							if( matcher.find() ) {
 								Integer key = new Integer(matcher.group(1));
-								getSortAddr().add(key, ai.getAddress() );
+								getSortAddr().put(key, ai.getAddress() );
 								strValue = strValue.replaceAll(sortRegex, "");
 							}
 					
@@ -436,19 +431,25 @@ public class ViewBasedObjectGraph {
 							Matcher matcher = revsortPatt.matcher(strValue); 
 							if( matcher.find() ) {
 								Integer key = new Integer(matcher.group(1));
-								getSortAddr().add(key, "-" + ai.getAddress() );
+								getSortAddr().put(key, "-" + ai.getAddress() );
 								strValue = strValue.replaceAll(revsortRegex, "");
 							}
 					
 						} else {
+							
 							ai.writeValueString(value+"");													
+						
 						}
 						
 					} else if( ad.getType().getBaseName().equals("blob") ||
 							ad.getType().getBaseName().equals("image")) { 
+					
 						ai.setValue(value);												
+
 					} else {
+
 						ai.writeValueString(value+"");						
+					
 					}
 					
 				} 
@@ -597,11 +598,11 @@ public class ViewBasedObjectGraph {
 		this.objMap = objMap;
 	}
 
-	public List<String> getSortAddr() {
+	public Map<Integer,String> getSortAddr() {
 		return sortAddr;
 	}
 
-	public void setSortAddr(List<String> sortAddr) {
+	public void setSortAddr(Map<Integer,String> sortAddr) {
 		this.sortAddr = sortAddr;
 	}
 

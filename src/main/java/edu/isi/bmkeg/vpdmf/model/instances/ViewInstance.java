@@ -1812,13 +1812,18 @@ public class ViewInstance extends LightViewInstance {
 		return this.isVisible();
 	}
 
-	public ViewInstance makeLightViewInstance() {
-		ViewInstance lvi = new ViewInstance(this.getDefName());
+	public LightViewInstance makeLightViewInstance() {
+
+		LightViewInstance lvi = new LightViewInstance();
+		
 		// lvi.thumbnail = this.thumbnail;
 		lvi.setVpdmfLabel(this.getVpdmfLabel());
+		lvi.setIndexTuple(this.getIndexTuple());
+		lvi.setIndexTupleFields(this.getIndexTupleFields());
 		lvi.setUIDString(this.getUIDString());
 		lvi.setVpdmfId(this.getVpdmfId());
 		lvi.setDefinition(this.getDefinition());
+		lvi.setDefName(this.getDefName());
 
 		return lvi;
 
@@ -2474,7 +2479,11 @@ public class ViewInstance extends LightViewInstance {
 		this.updateUIDString();
 		this.updateLabel();
 		this.updateIndexTuple();
-		this.updateUri();
+		
+		// TODO: WHAT CHARACTERISTICS DO WE NEED IN VPDMF THAT MIRRORS THOSE OF LINKED OPEN DATA?
+		// we need URI values for every entity but not yet.
+		//this.updateUri();
+		
 		this.updateVpdmfId();
 		this.setName(this.getUIDString());
 	}
@@ -2531,7 +2540,83 @@ public class ViewInstance extends LightViewInstance {
 		return indexTuple;
 
 	}
+	
+	/**
+	 * This function generates the index tuple as if it was being returned 
+	 * from a list query (including all the substitutions).
+	 * 
+	 * @throws VPDMfException
+	 */
+	public String[] generateCompleteIndexTuple() throws VPDMfException {
+		
+		String[] completeIdxTuple = new String[2];
+		VPDMf top = this.getDefinition().getTop();
 
+		for( String key : this.readAttributeAddresses()) {
+			if( key.endsWith(".indexTuple") || key.endsWith(".vpdmfLabel") ) {
+				String pvName = key.substring(1,key.indexOf("|"));
+				String key2 = "]" + pvName + "|ViewTable.viewType";
+
+				AttributeInstance vAi = this.readAttributeInstance(key, 0);
+				String v = vAi.readValueString();
+				
+				if( completeIdxTuple[1] == null ||
+						completeIdxTuple[1].length() == 0 ) {
+					completeIdxTuple[1] = "";
+				} else {
+					completeIdxTuple[1] = completeIdxTuple[1] + 
+							LightViewInstance.INDEX_TUPLE_SEPARATOR;					
+				}
+				completeIdxTuple[1] = completeIdxTuple[1] + v; 
+				
+				AttributeInstance vtAi = this.readAttributeInstance(key2, 0);
+				String viewType = this.getDefinition().getName();
+				if( vtAi.getValue() != null ) 
+					viewType = (String) vtAi.readValueString(); 
+				
+				ViewDefinition vd2 = top.readViewDefinitionFromViewTypeString(viewType);
+				
+				if( key.endsWith(".indexTuple") ) {
+				
+					int ieCount = vd2.getIndexElements().size();
+					for( int i=0; i<ieCount; i++) {
+						Integer ii = new Integer(i+1);
+						IndexElement ie = vd2.getIndexElements().get(ii);
+						
+						if( completeIdxTuple[0] == null || 
+								completeIdxTuple[0].length() == 0 ) {
+							completeIdxTuple[0] = "";
+						} else {
+							completeIdxTuple[0] = completeIdxTuple[0] + 
+									LightViewInstance.INDEX_TUPLE_SEPARATOR;					
+						}						
+						completeIdxTuple[0] = completeIdxTuple[0] + 
+								vd2.getName() + "_" + ii;
+						
+					}
+					
+				} else if( key.endsWith(".vpdmfLabel") ) { 
+								
+					if( completeIdxTuple[0] == null || 
+							completeIdxTuple[0].length() == 0 ) {
+						completeIdxTuple[0] = "";
+					} else {
+						completeIdxTuple[0] = completeIdxTuple[0] + 
+								LightViewInstance.INDEX_TUPLE_SEPARATOR;					
+					}	
+					completeIdxTuple[0] = completeIdxTuple[0] + 
+							vd2.getName();
+				
+				}
+				
+			}
+
+		}
+
+		return completeIdxTuple;
+
+	}
+	
 	public void updateLabel() throws Exception {
 
 		String vpdmfLabel = this.getDefinition().getVpdmfLabelFormat();
@@ -2563,8 +2648,8 @@ public class ViewInstance extends LightViewInstance {
 		idxTup.writeValueString(indexTuple);
 		this.setIndexTuple(indexTuple);
 
-	}
-
+	}	
+	
 	public void updateUri() throws Exception {
 
 		String vpdmfUri = this.getDefinition().getVpdmfUriFormat();
