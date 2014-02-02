@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.isi.bmkeg.vpdmf.controller.VPDMfKnowledgeBaseBuilder;
-import edu.isi.bmkeg.vpdmf.controller.queryEngineTools.QueryEngine;
+import edu.isi.bmkeg.vpdmf.controller.queryEngineTools.QueryEngineImpl;
 import edu.isi.bmkeg.vpdmf.model.definitions.ViewDefinition;
 import edu.isi.bmkeg.vpdmf.model.instances.AttributeInstance;
 import edu.isi.bmkeg.vpdmf.model.instances.ViewInstance;
@@ -72,7 +72,7 @@ public class SqlQueryBuilder {
 			addresses.add(addr);
 		}
 		
-		QueryEngine qe = new QueryEngine();
+		QueryEngineImpl qe = new QueryEngineImpl();
 		String sql = qe.buildSql(vi, addresses);
 		
 		System.out.println(sql);		

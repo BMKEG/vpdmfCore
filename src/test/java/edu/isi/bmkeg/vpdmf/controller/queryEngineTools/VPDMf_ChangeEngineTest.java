@@ -41,7 +41,7 @@ public class VPDMf_ChangeEngineTest {
 	String login;
 	String password;
 
-	VPDMfChangeEngineInterface ce;
+	ChangeEngine ce;
 
 	VPDMfKnowledgeBaseBuilder builder;
 	File buildFile;
@@ -84,7 +84,7 @@ public class VPDMf_ChangeEngineTest {
 
 		builder.buildDatabaseFromArchive();
 
-		ce = new ChangeEngine(this.login, this.password, dbName);
+		ce = new ChangeEngineImpl(this.login, this.password, dbName);
 		ce.connectToDB();
 
 		top = ce.readTop();
@@ -232,7 +232,7 @@ public class VPDMf_ChangeEngineTest {
 					"]Resource|ViewTable.vpdmfId", 0);
 			ai.writeValueString("32106");
 
-			QueryEngine vhf = new QueryEngine(this.login, this.password, dbName);
+			QueryEngineImpl vhf = new QueryEngineImpl(this.login, this.password, dbName);
 
 			vhf.connectToDB();
 			vhf.stat.execute("set autocommit=0;");

@@ -22,7 +22,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import edu.isi.bmkeg.utils.springContext.AppContext;
 import edu.isi.bmkeg.utils.springContext.BmkegProperties;
 import edu.isi.bmkeg.vpdmf.controller.VPDMfKnowledgeBaseBuilder;
-import edu.isi.bmkeg.vpdmf.controller.queryEngineTools.QueryEngine;
+import edu.isi.bmkeg.vpdmf.controller.queryEngineTools.QueryEngineImpl;
 import edu.isi.bmkeg.vpdmf.model.definitions.VPDMf;
 import edu.isi.bmkeg.vpdmf.model.definitions.ViewDefinition;
 import edu.isi.bmkeg.vpdmf.model.instances.AttributeInstance;
@@ -105,7 +105,7 @@ public class ReadWriteSolrDataTest {
 			return; 
 		}
 	    
-		QueryEngine qe = new QueryEngine(this.login, this.password, dbName);
+		QueryEngineImpl qe = new QueryEngineImpl(this.login, this.password, dbName);
 		qe.connectToDB(this.login, this.password, this.dbName);
 	 
 	    top = qe.readTop();
@@ -138,7 +138,7 @@ public class ReadWriteSolrDataTest {
 			return; 
 		}
 		
-		QueryEngine qe = new QueryEngine(this.login, this.password, dbName);
+		QueryEngineImpl qe = new QueryEngineImpl(this.login, this.password, dbName);
 		qe.connectToDB(this.login, this.password, this.dbName);
 	 
 	    top = qe.readTop();
@@ -163,7 +163,7 @@ public class ReadWriteSolrDataTest {
 			return; 
 		}
 		
-		QueryEngine qe = new QueryEngine(this.login, this.password, dbName);
+		QueryEngineImpl qe = new QueryEngineImpl(this.login, this.password, dbName);
 		qe.connectToDB(this.login, this.password, this.dbName);
 	 
 	    top = qe.readTop();

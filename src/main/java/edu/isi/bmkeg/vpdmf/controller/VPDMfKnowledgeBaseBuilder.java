@@ -175,10 +175,8 @@ public class VPDMfKnowledgeBaseBuilder {
 			sql = sql.toLowerCase();
 
 		ResultSet rs = quickStat.executeQuery(sql);
-		boolean nav = rs.last();
-		int pvCount = rs.getRow();
-		for (int i = 1; i <= pvCount; i++) {
-			rs.absolute(i);
+
+		while( rs.next() ) { 
 			String dbName = rs.getString("Database");
 			if (dbName.toLowerCase().equals(name.toLowerCase())) {
 				return true;
@@ -405,10 +403,7 @@ public class VPDMfKnowledgeBaseBuilder {
 			sql = sql.toLowerCase();
 
 		ResultSet rs = quickStat.executeQuery(sql);
-		rs.last();
-		int pvCount = rs.getRow();
-		for (int i = 1; i <= pvCount; i++) {
-			rs.absolute(i);
+		while( rs.next() ) {
 			String login = rs.getString("login");
 			lookup.add(login);
 		}
@@ -571,7 +566,7 @@ public class VPDMfKnowledgeBaseBuilder {
 			sql = sql.toLowerCase();
 
 		ResultSet rs = quickStat.executeQuery(sql);
-		boolean nav = rs.last();
+		rs.next();
 		String permissions = rs.getString("permissions");
 
 		String[] pp = permissions.split("&");
@@ -1250,10 +1245,7 @@ public class VPDMfKnowledgeBaseBuilder {
 
 		logger.debug("Show tables: " + deltaT + " ms");
 
-		boolean nav = rs.last();
-		int rowCount = rs.getRow();
-		for (int i = 1; i <= rowCount; i++) {
-			rs.absolute(i);
+		while( rs.next() ) {
 			String tName = rs.getString(1);
 			tableLookup.add(tName);
 		}
@@ -1376,15 +1368,11 @@ public class VPDMfKnowledgeBaseBuilder {
 			sql = sql.toLowerCase();
 
 		rs = stat.executeQuery(sql);
-		nav = rs.last();
-		rowCount = rs.getRow();
+		rs.next();
 
-		sql = "";
-		for (int i = 1; i <= rowCount; i++) {
-			rs.absolute(i);
-			sql += rs.getString(1) + "\n";
-		}
-		sqlOut.write(sql);
+		String buildSql = rs.getString(1) + "\n";
+		
+		sqlOut.write(buildSql);
 		sqlOut.close();
 		filesToZip.put(SCRIPT_DIR + "/" + sqlCmdFile.getName(), sqlCmdFile);
 

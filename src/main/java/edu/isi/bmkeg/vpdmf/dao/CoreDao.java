@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.semanticweb.owlapi.model.OWLOntology;
 
-import edu.isi.bmkeg.vpdmf.controller.queryEngineTools.VPDMfChangeEngineInterface;
+import edu.isi.bmkeg.vpdmf.controller.queryEngineTools.ChangeEngine;
 import edu.isi.bmkeg.vpdmf.model.ViewTable;
 import edu.isi.bmkeg.vpdmf.model.definitions.VPDMf;
 import edu.isi.bmkeg.vpdmf.model.instances.LightViewInstance;
@@ -17,7 +17,7 @@ import edu.isi.bmkeg.vpdmf.model.qo.ViewTable_qo;
 
 public interface CoreDao {
 
-	public VPDMfChangeEngineInterface getCe();
+	public ChangeEngine getCe();
 	
 	public VPDMf getTop();
 	

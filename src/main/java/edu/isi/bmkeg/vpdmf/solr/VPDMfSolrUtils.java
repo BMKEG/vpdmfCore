@@ -27,7 +27,7 @@ import edu.isi.bmkeg.utils.Converters;
 import edu.isi.bmkeg.utils.TextUtils;
 import edu.isi.bmkeg.utils.superGraph.SuperGraphTraversal;
 import edu.isi.bmkeg.utils.xml.XmlBindingTools;
-import edu.isi.bmkeg.vpdmf.controller.queryEngineTools.ChangeEngine;
+import edu.isi.bmkeg.vpdmf.controller.queryEngineTools.ChangeEngineImpl;
 import edu.isi.bmkeg.vpdmf.model.definitions.IndexElement;
 import edu.isi.bmkeg.vpdmf.model.definitions.PrimitiveDefinition;
 import edu.isi.bmkeg.vpdmf.model.definitions.PrimitiveDefinitionGraph;

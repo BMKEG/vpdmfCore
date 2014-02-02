@@ -11,8 +11,8 @@ import java.util.Set;
 import edu.isi.bmkeg.uml.model.UMLattribute;
 import edu.isi.bmkeg.uml.model.UMLclass;
 import edu.isi.bmkeg.utils.Converters;
+import edu.isi.bmkeg.vpdmf.controller.queryEngineTools.ChangeEngineImpl;
 import edu.isi.bmkeg.vpdmf.controller.queryEngineTools.ChangeEngine;
-import edu.isi.bmkeg.vpdmf.controller.queryEngineTools.VPDMfChangeEngineInterface;
 import edu.isi.bmkeg.vpdmf.model.definitions.VPDMf;
 import edu.isi.bmkeg.vpdmf.model.instances.AttributeInstance;
 import edu.isi.bmkeg.vpdmf.model.instances.ClassInstance;
@@ -42,7 +42,7 @@ public class CoreDaoImpl implements CoreDao {
 	private String password;
 	private String uri;
 
-	private VPDMfChangeEngineInterface ce;
+	private ChangeEngine ce;
 
 	public CoreDaoImpl() throws Exception {
 		this.cl = this.getClass().getClassLoader();
@@ -55,7 +55,7 @@ public class CoreDaoImpl implements CoreDao {
 	public void init(String login, String password, String uri)
 			throws Exception {
 
-		this.ce = new ChangeEngine(login, password, uri);
+		this.ce = new ChangeEngineImpl(login, password, uri);
 		this.ce.connectToDB();
 		this.top = this.ce.readTop();
 		//this.cl = this.ce.provideClassLoaderForModel();
@@ -63,11 +63,11 @@ public class CoreDaoImpl implements CoreDao {
 
 	}
 
-	public VPDMfChangeEngineInterface getCe() {
+	public ChangeEngine getCe() {
 		return ce;
 	}
 
-	public void setCe(VPDMfChangeEngineInterface ce) {
+	public void setCe(ChangeEngine ce) {
 		this.ce = ce;
 	}
 
