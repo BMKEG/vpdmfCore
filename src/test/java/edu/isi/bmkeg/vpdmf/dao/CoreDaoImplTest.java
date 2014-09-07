@@ -37,7 +37,8 @@ public class CoreDaoImplTest {
 	String dbName;
 	String login;
 	String password;
-
+	String workingDirectory;
+	
 	CoreDao coreDao;
 
 	VPDMfKnowledgeBaseBuilder builder;
@@ -59,6 +60,7 @@ public class CoreDaoImplTest {
 		login = prop.getDbUser();
 		password =  prop.getDbPassword();
 		dbName = "basic_vpdmf_test";
+		workingDirectory = prop.getWorkingDirectory();
 		
 		buildFile = ctx
 				.getResource(
@@ -85,7 +87,7 @@ public class CoreDaoImplTest {
 	    File jarLocation = new File(buildFile.getParent() + "/people-jpa-1.1.5-SNAPSHOT.jar" );
 		
 	    coreDao = new CoreDaoImpl();
-		coreDao.init(login, password, dbName);
+		coreDao.init(login, password, dbName, workingDirectory);
 	    
 		URL url = jarLocation.toURI().toURL();
 		URL[] urls = new URL[]{url};

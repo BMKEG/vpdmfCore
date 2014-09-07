@@ -398,6 +398,8 @@ public class ChangeEngineImpl extends QueryEngineImpl implements
 			}
 
 		}
+		
+		this.clearQuery();
 
 		//
 		// Bugfix:
@@ -817,6 +819,8 @@ public class ChangeEngineImpl extends QueryEngineImpl implements
 
 	public boolean insertObjectIntoDB(ClassInstance obj) throws Exception {
 
+		this.clearQuery();
+		
 		String insertSql = "INSERT INTO " + obj.getDefinition().getBaseName();
 		List<AttributeInstance> pks = new ArrayList<AttributeInstance>();
 		List<AttributeInstance> attVec = new ArrayList<AttributeInstance>();
@@ -907,23 +911,30 @@ public class ChangeEngineImpl extends QueryEngineImpl implements
 
 		this.buildTableAliases(obj);
 
-		String checkSql = buildSQLSelectClause() + 
+		String countSql = "SELECT COUNT(*) " + 
+				this.buildNonSelectPartOfSQLStatement(false);
+		int count = this.executeCountSql(countSql);
+
+		if( count == 1 ) {
+		
+			String checkSql = buildSQLSelectClause() + 
 				buildNonSelectPartOfSQLStatement(true);
 		
-		this.prettyPrintSQL(checkSql);
+			this.prettyPrintSQL(checkSql);
 
-		if (this.lc)
+			if (this.lc)
 			checkSql = checkSql.toLowerCase();
 
-		ResultSet rs = this.executeQueryOnStatement(stat, checkSql);
+			ResultSet rs = this.executeQueryOnStatement(stat, checkSql);
 
-		if ( rs.next() ) {
-
+			rs.next();
 			this.updateObjectFromDb(obj, rs, PKONLY);
+		
+			rs.close();
+			
+		} else if( count > 1) {
 
-			if( rs.next() ) {
-				throw new VPDMfException("Ambiguous data in DB after insertion");
-			}
+			throw new VPDMfException("Ambiguous data in DB after insertion");
 			
 		} else {
 
@@ -1079,6 +1090,7 @@ public class ChangeEngineImpl extends QueryEngineImpl implements
 			psmt.close();
 
 		}
+		
 	}
 
 	protected void updateObjectInDB(ClassInstance obj, Vector addrVec,

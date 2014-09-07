@@ -29,4 +29,6 @@ public interface DatabaseEngine {
 	
 	public void prettyPrintSQL(String sql);
 	
+	public void clearQuery() throws Exception;
+	
 }

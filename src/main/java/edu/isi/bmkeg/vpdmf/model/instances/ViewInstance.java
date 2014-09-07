@@ -25,7 +25,6 @@ import cern.colt.matrix.ObjectMatrix1D;
 import edu.isi.bmkeg.uml.model.UMLattribute;
 import edu.isi.bmkeg.uml.model.UMLclass;
 import edu.isi.bmkeg.uml.model.UMLmodel;
-import edu.isi.bmkeg.utils.superGraph.SuperGraphEdge;
 import edu.isi.bmkeg.utils.superGraph.SuperGraphNode;
 import edu.isi.bmkeg.utils.superGraph.SuperGraphTraversal;
 import edu.isi.bmkeg.vpdmf.exceptions.AttributeAddressException;
@@ -533,59 +532,29 @@ public class ViewInstance extends LightViewInstance {
 			String fAddr = "";
 			String tAddr = "";
 
-			ArrayList keys = pl.readFKKeys();
-			for (int i = 0; i < keys.size(); i++) {
-				UMLattribute fk = (UMLattribute) keys.get(i);
-				UMLattribute pk = fk.getPk();
-
-				if (fPd.getClasses().contains(pk.getParentClass())) {
-					fAddr = "]" + fPd.getName() + "|"
-							+ pk.getParentClass().getBaseName() + "."
-							+ pk.getBaseName();
-				}
-
-				if (fPd.getClasses().contains(fk.getParentClass())) {
-					fAddr = "]" + fPd.getName() + "|"
-							+ fk.getParentClass().getBaseName() + "."
-							+ fk.getBaseName();
-				}
-
-				if (tPd.getClasses().contains(pk.getParentClass())) {
-					tAddr = "]" + tPd.getName() + "|"
-							+ pk.getParentClass().getBaseName() + "."
-							+ pk.getBaseName();
-				}
-
-				if (tPd.getClasses().contains(fk.getParentClass())) {
-					tAddr = "]" + tPd.getName() + "|"
-							+ fk.getParentClass().getBaseName() + "."
-							+ fk.getBaseName();
-				}
-			}
-
+			List<UMLattribute> keys = pl.readFKKeys();
+			
 			int nf = this.countPrimitives(fPd);
 			int nt = this.countPrimitives(tPd);
 
 			//
-			// Look for matching keys
+			// Join primitives if one of them is zero and the other is not, or 
+			// if they are the same look for matching indexes
 			//
 			for (int j = 0; j < nf; j++) {
-				AttributeInstance aif = this.readAttributeInstance(fAddr, j);
 
 				for (int k = 0; k < nt; k++) {
-					AttributeInstance ait = this
-							.readAttributeInstance(tAddr, k);
 
-					if (aif.getValue() == null || ait.getValue() == null)
-						continue;
-
-					if (aif.getValue().equals(ait.getValue())) {
-
+					// heuristic connections between elements 
+					// based on primitive numbering
+					if( (nf == 1 && k > 0) || 
+						(nt == 1 && j > 0) || 
+						(nf > 1 && nt > 1 && j == k && j != 0 ) ) {
 						pig.addPvInstanceLink(pl,
 								fPd.getName() + "_" + j,
 								tPd.getName() + "_" + k);
-
 					}
+
 
 				}
 
@@ -664,7 +633,7 @@ public class ViewInstance extends LightViewInstance {
 			return;
 		}
 
-		Iterator aiIt = this.readAttributes().iterator();
+		Iterator<AttributeInstance> aiIt = this.readAttributes().iterator();
 		while (aiIt.hasNext()) {
 			AttributeInstance ai = (AttributeInstance) aiIt.next();
 
@@ -676,7 +645,7 @@ public class ViewInstance extends LightViewInstance {
 	public void convertStreamsToImages() throws IOException,
 			ClassNotFoundException {
 
-		Iterator aiIt = this.readAttributes().iterator();
+		Iterator<AttributeInstance> aiIt = this.readAttributes().iterator();
 
 		while (aiIt.hasNext()) {
 			AttributeInstance ai = (AttributeInstance) aiIt.next();
@@ -1192,8 +1161,8 @@ public class ViewInstance extends LightViewInstance {
 
 	}
 
-	public Vector readAttributes() {
-		Vector attrs = new Vector();
+	public List<AttributeInstance> readAttributes() {
+		List<AttributeInstance> attrs = new ArrayList<AttributeInstance>();
 		Object[] primitives = this.getSubGraph().getNodes().values().toArray();
 
 		for (int i = 0; i < primitives.length; i++) {
@@ -1483,21 +1452,9 @@ public class ViewInstance extends LightViewInstance {
 				indexItemString = ai.readValueString();
 
 				if (indexItemString == null || indexItemString.length() == 0) {
-
-					if (ie.getNullable()) {
-
-						indexItemString = "-";
-
-					} else {
-
-						throw new Exception("Can't build index, field ]"
-								+ ai.get_object().getPrimitive().getDefName()
-								+ "|"
-								+ ai.get_object().getDefinition().getBaseName()
-								+ "." + ai.getDefinition().getBaseName()
-								+ " is null");
-
-					}
+					
+					// Make everything 'nullable'
+					indexItemString = "-";
 
 				}
 
@@ -2525,7 +2482,7 @@ public class ViewInstance extends LightViewInstance {
 					idx = "null";
 
 				if (j > 0)
-					indexTuple += ",";
+					indexTuple += LightViewInstance.INDEX_TUPLE_FIELD_SEPARATOR;
 				indexTuple += idx;
 
 				j++;

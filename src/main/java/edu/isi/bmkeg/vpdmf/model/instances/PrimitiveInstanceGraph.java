@@ -201,7 +201,7 @@ public class PrimitiveInstanceGraph extends SuperGraph {
 		// First, remove all existing attribute links
 		//
 		ViewInstance vi = (ViewInstance) this.getSubGraphNode();
-		Iterator aiIt = vi.readAttributes().iterator();
+		Iterator<AttributeInstance> aiIt = vi.readAttributes().iterator();
 		while (aiIt.hasNext()) {
 			AttributeInstance ai = (AttributeInstance) aiIt.next();
 			ai.clearConnectedKeys();

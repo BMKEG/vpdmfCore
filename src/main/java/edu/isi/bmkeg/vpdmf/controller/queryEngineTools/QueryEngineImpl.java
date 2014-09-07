@@ -842,7 +842,13 @@ public class QueryEngineImpl extends DataHolderFactory implements QueryEngine {
 	
 	protected int executeCountSql(String countSql) throws SQLException {
 
-		ResultSet rs = stat.executeQuery(countSql);
+		ResultSet rs = null;
+		try {
+			rs = stat.executeQuery(countSql);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		if( !rs.next() ) {
 			rs.close();
@@ -1267,7 +1273,6 @@ public class QueryEngineImpl extends DataHolderFactory implements QueryEngine {
 			
 		vi.instantiateDefinition(this.vpdmf);
 
-		this.stat.execute("set autocommit=0;");		
 		this.setDoPagingInQuery(paging);
 		this.setListOffset(listOffset);
 		this.setListPageSize(pageSize);

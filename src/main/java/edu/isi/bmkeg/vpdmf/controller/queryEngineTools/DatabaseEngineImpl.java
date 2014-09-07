@@ -1957,15 +1957,18 @@ public class DatabaseEngineImpl implements DatabaseEngine {
 
 	}
 
-	/**
-	 * @todo DatabaseEngine
-	 */
-	protected void clearQuery() {
+	public void clearQuery() throws Exception {
 		this.reducible = false;
 		this.selectHeader = new ArrayList<String>();
 		this.tableAlias = new ArrayList<String>();
 		this.sqlConditions = new ArrayList<String>();
 		this.orderBy = new ArrayList<String>();
+
+		ResultSet rs = this.stat.getResultSet();
+		if( rs!= null ) {
+			rs.close();
+		}
+		
 	}
 
 	/**
@@ -2240,7 +2243,7 @@ public class DatabaseEngineImpl implements DatabaseEngine {
 			data_obj = (Object) data.substring(0, 0);
 
 		} else if (type.equals("String") || type.equals("url")
-				|| type.startsWith("longString")) {
+				|| type.startsWith("longString") || type.startsWith("shortString")) {
 
 			String data = rs.getString(columnNum);
 

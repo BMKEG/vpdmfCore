@@ -421,6 +421,7 @@ public class ViewBasedObjectGraph {
 								Integer key = new Integer(matcher.group(1));
 								getSortAddr().put(key, ai.getAddress() );
 								strValue = strValue.replaceAll(sortRegex, "");
+								ai.writeValueString(strValue+"");		
 							}
 					
 						} else if( strValue.contains("<vpdmf-rev-sort") ) {
@@ -433,6 +434,7 @@ public class ViewBasedObjectGraph {
 								Integer key = new Integer(matcher.group(1));
 								getSortAddr().put(key, "-" + ai.getAddress() );
 								strValue = strValue.replaceAll(revsortRegex, "");
+								ai.writeValueString(strValue+"");		
 							}
 					
 						} else {
@@ -551,8 +553,18 @@ public class ViewBasedObjectGraph {
 //					continue LINKS;
 //				}
 
+				//
+				// BUG: the forward-spawning of new primitives does not work when 
+				// the links go back to itself. Not sure how to fix this in the long term.
+				//
+				if( !pig.getNodes().containsKey(remotePv.getName() + "_" + pIndex) ) {
+					vi.addNewPrimitiveRecursively(pl, pi, remotePv, pIndex, false);
+				}
+
 				PrimitiveInstance remotePi = (PrimitiveInstance) pig.getNodes()
 						.get(remotePv.getName() + "_" + pIndex);
+				
+				
 				this.objectToPrimitive(remoteObject, remotePi);
 
 			}

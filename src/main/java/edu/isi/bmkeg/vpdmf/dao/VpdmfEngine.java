@@ -10,6 +10,6 @@ public interface VpdmfEngine {
 	 * @param dbName
 	 * @throws Exception
 	 */
-	public void  initializeVpdmfDao(String login, String password, String dbName) throws Exception;
+	public void  initializeVpdmfDao(String login, String password, String dbName, String workingDirectory) throws Exception;
 	
 }

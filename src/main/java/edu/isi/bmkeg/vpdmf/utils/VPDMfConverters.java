@@ -49,7 +49,7 @@ public class VPDMfConverters {
 		ByteArrayOutputStream bos = null;
 		ObjectOutputStream oos = null;
 		ViewInstance vi = null;
-		Iterator aiIt = null;
+		Iterator<AttributeInstance> aiIt = null;
 		AttributeInstance ai = null;
 		BufferedImage img = null;
 		ByteArrayOutputStream baos = null;

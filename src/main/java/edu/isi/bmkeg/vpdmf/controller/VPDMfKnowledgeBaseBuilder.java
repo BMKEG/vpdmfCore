@@ -1260,6 +1260,15 @@ public class VPDMfKnowledgeBaseBuilder {
 			Iterator aIt = c.getAttributes().iterator();
 			while (aIt.hasNext()) {
 				UMLattribute a = (UMLattribute) aIt.next();
+				
+				// TODO: TEMP CHANGES
+				// skip binary data but only for FTD tables
+				if( c.getBaseName().toLowerCase().equals("ftd") && (
+						a.getType().getBaseName().equals("blob") ||
+						a.getType().getBaseName().equals("longString")) ) {
+					continue;
+				}
+				
 				if (a.getToImplement()) {
 					if (atts.length() > 0)
 						atts += ",";

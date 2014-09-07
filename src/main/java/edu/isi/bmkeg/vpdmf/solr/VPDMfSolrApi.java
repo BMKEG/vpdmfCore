@@ -155,8 +155,8 @@ public class VPDMfSolrApi {
 			commitDocsToStore();
 		}
 
-		logger.info( submitted+" documents added to "+ solrUrl );
-		logger.info( skipped+" skipped" );
+		logger.info( submitted + " documents added to " + solrUrl );
+		logger.info( skipped + " skipped" );
 		
 		if( this.eptDataFile != null) {
 			XmlBindingTools.saveAsXml(this.eptData, this.eptDataFile);

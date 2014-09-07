@@ -41,6 +41,7 @@ public class CoreDaoImpl implements CoreDao {
 	private String login;
 	private String password;
 	private String uri;
+	private String workingDirectory;
 
 	private ChangeEngine ce;
 
@@ -49,15 +50,17 @@ public class CoreDaoImpl implements CoreDao {
 	}
 
 	public void init() throws Exception {
-		this.init(login, password, uri);
+		this.init(login, password, uri, workingDirectory);
 	}
 
-	public void init(String login, String password, String uri)
+	public void init(String login, String password, String uri, String workingDirectory)
 			throws Exception {
 
 		this.ce = new ChangeEngineImpl(login, password, uri);
 		this.ce.connectToDB();
 		this.top = this.ce.readTop();
+		this.workingDirectory = workingDirectory;
+		
 		//this.cl = this.ce.provideClassLoaderForModel();
 		this.ce.closeDbConnection();
 
@@ -414,8 +417,8 @@ public class CoreDaoImpl implements CoreDao {
 		ViewBasedObjectGraph vbog = new ViewBasedObjectGraph(this.getTop(),
 				this.getCl(), viewTypeName);
 
-		ViewInstance vi1 = vbog.objectGraphToView(obj);
-
+		ViewInstance vi1 = vbog.objectGraphToView(obj, false);
+				
 		Map<String, Object> objMap = vbog.getObjMap();
 
 		long vpdmfId = getCe().executeUpdateQuery(vi1);
@@ -617,12 +620,21 @@ public class CoreDaoImpl implements CoreDao {
 		VPDMf top = getCe().readTop();
 		
 		String qoName = qObj.getClass().getSimpleName();
-		Map<String, Method> methods = new HashMap<String, Method>();
-		Method mArray[] = qObj.getClass().getMethods();
-		for (int i = 0; i < mArray.length; i++) {
-			Method m = mArray[i];
+		Map<String, Method> qMethods = new HashMap<String, Method>();
+		Method m1Array[] = qObj.getClass().getMethods();
+		for (int i = 0; i < m1Array.length; i++) {
+			Method m = m1Array[i];
 			String mName = m.getName();
-			methods.put(mName, m);
+			qMethods.put(mName, m);
+		}
+
+		String roName = rObj.getClass().getSimpleName();
+		Map<String, Method> rMethods = new HashMap<String, Method>();
+		Method m2Array[] = rObj.getClass().getMethods();
+		for (int i = 0; i < m2Array.length; i++) {
+			Method m = m2Array[i];
+			String mName = m.getName();
+			rMethods.put(mName, m);
 		}
 		
 		String cName = qoName.replaceAll("_qo", "");
@@ -649,7 +661,7 @@ public class CoreDaoImpl implements CoreDao {
 			String getterName = "get"
 					+ attName.substring(0, 1).toUpperCase()
 					+ attName.substring(1, attName.length());
-			Method m = methods.get(getterName);
+			Method m = qMethods.get(getterName);
 			if (m == null) {
 				continue;
 			}			
@@ -665,14 +677,17 @@ public class CoreDaoImpl implements CoreDao {
 			T2 o2 = (T2) rObj.getClass().newInstance();
 			
 			for( String attName : rCi.getAttributes().keySet() ) {
-				AttributeInstance ai = ci.getAttributes().get(attName);
+				AttributeInstance ai = rCi.getAttributes().get(attName);
+				
+				if(ai.getDefinition().getPk() != null) 
+					continue;
 				
 				String setterName = "set"
 						+ attName.substring(0, 1).toUpperCase()
 						+ attName.substring(1, attName.length());
-				Method m = methods.get(setterName);
+				Method m = rMethods.get(setterName);
 				if (m == null) {
-					throw new Exception("No method " + qoName + "." + setterName);
+					throw new Exception("No method " + roName + "." + setterName);
 				}			
 				m.invoke(o2, ai.getValue());
 				
@@ -713,6 +728,14 @@ public class CoreDaoImpl implements CoreDao {
 
 	public void setUri(String uri) {
 		this.uri = uri;
+	}
+
+	public String getWorkingDirectory() {
+		return workingDirectory;
+	}
+
+	public void setWorkingDirectory(String workingDirectory) {
+		this.workingDirectory = workingDirectory;
 	}
 
 }

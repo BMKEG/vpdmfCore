@@ -19,6 +19,7 @@ public class LightViewInstance extends SuperGraphNode {
 	private String vpdmfLabel = "";
 
 	public static String INDEX_TUPLE_SEPARATOR = "{|}";
+	public static String INDEX_TUPLE_FIELD_SEPARATOR = "<|>";
 
 	private String indexTuple = "";
 	

@@ -25,7 +25,7 @@ public interface CoreDao {
 	
 	public void init() throws Exception;
 	
-	public void init(String login, String password, String uri) throws Exception;	
+	public void init(String login, String password, String uri, String workingDirectory) throws Exception;	
 
 	// ~~~~~~~~~~~~~~~~~~
 	// getters 'n setters
@@ -42,7 +42,11 @@ public interface CoreDao {
 	public String getUri();
 
 	public void setUri(String uri);
-	
+
+	public String getWorkingDirectory();
+
+	public void setWorkingDirectory(String workingDirectory);
+
 	// ~~~~~~~~~~~~~~~~~~~~~~
 	// Transaction management
 	// ~~~~~~~~~~~~~~~~~~~~~~
@@ -97,7 +101,6 @@ public interface CoreDao {
 	public <T extends VpdmfQueryObject> List<LightViewInstance> listInTrans(T obj, String viewTypeName) throws Exception;
 	
 	public <T extends VpdmfQueryObject> List<LightViewInstance> listInTrans(T obj, String viewTypeName, int offset, int pageSize) throws Exception;
-
 
 	// ~~~~~~~~~~~~~~~~~~~~~~
 	// Class level operations

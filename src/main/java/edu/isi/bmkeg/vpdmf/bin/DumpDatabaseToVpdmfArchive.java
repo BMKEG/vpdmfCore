@@ -19,7 +19,7 @@ public class DumpDatabaseToVpdmfArchive {
 	public static void main(String[] args) throws Exception {
 
 		if (args.length != 5) {
-			System.err.println(USAGE);
+			System.err.println(args.length + " " + USAGE);
 			System.exit(-1);
 		}
 

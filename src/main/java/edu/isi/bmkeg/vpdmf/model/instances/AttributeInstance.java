@@ -90,6 +90,11 @@ public class AttributeInstance implements Serializable {
 
 		this.connectedKeys.add(that);
 		that.connectedKeys.add(this);
+		
+		if( this.value == null && that.value != null) 
+			this.value = that.value;
+		else if( that.value == null && this.value != null) 
+			that.value = this.value;
 
 	}
 
@@ -259,9 +264,13 @@ public class AttributeInstance implements Serializable {
 		//
 		if( this.queryCode.length > 1 || !this.queryCode[0].equals(EQ) ) {
 			valueString = "";
-			String[] valueArray = (String[]) this.value;
-			for(int i=0; i<this.queryCode.length; i++) {
-				valueString += this.queryCode[i] + valueArray[i]; 	
+			if( this.value instanceof String[]) {
+				String[] valueArray = (String[]) this.value;
+				for(int i=0; i<this.queryCode.length; i++) {
+					valueString += this.queryCode[i] + valueArray[i]; 	
+				}				
+			} else {
+				valueString += this.value; 	
 			}
 			return valueString;
 		}
