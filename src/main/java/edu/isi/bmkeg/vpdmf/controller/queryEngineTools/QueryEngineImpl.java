@@ -959,9 +959,6 @@ public class QueryEngineImpl extends DataHolderFactory implements QueryEngine {
 
 	}
 	
-	
-	
-
 	private void RS2HHM(ResultSet rs, List<String> addresses, int rsSize) throws Exception {
 
 		data = ObjectFactory2D.dense.make(rsSize,
@@ -988,6 +985,21 @@ public class QueryEngineImpl extends DataHolderFactory implements QueryEngine {
 			}
 			i++;
 
+		}
+		
+		// It is possible that the DISTINCT query is 
+		// different from the SQL query 
+		// (e.g., if two authors on a single paper have the same surname)
+		// This happens very rarely. 
+		if( i != rsSize ) {
+			ObjectMatrix2D newData = ObjectFactory2D.dense.make(i,
+					addresses.size());
+			for(int ii=0; ii<i; ii++) {
+				for(int jj=0; jj<addresses.size(); jj++) {
+					newData.set(ii, jj, data.get(ii, jj));
+				}
+			}
+			data = newData;
 		}
 
 	}
