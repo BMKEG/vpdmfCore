@@ -457,6 +457,7 @@ public class VPDMfKnowledgeBaseBuilder {
 		File topFile = new File(p + "/" + TOP_FILE);
 
 		this.buildSQL = FileUtils.readFileToString(buildSQLFile);
+
 		if (loadSQLFile.exists()) {
 			this.loadSQL = FileUtils.readFileToString(loadSQLFile);
 			this.loadSQL = this.loadSQL.replaceAll("SUB_FILEPATH_HERE", p + "/"
