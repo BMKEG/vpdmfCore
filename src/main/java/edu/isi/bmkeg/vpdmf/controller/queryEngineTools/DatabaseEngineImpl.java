@@ -73,6 +73,8 @@ public class DatabaseEngineImpl implements DatabaseEngine {
 
 	private static Logger logger = Logger.getLogger(DatabaseEngineImpl.class);
 
+	protected static double ROUNDING_FACTOR = 0.0001;
+
 	// types of query
 	protected int queryType;
 	protected static int INSERT = 1;
@@ -1279,7 +1281,8 @@ public class DatabaseEngineImpl implements DatabaseEngine {
 		} else if( qc.equals(AttributeInstance.LIKE) ) {
 			op = "LIKE";
 		} 		
-				//
+		
+		//
 		// Be careful of strings that are too long
 		//
 		if (v == null || ad.getType().getBaseName().equalsIgnoreCase("image")
@@ -1326,6 +1329,18 @@ public class DatabaseEngineImpl implements DatabaseEngine {
 
 			cond = aliasName + "." + ad.getBaseName() + " LIKE " + q + value + q;
 		
+		} 
+		//
+		// float and double values might incur rounding errors 
+		// for equality queries. 
+		//
+		else if(op.equals("=") && (ad.getType().getBaseName().equals("float") || 
+				ad.getType().getBaseName().equals("double")) ) {
+		
+			Double dblValue = new Double(value);
+			cond = aliasName + "." + ad.getBaseName() + " > " + (dblValue - ROUNDING_FACTOR) + " AND " +
+					aliasName + "." + ad.getBaseName() + " < " + (dblValue + ROUNDING_FACTOR);
+
 		} else {
 		
 			cond = aliasName + "." + ad.getBaseName() + " " + op + " " + q + value + q;

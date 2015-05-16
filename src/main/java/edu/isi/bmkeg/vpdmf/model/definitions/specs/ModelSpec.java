@@ -18,6 +18,8 @@ public class ModelSpec implements Serializable {
 
 	private String path;
 
+	private String url;
+
 	@XmlAttribute
 	public String getName() {
 		return name;
@@ -43,6 +45,15 @@ public class ModelSpec implements Serializable {
 
 	public void setPath(String path) {
 		this.path = path;
+	}
+
+	@XmlAttribute
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
 }
