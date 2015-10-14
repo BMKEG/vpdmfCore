@@ -109,12 +109,4 @@ public interface CoreDao {
 	public <T1 extends VpdmfQueryObject, T2> List<T2> listClassInTrans(T1 qObj, T2 rObj) 
 			throws Exception;
 	
-	
-	// ~~~~~~~~~~~~~~~~~~~~
-	// 'additional' operations
-	// ~~~~~~~~~~~~~~~~~~~~	
-	/*public void saveViewInstanceToOntology(OWLOntology o, String uri,
-			ViewInstance vi) throws Exception */
-	
-	
 }

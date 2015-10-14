@@ -71,6 +71,5 @@ public interface ChangeEngine extends QueryEngine {
 	 * @throws SQLException 
 	 */
 	public int executeRawUpdateQuery(String sql) throws SQLException;
-
 	
 }
