@@ -79,7 +79,7 @@ public class VPDMfParser {
 			File f = fArray[i];
 			if (f.isDirectory()) {
 				al.addAll(VPDMfParser.getAllSpecFiles(f));
-			} else if (f.exists() && (f.getName().endsWith("-vw.xml"))) {
+			} else if ( f.exists() && f.getName().endsWith(".xml")) {
 				al.add(f);
 			}
 		}
@@ -290,7 +290,8 @@ public class VPDMfParser {
 			List<File> allSpecFiles, List<String> solrViews) throws Exception {
 
 		this.model = model;
-
+		model.convertToObjectOrientedImplementation();
+		
 		String groupId = vpdmfSpec.getGroupId();
 		String artifactId = vpdmfSpec.getArtifactId();
 		String version = vpdmfSpec.getVersion();
@@ -315,9 +316,7 @@ public class VPDMfParser {
 		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		// Build the view shells from ViewSpecs.
 		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		Iterator<File> sfIt = allSpecFiles.iterator();
-		while (sfIt.hasNext()) {
-			File sf = (File) sfIt.next();
+		for( File sf: allSpecFiles ) {
 
 			log.debug("Parsing " + sf.getName());
 
@@ -417,9 +416,7 @@ public class VPDMfParser {
 		// and primitive involved in a viewLink
 		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		for (ViewDefinition vd : top.getViews().values()) {
-
 			vd.buildViewTypeConditions();
-
 		}
 
 		return top;

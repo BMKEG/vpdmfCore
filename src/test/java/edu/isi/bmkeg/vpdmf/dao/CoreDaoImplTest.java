@@ -9,25 +9,17 @@ import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import edu.isi.bmkeg.uml.model.UMLmodel;
 import edu.isi.bmkeg.uml.sources.UMLModelSimpleParser;
-import edu.isi.bmkeg.utils.springContext.AppContext;
 import edu.isi.bmkeg.utils.springContext.BmkegProperties;
 import edu.isi.bmkeg.vpdmf.controller.VPDMfKnowledgeBaseBuilder;
 import edu.isi.bmkeg.vpdmf.model.definitions.VPDMf;
+import junit.framework.TestCase;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "/edu/isi/bmkeg/vpdmf/appCtx-VPDMfTest.xml" })
-public class CoreDaoImplTest {
+public class CoreDaoImplTest extends TestCase {
 
 	Logger log = Logger.getLogger("edu.isi.bmkeg.vpdmf.dao.CoreDaoImplTest");
-
-	ApplicationContext ctx;
 
 	VPDMf top;
 	ClassLoader cl;
@@ -53,19 +45,17 @@ public class CoreDaoImplTest {
 	@Before
 	public void setUp() throws Exception {
 
-		ctx = AppContext.getApplicationContext();
-
-		BmkegProperties prop = (BmkegProperties) ctx.getBean("bmkegProperties");
+		// NEED TO SET THIS
+		BmkegProperties prop = new BmkegProperties();
 		
 		login = prop.getDbUser();
 		password =  prop.getDbPassword();
 		dbName = "basic_vpdmf_test";
 		workingDirectory = prop.getWorkingDirectory();
 		
-		buildFile = ctx
-				.getResource(
-						"classpath:edu/isi/bmkeg/vpdmf/people/people-mysql-1.1.5-SNAPSHOT.zip")
-				.getFile();
+		buildFile = new File(this.getClass().getClassLoader().getResource(
+				"classpath:edu/isi/bmkeg/vpdmf/people/people-mysql-1.1.5-SNAPSHOT.zip")
+				.getFile());
 	    
 	    builder = new VPDMfKnowledgeBaseBuilder(buildFile, login, password, dbName);
 		

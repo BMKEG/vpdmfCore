@@ -52,11 +52,11 @@ import edu.isi.bmkeg.uml.model.UMLclass;
 import edu.isi.bmkeg.uml.model.UMLmodel;
 import edu.isi.bmkeg.utils.Converters;
 import edu.isi.bmkeg.utils.TextUtils;
-import edu.isi.bmkeg.utils.jna.LibC;
 import edu.isi.bmkeg.utils.xml.XmlBindingTools;
 import edu.isi.bmkeg.vpdmf.exceptions.VPDMfException;
 import edu.isi.bmkeg.vpdmf.model.definitions.VPDMf;
 import edu.isi.bmkeg.vpdmf.model.definitions.specs.VpdmfSpec;
+import edu.isi.bmkeg.vpdmf.utils.LibC;
 import edu.isi.bmkeg.vpdmf.utils.VPDMfConverters;
 
 public class VPDMfKnowledgeBaseBuilder {

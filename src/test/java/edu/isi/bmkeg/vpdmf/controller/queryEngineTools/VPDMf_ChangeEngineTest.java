@@ -10,14 +10,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import edu.isi.bmkeg.uml.model.UMLmodel;
 import edu.isi.bmkeg.uml.sources.UMLModelSimpleParser;
-import edu.isi.bmkeg.utils.springContext.AppContext;
 import edu.isi.bmkeg.utils.springContext.BmkegProperties;
 import edu.isi.bmkeg.vpdmf.controller.VPDMfKnowledgeBaseBuilder;
 import edu.isi.bmkeg.vpdmf.exceptions.AttributeAddressException;
@@ -26,12 +21,9 @@ import edu.isi.bmkeg.vpdmf.model.definitions.ViewDefinition;
 import edu.isi.bmkeg.vpdmf.model.instances.AttributeInstance;
 import edu.isi.bmkeg.vpdmf.model.instances.LightViewInstance;
 import edu.isi.bmkeg.vpdmf.model.instances.ViewInstance;
+import junit.framework.TestCase;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "/edu/isi/bmkeg/vpdmf/appCtx-VPDMfTest.xml" })
-public class VPDMf_ChangeEngineTest {
-
-	ApplicationContext ctx;
+public class VPDMf_ChangeEngineTest extends TestCase {
 
 	VPDMf top;
 	UMLmodel m;
@@ -54,18 +46,15 @@ public class VPDMf_ChangeEngineTest {
 	@Before
 	public void setUp() throws Exception {
 
-		ctx = AppContext.getApplicationContext();
-
-		BmkegProperties prop = (BmkegProperties) ctx.getBean("bmkegProperties");
-
+		// NEED TO SET THIS
+		BmkegProperties prop = new BmkegProperties();
+		
 		login = prop.getDbUser();
 		password = prop.getDbPassword();
 		dbName = "basic_vpdmf_test";
 
-		buildFile = ctx
-				.getResource(
-						"classpath:edu/isi/bmkeg/vpdmf/people/people-mysql-1.1.5-SNAPSHOT.zip")
-				.getFile();
+		buildFile = new File(this.getClass().getClassLoader().getResource(
+					"classpath:edu/isi/bmkeg/vpdmf/people/people-mysql-1.1.5-SNAPSHOT.zip").getFile());
 
 		builder = new VPDMfKnowledgeBaseBuilder(buildFile, login, password,
 				dbName);

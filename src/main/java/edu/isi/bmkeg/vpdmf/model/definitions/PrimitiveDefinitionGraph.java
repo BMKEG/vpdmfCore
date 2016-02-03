@@ -37,55 +37,16 @@ public class PrimitiveDefinitionGraph extends SuperGraph {
 			fromPv = pv2;
 			toPv = pv1;
 		}
-		// if the role is implemented by other roles then we simply preserve the 
-		// original order, this is an n-to-n relationship and could be constructed 
-		// either way. 
-		else if( role.getImplementedBy().size() > 0 ) {
+		//
+		// Note we no longer track the dependency between primitives at this level 
+		//
+		else {
 			
 			fromPv = pv1;
 			toPv = pv2;
 			
 	 	} 
-		// we need to sort out the dependency based on key constraints
-		// from the cardinality of the association
-		else {
 
-			List fks = role.getFkArray();
-			UMLclass pkClass = ((UMLattribute) fks.get(0)).getPk()
-					.getParentClass();
-
-			boolean go1 = false;
-			Iterator it = pv1.getClasses().iterator();
-			while (it.hasNext()) {
-				UMLclass c = (UMLclass) it.next();
-				if (c.equals(pkClass)) {
-					go1 = true;
-					break;
-				}
-			}
-
-			boolean go2 = false;
-			it = pv2.getClasses().iterator();
-			while (it.hasNext()) {
-				UMLclass c = (UMLclass) it.next();
-				if (c.equals(pkClass)) {
-					go2 = true;
-					break;
-				}
-			}
-
-			if (go1) {
-				fromPv = pv1;
-				toPv = pv2;
-			} else if (go2) {
-				fromPv = pv2;
-				toPv = pv1;
-			} else {
-				fromPv = pv1;
-				toPv = pv2;
-			}
-
-		}
 
 		PrimitiveLink edge = null;
 		if (role != null) {

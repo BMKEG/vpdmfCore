@@ -361,9 +361,7 @@ public class ViewDefinition extends SuperGraphNode {
 
 	public List<ViewDefinition> readAllParents() {
 		List<ViewDefinition> parents = new ArrayList<ViewDefinition>();
-		Iterator<ViewDefinition> vdIt = this.getTop().getViews().values().iterator();
-		while (vdIt.hasNext()) {
-			ViewDefinition vd = vdIt.next();
+		for( ViewDefinition vd :  this.getTop().getViews().values() ) {
 			if (this.checkIsAChildOf(vd)) {
 				parents.add(vd);
 			}
@@ -1532,7 +1530,6 @@ public class ViewDefinition extends SuperGraphNode {
 		 * @wcc; print "\n\n\n"; print $self->{subGraph}->{graph}; confess
 		 * "$self->{Name}'s primitive graph is not connected\n"; }
 		 */
-
 
 	}
 	
