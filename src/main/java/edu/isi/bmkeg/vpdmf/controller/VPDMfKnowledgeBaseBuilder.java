@@ -84,6 +84,7 @@ public class VPDMfKnowledgeBaseBuilder {
 	private HashSet builds;
 	private Map<String, Boolean> permissionsTable = new HashMap<String, Boolean>();
 
+	private String uri;
 	private String login;
 	private String password;
 	private String kbName;
@@ -106,16 +107,36 @@ public class VPDMfKnowledgeBaseBuilder {
 
 	private File temp;
 
-	public VPDMfKnowledgeBaseBuilder(File vpdmfArchiveFile, String login,
+	public VPDMfKnowledgeBaseBuilder(File vpdmfArchiveFile, String uri, String login,
 			String password, String kbName) throws Exception {
 		super();
 		this.setDefaultPermissions();
 
+		this.uri = uri;
 		this.login = login;
 		this.password = password;
 		this.vpdmfArchiveFile = vpdmfArchiveFile;
 		this.kbName = kbName;
 
+	}
+
+	
+	public VPDMfKnowledgeBaseBuilder(File vpdmfArchiveFile, String login,
+			String password, String kbName) throws Exception {
+		super();
+		this.setDefaultPermissions();
+
+		int l = kbName.lastIndexOf("/");
+		if( l == -1 ) {
+			this.uri = "jdbc:mysql://localhost:3306/";
+		 	this.kbName = kbName;
+		} else {
+			this.uri = kbName.substring(0, l+1);
+		 	this.kbName = kbName.substring(l+1, kbName.length());			
+		}		
+		this.login = login;
+		this.password = password;
+		this.vpdmfArchiveFile = vpdmfArchiveFile;
 	}
 
 	public void setKbName(String kbName) {
@@ -159,7 +180,7 @@ public class VPDMfKnowledgeBaseBuilder {
 		Statement quickStat = null;
 
 		Connection dbConnection = DriverManager.getConnection(
-				"jdbc:mysql://localhost:3306/", login, new String(password));
+				uri, login, new String(password));
 
 		quickStat = dbConnection.createStatement(
 				ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -273,6 +294,11 @@ public class VPDMfKnowledgeBaseBuilder {
 		// _____________________________________________________________________
 		// Global database operations
 		//
+		System.out.println("DATA");
+		System.out.println("URI: " + this.uri);
+		System.out.println("KB: " + this.kbName);
+		System.out.println("LOGIN: " + this.login);
+		System.out.println("PASSWORD: " + this.password);
 		Statement quickStat = this.ConnectToDB();
 
 		//
@@ -285,14 +311,17 @@ public class VPDMfKnowledgeBaseBuilder {
 		//
 		if (checkIfKbExists(kbName, quickStat)) {
 			logger.debug("Database " + kbName + " already exists");
-
-			throw new Exception("Database " + kbName + " already exists");
+			//throw new Exception("Database " + kbName + " already exists");
 		}
 
 		//
 		// Create the database.
 		//
-		createDatabase(kbName.toLowerCase(), quickStat);
+		try{
+			createDatabase(kbName.toLowerCase(), quickStat);
+		} catch (SQLException e) {
+			System.out.println("Database already Exists");
+		}
 
 		int n = buildSQL.length() - buildSQL.replaceAll("\\n", "").length();
 
@@ -499,6 +528,8 @@ public class VPDMfKnowledgeBaseBuilder {
 	private void runBatchSqlCommands(String commandStr, Statement quickStat)
 			throws SQLException {
 
+		quickStat.execute("use " + this.kbName );
+
 		String d = VPDMfKnowledgeBaseBuilder.SCRIPT_DIR;
 		File sqlDir = new File(d);
 
@@ -602,8 +633,9 @@ public class VPDMfKnowledgeBaseBuilder {
 		// a good security measure, since you should ask the local administrator
 		// to set up a local password for you before you login).
 		//
+		System.out.println(uri + targetDb);
 		Connection dbConnection = DriverManager.getConnection(
-				"jdbc:mysql://localhost:3306/" + targetDb, login, new String(
+				uri + targetDb, login, new String(
 						password));
 
 		if (dbConnection == null) {

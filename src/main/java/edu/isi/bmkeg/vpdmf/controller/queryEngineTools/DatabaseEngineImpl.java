@@ -509,12 +509,12 @@ public class DatabaseEngineImpl implements DatabaseEngine {
 
 		Class.forName("com.mysql.jdbc.Driver").newInstance();
 
-		if (getUri() == null)
+		/*if (getUri() == null)
 			throw new Exception("No database specified");
 		else if( !getUri().startsWith("jdbc:mysql://localhost/"))
 			setUri("jdbc:mysql://localhost/"
 					+ getUri().substring(getUri().lastIndexOf("/") + 1,
-							getUri().length()));
+							getUri().length()));*/
 
 		Class.forName("com.mysql.jdbc.Driver").newInstance();
 
@@ -524,9 +524,9 @@ public class DatabaseEngineImpl implements DatabaseEngine {
 		// is included to permit use of aliases within
 		// ResultSetMetaData processing (which was changed since
 		// VPDMf was originally developed).
-		dbConnection = DriverManager.getConnection(getUri()
-				+ "?user=" + this.getLogin() + "&password="
-				+ this.getPassword() + "&useOldAliasMetadataBehavior=true");
+		String connx = getUri() + "?user=" + this.getLogin() + "&password="
+				+ this.getPassword() + "&useOldAliasMetadataBehavior=true";
+		dbConnection = DriverManager.getConnection(connx);
 
 		if (dbConnection == null) {
 			throw new VPDMfException("Can't connect to db: " + getUri());

@@ -31,31 +31,25 @@ public class BuildDatabaseFromVpdmfArchive {
 		}
 		
 		String dbName = args[1];
-		int l = dbName.lastIndexOf("/");
-		if( l != -1 )
-			dbName = dbName.substring(l+1, dbName.length());
+		//int l = dbName.lastIndexOf("/");
+		//if( l != -1 )
+		// 	dbName = dbName.substring(l+1, dbName.length());
 		
 		String login = args[2];
 		String password =  args[3];
-		
-		System.out.println("VPDMf Archive: " + buildFile.getPath());
-		System.out.println("Database: " + dbName);
-		System.out.println("Login: " + login);
 		
 		try {
 			
 			VPDMfKnowledgeBaseBuilder builder = new VPDMfKnowledgeBaseBuilder(buildFile, login, password, dbName);
 			
 			// Gully: Make sure that this runs, avoid silly issues.
-			try {
+			/*try {
 					builder.destroyDatabase(dbName);
-			} catch (SQLException sqlE) {		
-
+			} catch (Exception sqlE) {		
 				if( !sqlE.getMessage().contains("database doesn't exist") ) {
 					sqlE.printStackTrace();
 				}
-				
-			} 
+			}*/
 			
 			builder.buildDatabaseFromArchive();
 

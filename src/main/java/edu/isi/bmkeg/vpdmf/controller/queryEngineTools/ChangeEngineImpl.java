@@ -240,21 +240,18 @@ public class ChangeEngineImpl extends QueryEngineImpl implements
 
 	public boolean connectToDB() throws Exception {
 
-		if (getUri() == null)
-			throw new Exception("No database specified");
-		else if (!getUri().startsWith("jdbc:mysql://localhost/"))
-			setUri("jdbc:mysql://localhost/"
-					+ getUri().substring(getUri().lastIndexOf("/") + 1,
-							getUri().length()));
+		//if (getUri() == null)
+		//	throw new Exception("No database specified");
+		//else if (!getUri().startsWith("jdbc:mysql://localhost/"))
+		//	setUri("jdbc:mysql://localhost/"
+		//			+ getUri().substring(getUri().lastIndexOf("/") + 1,
+		//					getUri().length()));
 
 		Class.forName("com.mysql.jdbc.Driver").newInstance();
-
-		dbConnection = DriverManager.getConnection(getUri() + "?user="
-				+ getLogin() + "&password=" + getPassword()
-				// this is included to permit use of aliases within
-				// ResultSetMetaData processing (which was changed since
-				// VPDMf was originally developed).
-				+ "&useOldAliasMetadataBehavior=true");
+		String connx = getUri() + "?user=" + this.getLogin() + "&password="
+				+ this.getPassword() + "&useOldAliasMetadataBehavior=true";
+		logger.debug(connx);
+		dbConnection = DriverManager.getConnection(connx);
 
 		if (dbConnection == null) {
 			throw new VPDMfException("Can't connect to db: " + getUri());
@@ -288,9 +285,11 @@ public class ChangeEngineImpl extends QueryEngineImpl implements
 		// @todo: when connectivity problems fixed with MySQL 4.1
 		// reinstate remote connectivity, until then just use 'localhost'
 		// if( this.checkRoot(login, password, uri) ) {
-		uri = "localhost/"
-				+ uri.substring(uri.lastIndexOf("/") + 1, uri.length());
+		//uri = getUri"localhost/"
+		//		+ uri.substring(uri.lastIndexOf("/") + 1, uri.length());
 		// }
+		
+		System.out.println("FUCK YOU TOO" + uri);
 
 		dbConnection = DriverManager.getConnection("jdbc:mysql://" + uri
 				+ "?user=" + l + "&password=" + p
